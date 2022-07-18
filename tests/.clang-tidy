@@ -1,0 +1,2 @@
+InheritParentConfig: true
+Checks: '-readability-magic-numbers,-cppcoreguidelines-avoid-goto,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-avoid-non-const-global-variables,-cppcoreguidelines-owning-memory,-readability-function-cognitive-complexity,-modernize-use-trailing-return-type'

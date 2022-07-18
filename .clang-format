@@ -1,0 +1,35 @@
+Language: Cpp
+BasedOnStyle:  Chromium
+
+BreakBeforeBraces:  Stroustrup
+AccessModifierOffset: -2
+ColumnLimit: 100
+
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^("|<)eely_app[\/]'
+    Priority:        1
+  - Regex:           '^("|<)eely[\/]'
+    Priority:        2
+  - Regex:           '^<(bx|bimg|bgfx)\/*'
+    Priority:        3
+  - Regex:           '^<entt\/*'
+    Priority:        4
+  - Regex:           '^<fbxsdk\/*'
+    Priority:        5
+  - Regex:           '^<fmt\/*'
+    Priority:        6
+  - Regex:           '^<gsl\/*'
+    Priority:        7
+  - Regex:           '^<gtest\/*'
+    Priority:        8
+  - Regex:           '^<gmock\/*'
+    Priority:        9
+  - Regex:           '^<imgui*'
+    Priority:        10
+  - Regex:           '^<SDL.*'
+    Priority:        11
+  - Regex:           '^<.*>'
+    Priority:        12
+  - Regex:           '.*'
+    Priority:        0

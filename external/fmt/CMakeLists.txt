@@ -1,0 +1,11 @@
+project(external_fmt)
+
+add_library(${PROJECT_NAME} STATIC IMPORTED GLOBAL)
+if (${EELY_TARGET_SYSTEM} STREQUAL ${EELY_TARGET_SYSTEM_MACOS_ARM})
+  set_target_properties(
+    ${PROJECT_NAME} PROPERTIES
+    IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/libs/${EELY_TARGET_SYSTEM_MACOS_ARM}/libfmt.a
+    INTERFACE_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/include)
+else()
+  message(FATAL_ERROR "System is not supported")
+endif()
