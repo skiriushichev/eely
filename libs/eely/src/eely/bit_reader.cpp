@@ -1,6 +1,7 @@
 #include "eely/bit_reader.h"
 
-#include <gsl/assert>
+#include "eely/assert.h"
+
 #include <gsl/narrow>
 #include <gsl/util>
 
@@ -13,13 +14,13 @@ namespace eely {
 bit_reader::bit_reader(const std::span<const std::byte>& data)
     : _data{data.data()}, _data_size_bits{gsl::narrow<gsl::index>(data.size() * 8)}
 {
-  Expects(_data != nullptr);
-  Expects(_data_size_bits > 0);
+  EXPECTS(_data != nullptr);
+  EXPECTS(_data_size_bits > 0);
 }
 
 uint32_t bit_reader::read(const gsl::index size_bits)
 {
-  Expects(size_bits >= 0 && size_bits <= 32);
+  EXPECTS(size_bits >= 0 && size_bits <= 32);
 
   if (size_bits == 0) {
     return 0;

@@ -6,6 +6,8 @@
 #include "eely/math_utils.h"
 #include "eely/quaternion.h"
 
+#include <gsl/util>
+
 namespace eely {
 // Represents coordinate system relative to some other (parent) space.
 // Essentially combines scale, rotation and translation transformations
@@ -25,6 +27,9 @@ struct transform final {
 
 // Parts of transform.
 enum transform_components { translation = 1 << 0, rotation = 1 << 1, scale = 1 << 2 };
+
+// Number of bits in which it is safe to pack `transform_components` value.
+static constexpr gsl::index bits_transform_components{3};
 
 // Return transform that is a combination of two other transforms,
 // `t0` is applied first and then `t1`.

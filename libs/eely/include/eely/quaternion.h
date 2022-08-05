@@ -1,5 +1,6 @@
 #pragma once
 
+#include "eely/assert.h"
 #include "eely/bit_reader.h"
 #include "eely/bit_writer.h"
 #include "eely/float3.h"
@@ -57,6 +58,12 @@ std::pair<float3, float> quaternion_to_axis_angle(const quaternion& q);
 // Spherically interpolate between two quaternions based on parameter `t`.
 quaternion quaternion_slerp(const quaternion& q0, const quaternion& q1, float t);
 
+// Return quaternion component at specified index (0123 = xyzw).
+float& quaternion_get_at(quaternion& q, gsl::index index);
+
+// Return quaternion component at specified index (0123 = xyzw).
+float quaternion_get_at(const quaternion& q, gsl::index index);
+
 // Return `true` if corresponding components of two quaternions
 // are within specified epsilon.
 bool quaternion_near(const quaternion& q0, const quaternion& q1, float epsilon = epsilon_default);
@@ -69,4 +76,48 @@ quaternion quaternion_deserialize(bit_reader& reader);
 
 // Return vector rotated by a quaternion.
 float3 vector_rotate(const float3& v, const quaternion& q);
+
+// Implementation
+
+inline float& quaternion_get_at(quaternion& q, const gsl::index index)
+{
+  switch (index) {
+    case 0:
+      return q.x;
+
+    case 1:
+      return q.y;
+
+    case 2:
+      return q.z;
+
+    case 3:
+      return q.w;
+
+    default:
+      EXPECTS(false);
+      return q.x;
+  }
+}
+
+inline float quaternion_get_at(const quaternion& q, const gsl::index index)
+{
+  switch (index) {
+    case 0:
+      return q.x;
+
+    case 1:
+      return q.y;
+
+    case 2:
+      return q.z;
+
+    case 3:
+      return q.w;
+
+    default:
+      EXPECTS(false);
+      return q.x;
+  }
+}
 }  // namespace eely

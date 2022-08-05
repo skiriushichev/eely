@@ -3,8 +3,6 @@
 #include "eely/base_utils.h"
 #include "eely/math_utils.h"
 
-#include <gsl/assert>
-
 #include <cmath>
 
 namespace eely {

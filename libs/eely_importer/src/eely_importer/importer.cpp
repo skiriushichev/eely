@@ -35,7 +35,7 @@ static FbxSystemUnit measurement_unit_to_fbx_system_unit(const measurement_unit 
     }
 
     default: {
-      Expects(false);
+      EXPECTS(false);
       return FbxSystemUnit::m;
     }
   }
@@ -51,7 +51,7 @@ static FbxAxisSystem axis_system_to_fbx_axis_system(const axis_system axes)
     } break;
 
     default: {
-      Expects(false);
+      EXPECTS(false);
       FbxAxisSystem::ParseAxisSystem("xyz", result);
     }
   }
@@ -59,9 +59,12 @@ static FbxAxisSystem axis_system_to_fbx_axis_system(const axis_system axes)
   return result;
 }
 
-transform evaluate_local_transform(FbxNode* fbx_node, const FbxTime& time = FBXSDK_TIME_INFINITE)
+transform evaluate_local_transform(FbxNode* fbx_node,
+                                   const bool is_root,
+                                   const FbxTime& time = FBXSDK_TIME_INFINITE)
 {
-  FbxAMatrix& fbx_local_transform{fbx_node->EvaluateLocalTransform(time)};
+  FbxAMatrix& fbx_local_transform{is_root ? fbx_node->EvaluateGlobalTransform(time)
+                                          : fbx_node->EvaluateLocalTransform(time)};
   FbxVector4 fbx_local_translation{fbx_local_transform.GetT()};
   FbxQuaternion fbx_local_rotation{fbx_local_transform.GetQ()};
   FbxVector4 fbx_local_scale{fbx_local_transform.GetS()};
@@ -133,7 +136,7 @@ const std::vector<FbxSkeleton*>& importer::get_skeletons()
   return _fbx_skeletons;
 }
 
-const skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_index)
+skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_index)
 {
   const FbxSkeleton* fbx_skeleton{_fbx_skeletons[skeleton_index]};
 
@@ -147,9 +150,9 @@ const skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_ind
   const size_t joints_count{fbx_joints.size()};
   for (gsl::index i{0}; i < joints_count; ++i) {
     FbxNode* fbx_node{fbx_joints[i]->GetNode()};
+    const bool is_root{!parent_indices[i].has_value()};
 
-    transform local_transform{evaluate_local_transform(fbx_node)};
-
+    transform local_transform{evaluate_local_transform(fbx_node, is_root)};
     joints.push_back({.id = fbx_node->GetName(),
                       .parent_index = parent_indices[i],
                       .rest_pose_transform_joint_space = local_transform});
@@ -164,13 +167,13 @@ const skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_ind
   return *_project.get_resource<skeleton_uncooked>(id);
 }
 
-const clip_uncooked& importer::import_clip(const gsl::index animation_index,
-                                           const skeleton_uncooked& skeleton)
+clip_uncooked& importer::import_clip(const gsl::index animation_index,
+                                     const skeleton_uncooked& skeleton)
 {
   const auto& [fbx_anim_stack, fbx_anim_layer] = _fbx_animations[animation_index];
 
   std::vector<clip_uncooked::track> tracks;
-  collect_tracks_recursively(fbx_anim_layer, _fbx_scene->GetRootNode(), tracks);
+  collect_tracks_recursively(fbx_anim_layer, _fbx_scene->GetRootNode(), skeleton, tracks);
 
   const string_id id{_filename};
   std::unique_ptr<clip_uncooked> result{std::make_unique<clip_uncooked>(id)};
@@ -238,9 +241,20 @@ void importer::collect_fbx_skeletons_recursively(
 
 void importer::collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
                                           FbxNode* fbx_node,
+                                          const skeleton_uncooked& skeleton,
                                           std::vector<clip_uncooked::track>& out_tracks)
 {
   enum property { translation = 1 << 0, rotation = 1 << 1, scale = 1 << 2 };
+
+  auto name = fbx_node->GetName();
+
+  const std::vector<skeleton_uncooked::joint>& joints{skeleton.get_joints()};
+  const auto joint_find_iter{std::find_if(joints.begin(), joints.end(), [fbx_node](const auto& j) {
+    return j.id == fbx_node->GetName();
+  })};
+
+  const bool is_root =
+      joint_find_iter != joints.end() && !joint_find_iter->parent_index.has_value();
 
   std::unordered_map<property, std::array<const FbxAnimCurve*, 3>> property_to_curves;
 
@@ -285,7 +299,7 @@ void importer::collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
     for (const auto& [fbx_time, props] : time_to_properties) {
       const float time_s{gsl::narrow_cast<float>(fbx_time.GetSecondDouble()) - start_time_s};
 
-      const transform local_transform{evaluate_local_transform(fbx_node, fbx_time)};
+      transform local_transform{evaluate_local_transform(fbx_node, is_root, fbx_time)};
 
       if ((props & property::translation) != 0) {
         track.keys[time_s].translation = local_transform.translation;
@@ -305,7 +319,7 @@ void importer::collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
 
   const int children_count{fbx_node->GetChildCount()};
   for (int i{0}; i < children_count; ++i) {
-    collect_tracks_recursively(fbx_anim_layer, fbx_node->GetChild(i), out_tracks);
+    collect_tracks_recursively(fbx_anim_layer, fbx_node->GetChild(i), skeleton, out_tracks);
   }
 }
 }  // namespace eely

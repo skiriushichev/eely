@@ -1,5 +1,6 @@
 #include "eely/project.h"
 
+#include "eely/assert.h"
 #include "eely/bit_reader.h"
 #include "eely/bit_writer.h"
 #include "eely/clip.h"
@@ -48,7 +49,7 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
       resource_cooked = std::make_unique<clip>(tmp_project, *ru);
     }
     else {
-      Expects(false);
+      EXPECTS(false);
     }
 
     const string_id& id{resource_cooked->get_id()};
@@ -59,7 +60,6 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
 
   project_uncooked.for_each_resource_topological(cook_resource);
 
-  Expects(std::bit_width(resources_ordered.size()) <= bits_resources_count);
   writer.write({.value = static_cast<uint32_t>(resources_ordered.size()),
                 .size_bits = bits_resources_count});
 

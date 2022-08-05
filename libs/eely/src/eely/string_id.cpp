@@ -1,5 +1,7 @@
 #include "eely/string_id.h"
 
+#include "eely/assert.h"
+
 #include <gsl/narrow>
 
 #include <bit>
@@ -10,10 +12,7 @@ static constexpr gsl::index bits_size{8};
 
 void string_id_serialize(const string_id& id, bit_writer& writer)
 {
-  Expects(std::bit_width(id.size()) <= bits_size);
-
-  writer.write(
-      {.value = gsl::narrow<uint32_t>(id.size()), .size_bits = bits_size});
+  writer.write({.value = gsl::narrow<uint32_t>(id.size()), .size_bits = bits_size});
   for (const char c : id) {
     writer.write({.value = gsl::narrow<uint32_t>(c), .size_bits = 8});
   }

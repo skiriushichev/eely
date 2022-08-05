@@ -40,7 +40,8 @@ static std::unique_ptr<project> import_and_cook_resources()
   importer importer{project_uncooked, fbx_path};
 
   const skeleton_uncooked& skeleton_uncooked{importer.import_skeleton(0)};
-  importer.import_clip(0, skeleton_uncooked);
+  clip_uncooked& clip_uncooked{importer.import_clip(0, skeleton_uncooked)};
+  clip_uncooked.set_compression_scheme(compression_scheme::compressed_fixed);
 
   static constexpr size_t buffer_size_bytes{gsl::narrow_cast<size_t>(1024 * 256)};
   std::array<std::byte, buffer_size_bytes> buffer;
@@ -89,7 +90,7 @@ void app_example_clip::update(const float dt_s)
 
   _scene.update(dt_s);
 
-  ImGui::SetNextWindowSize(ImVec2(260.0F, 80.0F));
+  ImGui::SetNextWindowSize(ImVec2(200.0F, 80.0F));
   ImGui::SetNextWindowPos(ImVec2(10.0F, 10.0F));
   if (ImGui::Begin(
           "Clip player", nullptr,

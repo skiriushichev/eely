@@ -36,11 +36,11 @@ public:
 
   // Import skeleton with specified index.
   // Imported skeleton will be added to the project.
-  const skeleton_uncooked& import_skeleton(gsl::index skeleton_index);
+  skeleton_uncooked& import_skeleton(gsl::index skeleton_index);
 
   // Import specified clip.
   // Imported clip will be added to the project.
-  const clip_uncooked& import_clip(gsl::index animation_index, const skeleton_uncooked& skeleton);
+  clip_uncooked& import_clip(gsl::index animation_index, const skeleton_uncooked& skeleton);
 
 private:
   static FbxSkeleton* get_skeleton_attribute(FbxNode* fbx_node);
@@ -56,6 +56,7 @@ private:
 
   static void collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
                                          FbxNode* fbx_node,
+                                         const skeleton_uncooked& skeleton,
                                          std::vector<clip_uncooked::track>& out_tracks);
 
   std::string _filename;

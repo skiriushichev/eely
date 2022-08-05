@@ -1,5 +1,6 @@
 #include "eely/project_uncooked.h"
 
+#include "eely/assert.h"
 #include "eely/axis_system.h"
 #include "eely/measurement_unit.h"
 #include "eely/resource_uncooked.h"
@@ -7,8 +8,6 @@
 #include <bit>
 
 namespace eely {
-static constexpr gsl::index bits_measurement_units{2};
-static constexpr gsl::index bits_axis_system{4};
 static constexpr gsl::index bits_resources_count{16};
 
 project_uncooked::project_uncooked(bit_reader& reader)
@@ -31,14 +30,11 @@ project_uncooked::project_uncooked(measurement_unit measurement_unit, axis_syste
 
 void project_uncooked::serialize(bit_writer& writer)
 {
-  Expects(std::bit_width(static_cast<uint32_t>(_measurement_unit)) <= bits_measurement_units);
   writer.write(
       {.value = static_cast<uint32_t>(_measurement_unit), .size_bits = bits_measurement_units});
 
-  Expects(std::bit_width(static_cast<uint32_t>(_axis_system)) <= bits_axis_system);
   writer.write({.value = static_cast<uint32_t>(_axis_system), .size_bits = bits_axis_system});
 
-  Expects(std::bit_width(_resources.size()) <= bits_resources_count);
   writer.write(
       {.value = static_cast<uint32_t>(_resources.size()), .size_bits = bits_resources_count});
 

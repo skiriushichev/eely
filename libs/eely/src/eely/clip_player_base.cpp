@@ -1,5 +1,6 @@
 #include "eely/clip_player_base.h"
 
+#include "eely/assert.h"
 #include "eely/float3.h"
 #include "eely/quaternion.h"
 #include "eely/skeleton.h"
@@ -11,30 +12,11 @@
 #include <vector>
 
 namespace eely {
-clip_player_base::clip_player_base(const float duration_s) : _duration_s(duration_s) {}
-
 clip_player_base::~clip_player_base() = default;
-
-void clip_player_base::play(const float time_s, skeleton_pose& out_pose)
-{
-  Expects(time_s >= 0.0F && time_s <= _duration_s);
-
-  play_impl(time_s, out_pose);
-  _last_play_time_s = time_s;
-}
-
-float clip_player_base::get_duration_s() const
-{
-  return _duration_s;
-}
-
-float clip_player_base::get_last_play_time_s() const
-{
-  return _last_play_time_s;
-}
 
 void cursor_reset(cursor& cursor)
 {
+  cursor.last_play_time_s = -1.0F;
   cursor.last_data_pos = 0;
   cursor.last_data_time_s = -1.0F;
   cursor.last_data_joint_index = std::numeric_limits<gsl::index>::max();
@@ -54,56 +36,29 @@ void cursor_reset(cursor& cursor)
 
 void cursor_calculate_pose(const cursor& cursor, const float time_s, skeleton_pose& out_pose)
 {
-  gsl::index translation_index{0};
-  gsl::index rotation_index{0};
-  gsl::index scale_index{0};
+  // Go over all components and set each one.
+  // Even though it means we're moving across transforms array up to 3 times,
+  // in practices we're dealing with rotations most of the times,
+  // and very small number of translations and scales.
 
-  while (true) {
-    gsl::index joint_index{std::numeric_limits<gsl::index>::max()};
+  out_pose.sequence_start(cursor.shallow_joint_index);
 
-    const cursor_component<float3>* translation{nullptr};
-    const cursor_component<quaternion>* rotation{nullptr};
-    const cursor_component<float3>* scale{nullptr};
+  const gsl::index rotations_count{gsl::narrow_cast<gsl::index>(cursor.rotations.size())};
+  for (const auto& rotation_component : cursor.rotations) {
+    const quaternion rotation{cursor_component_calculate(rotation_component, time_s)};
+    out_pose.sequence_set_rotation_joint_space(rotation_component.joint_index, rotation);
+  }
 
-    if (translation_index < cursor.translations.size()) {
-      translation = &cursor.translations[translation_index];
-      joint_index = std::min(joint_index, translation->joint_index);
-    }
+  const gsl::index translations_count{gsl::narrow_cast<gsl::index>(cursor.translations.size())};
+  for (const auto& translation_component : cursor.translations) {
+    const float3 translation{cursor_component_calculate(translation_component, time_s)};
+    out_pose.sequence_set_translation_joint_space(translation_component.joint_index, translation);
+  }
 
-    if (rotation_index < cursor.rotations.size()) {
-      rotation = &cursor.rotations[rotation_index];
-      joint_index = std::min(joint_index, rotation->joint_index);
-    }
-
-    if (scale_index < cursor.scales.size()) {
-      scale = &cursor.scales[scale_index];
-      joint_index = std::min(joint_index, scale->joint_index);
-    }
-
-    if (joint_index == std::numeric_limits<gsl::index>::max()) {
-      break;
-    }
-
-    Expects(translation != nullptr || rotation != nullptr || scale != nullptr);
-
-    transform joint_transform{out_pose.get_transform_joint_space(joint_index)};
-
-    if (translation != nullptr && translation->joint_index == joint_index) {
-      ++translation_index;
-      joint_transform.translation = cursor_component_calculate(*translation, time_s);
-    }
-
-    if (rotation != nullptr && rotation->joint_index == joint_index) {
-      ++rotation_index;
-      joint_transform.rotation = cursor_component_calculate(*rotation, time_s);
-    }
-
-    if (scale != nullptr && scale->joint_index == joint_index) {
-      ++scale_index;
-      joint_transform.scale = cursor_component_calculate(*scale, time_s);
-    }
-
-    out_pose.set_transform_joint_space(joint_index, joint_transform);
+  const gsl::index scales_count{gsl::narrow_cast<gsl::index>(cursor.scales.size())};
+  for (const auto& scale_component : cursor.scales) {
+    const float3 scale{cursor_component_calculate(scale_component, time_s)};
+    out_pose.sequence_set_scale_joint_space(scale_component.joint_index, scale);
   }
 }
 }  // namespace eely

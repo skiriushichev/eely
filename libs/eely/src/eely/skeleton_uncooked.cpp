@@ -1,5 +1,6 @@
 #include "eely/skeleton_uncooked.h"
 
+#include "eely/assert.h"
 #include "eely/resource_uncooked.h"
 #include "eely/string_id.h"
 #include "eely/transform.h"
@@ -41,7 +42,6 @@ void skeleton_uncooked::serialize(bit_writer& writer) const
 
   const gsl::index joints_count{gsl::narrow<gsl::index>(_joints.size())};
 
-  Expects(std::bit_width(gsl::narrow<size_t>(joints_count)) <= bits_joints_count);
   writer.write({.value = gsl::narrow_cast<uint32_t>(joints_count), .size_bits = bits_joints_count});
 
   for (const joint& joint : _joints) {

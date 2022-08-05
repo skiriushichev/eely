@@ -1,12 +1,11 @@
 #include "eely/quaternion.h"
 
+#include "eely/assert.h"
 #include "eely/base_utils.h"
 #include "eely/bit_reader.h"
 #include "eely/bit_writer.h"
 #include "eely/float3.h"
 #include "eely/math_utils.h"
-
-#include <gsl/assert>
 
 #include <cmath>
 
@@ -42,7 +41,7 @@ float quaternion_length(const quaternion& q)
 quaternion quaternion_normalized(const quaternion& q)
 {
   const float length{quaternion_length(q)};
-  Expects(length > 0.0F);
+  EXPECTS(length > 0.0F);
 
   return quaternion{q.x / length, q.y / length, q.z / length, q.w / length};
 }
@@ -116,8 +115,10 @@ quaternion quaternion_slerp(const quaternion& q0, const quaternion& q1, float t)
     const float angle{std::acos(cos_angle)};
     const float sin_angle{std::sin(angle)};
 
-    k0 = std::sin(k0 * angle) / sin_angle;
-    k1 = std::sin(k1 * angle) / sin_angle;
+    const float sin_inversed{1.0F / sin_angle};
+
+    k0 = std::sin(k0 * angle) * sin_inversed;
+    k1 = std::sin(k1 * angle) * sin_inversed;
   }
 
   return quaternion{k0 * q0.x + k1 * q1_shortest.x, k0 * q0.y + k1 * q1_shortest.y,

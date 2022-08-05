@@ -1,5 +1,6 @@
 #pragma once
 
+#include "eely/assert.h"
 #include "eely/axis_system.h"
 #include "eely/base_utils.h"
 #include "eely/graph.h"
@@ -48,6 +49,12 @@ public:
   requires std::derived_from<TRes, resource_uncooked>
   [[nodiscard]] const TRes* get_resource(const string_id& id) const;
 
+  // Get resource with specified id and type.
+  // Return `nullptr` if there is no such resource.
+  template <typename TRes>
+  requires std::derived_from<TRes, resource_uncooked>
+  [[nodiscard]] TRes* get_resource(const string_id& id);
+
   // Add resource to the project, if there was no such resource before.
   // If there was such a resource, override it with the new one.
   // Previous version of this resource will no longer be valid.
@@ -90,7 +97,7 @@ void project_uncooked::for_each_resource_topological(const TFn& fn) const
   std::vector<const resource_uncooked*> sorted_resources;
   auto sorted_resources_inserter{std::back_inserter(sorted_resources)};
   const bool traversed = graph_topological_traversal(resources_graph, sorted_resources_inserter);
-  Expects(traversed);
+  EXPECTS(traversed);
 
   for (const resource_uncooked* r : sorted_resources) {
     fn(r);
@@ -104,6 +111,18 @@ const TRes* project_uncooked::get_resource(const string_id& id) const
   auto iter = _resources.find(id);
   if (iter != _resources.end()) {
     return polymorphic_downcast<const TRes*>(iter->second.get());
+  }
+
+  return nullptr;
+}
+
+template <typename TRes>
+requires std::derived_from<TRes, resource_uncooked> TRes* project_uncooked::get_resource(
+    const string_id& id)
+{
+  auto iter = _resources.find(id);
+  if (iter != _resources.end()) {
+    return polymorphic_downcast<TRes*>(iter->second.get());
   }
 
   return nullptr;

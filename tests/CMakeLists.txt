@@ -7,6 +7,7 @@ set(SOURCE_FILES
     src/tests/graph.cpp
     src/tests/math_utils.cpp
     src/tests/matrix4x4.cpp
+    src/tests/quantization.cpp
     src/tests/quaternion.cpp
     src/tests/skeleton_and_clip.cpp
     src/tests/skeleton_pose.cpp

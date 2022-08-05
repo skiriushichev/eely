@@ -164,6 +164,15 @@ TEST(quaternion, utils)
     slerp_test(vector_normalized(float3{1.0F, 1.0F, 1.0F}), 3.0F, 3.11F);
   }
 
+  // quaternion_get_at
+  {
+    quaternion q{0.053973F, 0.1619191F, 0.2698652F, -0.9476507F};
+    EXPECT_EQ(quaternion_get_at(q, 0), q.x);
+    EXPECT_EQ(quaternion_get_at(q, 1), q.y);
+    EXPECT_EQ(quaternion_get_at(q, 2), q.z);
+    EXPECT_EQ(quaternion_get_at(q, 3), q.w);
+  }
+
   // quaternion_near
   {
     const quaternion q{0.4400896F, 0.3600733, 0.3920798F, 0.7231472F};

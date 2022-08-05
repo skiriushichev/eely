@@ -1,5 +1,6 @@
 #include "eely/skeleton.h"
 
+#include "eely/assert.h"
 #include "eely/base_utils.h"
 #include "eely/bit_reader.h"
 #include "eely/bit_writer.h"
@@ -25,8 +26,8 @@ skeleton::skeleton(const skeleton_uncooked& uncooked) : resource(uncooked.get_id
 
   const gsl::index joints_count{gsl::narrow<gsl::index>(joints.size())};
 
-  Expects(joints_count > 0);
-  Expects(joints_count < skeleton_uncooked::max_joints_count);
+  EXPECTS(joints_count > 0);
+  EXPECTS(joints_count < skeleton_uncooked::max_joints_count);
 
   _joint_ids.resize(joints_count);
   _joint_parents.resize(joints_count);
@@ -69,7 +70,6 @@ void skeleton::serialize(bit_writer& writer) const
 
   const gsl::index joints_count{gsl::narrow<gsl::index>(_joint_ids.size())};
 
-  Expects(std::bit_width(gsl::narrow<size_t>(joints_count)) <= bits_joints_count);
   writer.write({.value = gsl::narrow_cast<uint32_t>(joints_count), .size_bits = bits_joints_count});
 
   for (gsl::index i{0}; i < joints_count; ++i) {

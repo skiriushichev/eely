@@ -2,6 +2,7 @@
 
 #include "eely/bit_reader.h"
 #include "eely/bit_writer.h"
+#include "eely/clip_utils.h"
 #include "eely/float3.h"
 #include "eely/quaternion.h"
 #include "eely/resource_uncooked.h"
@@ -46,20 +47,27 @@ public:
   // Return id of a skeleton this clip is targeted at.
   [[nodiscard]] const string_id& get_target_skeleton_id() const;
 
-  // Return list of clip tracks.
-  [[nodiscard]] const std::vector<track>& get_tracks() const;
-
-  // Get clip duration in seconds.
-  [[nodiscard]] float get_duration_s() const;
-
   // Set id of a skeleton this clip is targeted at.
   void set_target_skeleton_id(string_id skeleton_id);
+
+  // Return list of clip tracks.
+  [[nodiscard]] const std::vector<track>& get_tracks() const;
 
   // Set list of clip tracks.
   void set_tracks(std::vector<track> tracks);
 
+  // Return clip's compression scheme.
+  [[nodiscard]] compression_scheme get_compression_scheme() const;
+
+  // Set compression scheme for the clip.
+  void set_compression_scheme(compression_scheme scheme);
+
+  // Return clip's duration in seconds.
+  [[nodiscard]] float get_duration_s() const;
+
 private:
   string_id _target_skeleton_id;
+  compression_scheme _compression_scheme;
   std::vector<track> _tracks;
 };
 }  // namespace eely

@@ -29,6 +29,9 @@ public:
   // To fit in 11 bits + 2047 is reserved
   static constexpr gsl::index max_joints_count{2047};
 
+  // Number of bits in which it is safe to write index joint or number of joints.
+  static constexpr gsl::index bits_joints_count{11};
+
   // Construct an uncooked skeleton from a memory buffer.
   explicit skeleton_uncooked(bit_reader& reader);
 

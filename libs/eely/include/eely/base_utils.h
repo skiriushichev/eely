@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gsl/assert>
+#include "eely/assert.h"
 
 #include <cstring>
 #include <type_traits>
@@ -31,7 +31,7 @@ bool has_flag(const typename std::underlying_type<T>::type value, const T flag)
 template <class TDst, class TSrc>
 TDst polymorphic_downcast(TSrc src)
 {
-  Expects(dynamic_cast<TDst>(src) == src);
+  EXPECTS(dynamic_cast<TDst>(src) == src);
   return static_cast<TDst>(src);
 }
 }  // namespace eely

@@ -10,18 +10,19 @@
 
 namespace eely {
 // Player for uncompressed clips.
-class clip_player_uncompressed final : public clip_player_base {
+class clip_player_compressed_fixed final : public clip_player_base {
 public:
-  // Construct player for specified uncompressed animation.
-  explicit clip_player_uncompressed(std::span<const uint32_t> data, const clip_metadata& metadata);
+  // Construct player for specified compressed animation.
+  explicit clip_player_compressed_fixed(std::span<const uint16_t> data,
+                                        const clip_metadata_compressed_fixed& metadata);
 
   [[nodiscard]] float get_duration_s() override;
 
   void play(float time_s, skeleton_pose& out_pose) override;
 
 private:
-  const std::span<const uint32_t> _data;
-  const clip_metadata& _metadata;
+  const std::span<const uint16_t> _data;
+  const clip_metadata_compressed_fixed& _metadata;
 
   cursor _cursor;
 };

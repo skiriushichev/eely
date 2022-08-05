@@ -1,9 +1,11 @@
 #include "eely/bit_writer.h"
 
-#include <gsl/assert>
+#include "eely/assert.h"
+
 #include <gsl/narrow>
 #include <gsl/util>
 
+#include <bit>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -12,13 +14,14 @@ namespace eely {
 bit_writer::bit_writer(const std::span<std::byte>& data)
     : _data{data.data()}, _data_size_bits{gsl::narrow<gsl::index>(data.size() * 8)}
 {
-  Expects(_data != nullptr);
-  Expects(_data_size_bits > 0);
+  EXPECTS(_data != nullptr);
+  EXPECTS(_data_size_bits > 0);
 }
 
 void bit_writer::write(const write_params& params)
 {
-  Expects(params.size_bits >= 0 && params.size_bits <= 32);
+  EXPECTS(params.size_bits >= 0 && params.size_bits <= 32);
+  EXPECTS(std::bit_width(params.value) <= params.size_bits);
 
   if (params.size_bits == 0) {
     return;
@@ -35,8 +38,8 @@ void bit_writer::write(const write_params& params)
 
 void bit_writer::patch(const patch_params& params)
 {
-  Expects(params.size_bits >= 0 && params.size_bits <= 32);
-  Expects(params.offset_bits >= 0 && params.offset_bits <= _data_size_bits);
+  EXPECTS(params.size_bits >= 0 && params.size_bits <= 32);
+  EXPECTS(params.offset_bits >= 0 && params.offset_bits <= _data_size_bits);
 
   if (params.offset_bits + params.size_bits > _data_size_bits) {
     throw std::runtime_error("Attempt to write past specified buffer");

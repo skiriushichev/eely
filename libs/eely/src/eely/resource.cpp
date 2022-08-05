@@ -1,5 +1,6 @@
 #include "eely/resource.h"
 
+#include "eely/assert.h"
 #include "eely/bit_reader.h"
 #include "eely/bit_writer.h"
 #include "eely/clip.h"
@@ -27,7 +28,6 @@ void resource_serialize(const resource& resource, bit_writer& writer)
     throw std::runtime_error("Unknown resource type for serialization");
   }
 
-  Expects(std::bit_width(static_cast<uint32_t>(type)) <= bits_resource_type);
   writer.write({.value = static_cast<uint32_t>(type), .size_bits = bits_resource_type});
 
   resource.serialize(writer);

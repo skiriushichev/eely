@@ -1,8 +1,10 @@
 #include "eely/clip_uncooked.h"
 
+#include "eely/assert.h"
 #include "eely/base_utils.h"
 #include "eely/bit_reader.h"
 #include "eely/bit_writer.h"
+#include "eely/clip_utils.h"
 #include "eely/float3.h"
 #include "eely/quaternion.h"
 #include "eely/resource_uncooked.h"
@@ -18,15 +20,15 @@
 #include <vector>
 
 namespace eely {
-static constexpr gsl::index bits_tracks_count{
-    std::bit_width<size_t>(skeleton_uncooked::max_joints_count)};
 static constexpr gsl::index bits_keys_count{16};
 
 clip_uncooked::clip_uncooked(bit_reader& reader) : resource_uncooked(reader)
 {
   _target_skeleton_id = string_id_deserialize(reader);
 
-  const gsl::index tracks_count{reader.read(bits_tracks_count)};
+  _compression_scheme = static_cast<compression_scheme>(reader.read(bits_compression_scheme));
+
+  const gsl::index tracks_count{reader.read(skeleton_uncooked::bits_joints_count)};
   for (gsl::index track_index{0}; track_index < tracks_count; ++track_index) {
     track t;
 
@@ -58,7 +60,10 @@ clip_uncooked::clip_uncooked(bit_reader& reader) : resource_uncooked(reader)
   }
 }
 
-clip_uncooked::clip_uncooked(const string_id& id) : resource_uncooked(id) {}
+clip_uncooked::clip_uncooked(const string_id& id)
+    : resource_uncooked(id), _compression_scheme(compression_scheme::compressed_fixed)
+{
+}
 
 void clip_uncooked::serialize(bit_writer& writer) const
 {
@@ -66,9 +71,13 @@ void clip_uncooked::serialize(bit_writer& writer) const
 
   string_id_serialize(_target_skeleton_id, writer);
 
+  writer.write(
+      {.value = static_cast<uint32_t>(_compression_scheme), .size_bits = bits_compression_scheme});
+
   const gsl::index tracks_count{gsl::narrow<gsl::index>(_tracks.size())};
-  Expects(tracks_count <= skeleton_uncooked::max_joints_count);
-  writer.write({.value = gsl::narrow_cast<uint32_t>(tracks_count), .size_bits = bits_tracks_count});
+  EXPECTS(tracks_count <= skeleton_uncooked::max_joints_count);
+  writer.write({.value = gsl::narrow_cast<uint32_t>(tracks_count),
+                .size_bits = skeleton_uncooked::bits_joints_count});
 
   for (gsl::index track_index{0}; track_index < tracks_count; ++track_index) {
     const track& t{_tracks[track_index]};
@@ -76,7 +85,6 @@ void clip_uncooked::serialize(bit_writer& writer) const
     string_id_serialize(t.joint_id, writer);
 
     const gsl::index keys_count{gsl::narrow<gsl::index>(t.keys.size())};
-    Expects(std::bit_width(gsl::narrow<size_t>(t.keys.size())) <= bits_keys_count);
     writer.write({.value = gsl::narrow_cast<uint32_t>(keys_count), .size_bits = bits_keys_count});
 
     for (const auto& [time, key] : t.keys) {
@@ -119,9 +127,29 @@ const string_id& clip_uncooked::get_target_skeleton_id() const
   return _target_skeleton_id;
 }
 
+void clip_uncooked::set_target_skeleton_id(string_id skeleton_id)
+{
+  _target_skeleton_id = std::move(skeleton_id);
+}
+
 const std::vector<clip_uncooked::track>& clip_uncooked::get_tracks() const
 {
   return _tracks;
+}
+
+void clip_uncooked::set_tracks(std::vector<track> tracks)
+{
+  _tracks = std::move(tracks);
+}
+
+compression_scheme clip_uncooked::get_compression_scheme() const
+{
+  return _compression_scheme;
+}
+
+void clip_uncooked::set_compression_scheme(const compression_scheme scheme)
+{
+  _compression_scheme = scheme;
 }
 
 float clip_uncooked::get_duration_s() const
@@ -137,15 +165,5 @@ float clip_uncooked::get_duration_s() const
   }
 
   return duration_s;
-}
-
-void clip_uncooked::set_target_skeleton_id(string_id skeleton_id)
-{
-  _target_skeleton_id = std::move(skeleton_id);
-}
-
-void clip_uncooked::set_tracks(std::vector<track> tracks)
-{
-  _tracks = std::move(tracks);
 }
 }  // namespace eely

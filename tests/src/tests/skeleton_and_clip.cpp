@@ -1,5 +1,7 @@
 #include "tests/test_utils.h"
 
+#include "eely/clip_utils.h"
+#include "eely/math_utils.h"
 #include <eely/axis_system.h>
 #include <eely/bit_reader.h>
 #include <eely/bit_writer.h>
@@ -20,9 +22,10 @@
 #include <array>
 #include <cstddef>
 #include <random>
+#include <variant>
 #include <vector>
 
-TEST(skeleton_and_clip, cook_and_play)
+static void test_skeleton_and_cip_with_scheme(eely::compression_scheme compression_scheme)
 {
   using namespace eely;
 
@@ -68,6 +71,7 @@ TEST(skeleton_and_clip, cook_and_play)
     EXPECT_EQ(skeleton_uncooked->get_id(), "test_skeleton");
 
     auto clip_uncooked = std::make_unique<eely::clip_uncooked>("test_clip");
+    clip_uncooked->set_compression_scheme(compression_scheme);
     clip_uncooked->set_target_skeleton_id(skeleton_uncooked->get_id());
     clip_uncooked->set_tracks({
         {.joint_id = "root", .keys = {{0.0F, {.translation = root_translation_0}}}},
@@ -116,6 +120,7 @@ TEST(skeleton_and_clip, cook_and_play)
 
   const clip* clip{project.get_resource<eely::clip>("test_clip")};
   EXPECT_EQ(clip->get_id(), "test_clip");
+  EXPECT_EQ(clip->get_duration_s(), 8.0F);
 
   const std::vector<transform>& rest_transforms{skeleton->get_rest_pose_transforms()};
 
@@ -124,15 +129,41 @@ TEST(skeleton_and_clip, cook_and_play)
 
   skeleton_pose pose{*skeleton};
 
+  // Remember acceptable errors
+  // TODO: calculate and test compressed clips errors
+
+  const auto calculate_joint_translation_acceptible_error = []() { return epsilon_default; };
+
+  const auto calculate_joint_scale_acceptible_error = []() { return epsilon_default; };
+
+  const float acceptible_error_quaternion = [compression_scheme]() { return epsilon_default; }();
+
+  const float acceptible_error_root_translation{calculate_joint_translation_acceptible_error()};
+
+  const float acceptible_error_root_scale{calculate_joint_scale_acceptible_error()};
+
+  const float acceptible_error_child_0_translation{calculate_joint_translation_acceptible_error()};
+
+  const float acceptible_error_child_0_scale{calculate_joint_scale_acceptible_error()};
+
+  const float acceptible_error_child_1_translation{calculate_joint_translation_acceptible_error()};
+
+  const float acceptible_error_child_1_scale{calculate_joint_scale_acceptible_error()};
+
+  // Checks
+
   auto play_and_check_pose = [&](const float time_s) {
     player->play(time_s, pose);
 
     // root
 
     const transform& root_transform{pose.get_transform_joint_space(root_index)};
-    expect_float3_near(root_transform.translation, root_translation_0);
-    expect_quaternion_near(root_transform.rotation, rest_transforms[root_index].rotation);
-    expect_float3_near(root_transform.scale, rest_transforms[root_index].scale);
+    expect_float3_near(root_transform.translation, root_translation_0,
+                       acceptible_error_root_translation);
+    expect_quaternion_near(root_transform.rotation, rest_transforms[root_index].rotation,
+                           acceptible_error_quaternion);
+    expect_float3_near(root_transform.scale, rest_transforms[root_index].scale,
+                       acceptible_error_root_scale);
 
     // child_0
 
@@ -187,16 +218,22 @@ TEST(skeleton_and_clip, cook_and_play)
       return child_0_scale_4;
     }();
 
-    expect_float3_near(child_0_transform.translation, child_0_translation_expected);
-    expect_quaternion_near(child_0_transform.rotation, child_0_rotation_expected);
-    expect_float3_near(child_0_transform.scale, child_0_scale_expect);
+    expect_float3_near(child_0_transform.translation, child_0_translation_expected,
+                       acceptible_error_child_0_translation);
+    expect_quaternion_near(child_0_transform.rotation, child_0_rotation_expected,
+                           acceptible_error_quaternion);
+    expect_float3_near(child_0_transform.scale, child_0_scale_expect,
+                       acceptible_error_child_0_scale);
 
     // child_1
 
     const transform& child_1_transform{pose.get_transform_joint_space(child_1_index)};
-    expect_float3_near(child_1_transform.translation, rest_transforms[child_1_index].translation);
-    expect_quaternion_near(child_1_transform.rotation, child_1_rotation_2);
-    expect_float3_near(child_1_transform.scale, rest_transforms[child_1_index].scale);
+    expect_float3_near(child_1_transform.translation, rest_transforms[child_1_index].translation,
+                       acceptible_error_child_1_translation);
+    expect_quaternion_near(child_1_transform.rotation, child_1_rotation_2,
+                           acceptible_error_quaternion);
+    expect_float3_near(child_1_transform.scale, rest_transforms[child_1_index].scale,
+                       acceptible_error_child_1_scale);
   };
 
   play_and_check_pose(0.0F);
@@ -222,7 +259,6 @@ TEST(skeleton_and_clip, cook_and_play)
   play_and_check_pose(8.0F);
   play_and_check_pose(8.0F);
 
-  static constexpr int seed = 30091990;
   static constexpr int random_samples = 200;
   std::mt19937 gen(seed);
   std::uniform_int_distribution<> distr(0, 100);
@@ -231,4 +267,9 @@ TEST(skeleton_and_clip, cook_and_play)
     const float time_s{player->get_duration_s() * percentage};
     play_and_check_pose(time_s);
   }
+}
+
+TEST(skeleton_and_clip, cook_and_play)
+{
+  test_skeleton_and_cip_with_scheme(eely::compression_scheme::uncompressed);
 }

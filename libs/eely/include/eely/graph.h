@@ -1,6 +1,7 @@
 #pragma once
 
-#include <gsl/assert>
+#include "eely/assert.h"
+
 #include <gsl/narrow>
 #include <gsl/util>
 
@@ -71,10 +72,10 @@ const typename graph<TData>::vertex& graph<TData>::add_vertex(TData data)
 template <typename TData>
 void graph<TData>::add_edge(const gsl::index from, const gsl::index to)
 {
-  Expects(from < _vertices.size() && to < _vertices.size());
+  EXPECTS(from < _vertices.size() && to < _vertices.size());
 
   std::vector<gsl::index>& adjacency_list = _vertices[from].adjacency_list;
-  Expects(std::find(adjacency_list.begin(), adjacency_list.end(), to) == adjacency_list.end());
+  EXPECTS(std::find(adjacency_list.begin(), adjacency_list.end(), to) == adjacency_list.end());
 
   adjacency_list.push_back(to);
 }
@@ -134,7 +135,7 @@ bool graph_topological_traversal(const graph<TData>& graph, TOutputIterator outp
     }
   }
 
-  Ensures(std::all_of(marks.begin(), marks.end(),
+  ENSURES(std::all_of(marks.begin(), marks.end(),
                       [](const mark mark) { return mark == mark::permanent; }));
 
   return true;
