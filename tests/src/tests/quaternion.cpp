@@ -1,9 +1,9 @@
 #include "tests/test_utils.h"
 
-#include <eely/bit_reader.h>
-#include <eely/bit_writer.h>
-#include <eely/math_utils.h>
-#include <eely/quaternion.h>
+#include <eely/base/bit_reader.h>
+#include <eely/base/bit_writer.h>
+#include <eely/math/math_utils.h>
+#include <eely/math/quaternion.h>
 
 #include <gtest/gtest.h>
 

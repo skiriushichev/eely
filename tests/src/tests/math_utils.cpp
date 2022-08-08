@@ -1,4 +1,4 @@
-#include <eely/math_utils.h>
+#include <eely/math/math_utils.h>
 
 #include <gtest/gtest.h>
 

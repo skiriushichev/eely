@@ -3,8 +3,8 @@
 #include "eely_app/component_camera.h"
 #include "eely_app/component_transform.h"
 
-#include <eely/math_utils.h>
-#include <eely/transform.h>
+#include <eely/math/math_utils.h>
+#include <eely/math/transform.h>
 
 #include <entt/entity/registry.hpp>
 

@@ -1,6 +1,6 @@
-#include <eely/bit_reader.h>
-#include <eely/bit_writer.h>
-#include <eely/string_id.h>
+#include <eely/base/bit_reader.h>
+#include <eely/base/bit_writer.h>
+#include <eely/base/string_id.h>
 
 #include <gtest/gtest.h>
 

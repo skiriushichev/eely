@@ -1,17 +1,17 @@
 #include "tests/test_utils.h"
 
-#include "eely/math_utils.h"
-#include "eely/quaternion.h"
-#include <eely/clip_utils.h>
+#include <eely/math/math_utils.h>
+#include <eely/math/quantization.h>
+#include <eely/math/quaternion.h>
 
 #include <gtest/gtest.h>
 
 #include <cmath>
 #include <random>
 
-static float quantize_and_dequantize(const eely::float_quantize_params& params)
+static float quantize_and_dequantize(const eely::internal::float_quantize_params& params)
 {
-  using namespace eely;
+  using namespace eely::internal;
 
   uint16_t quantized{float_quantize(params)};
 
@@ -24,7 +24,7 @@ static float quantize_and_dequantize(const eely::float_quantize_params& params)
 
 static eely::quaternion quantize_and_dequantize(const eely::quaternion& q)
 {
-  using namespace eely;
+  using namespace eely::internal;
 
   const std::array<uint16_t, 4> quantized{quaternion_quantize(q)};
   return quaternion_dequantize(quantized);
@@ -33,6 +33,7 @@ static eely::quaternion quantize_and_dequantize(const eely::quaternion& q)
 TEST(quantization, floats)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   // Quantize bunch of values and check that dequantized values are within accepted error
   // Also, check that interval ends are represented exactly

@@ -9,7 +9,7 @@
 #include "eely_app/filesystem_utils.h"
 #include "eely_app/matrix4x4.h"
 
-#include "eely/skeleton_pose.h"
+#include "eely/skeleton/skeleton_pose.h"
 
 #include <bgfx/bgfx.h>
 

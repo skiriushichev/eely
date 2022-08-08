@@ -1,13 +1,10 @@
 #include "eely_importer/importer.h"
 
-#include "eely/clip_uncooked.h"
-#include "eely/project_uncooked.h"
-#include "eely/skeleton_uncooked.h"
-#include <eely/axis_system.h>
-#include <eely/clip_uncooked.h>
-#include <eely/measurement_unit.h>
-#include <eely/project_uncooked.h>
-#include <eely/skeleton_uncooked.h>
+#include <eely/clip/clip_uncooked.h>
+#include <eely/project/axis_system.h>
+#include <eely/project/measurement_unit.h>
+#include <eely/project/project_uncooked.h>
+#include <eely/skeleton/skeleton_uncooked.h>
 
 #include <fbxsdk.h>
 
@@ -155,7 +152,7 @@ skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_index)
     transform local_transform{evaluate_local_transform(fbx_node, is_root)};
     joints.push_back({.id = fbx_node->GetName(),
                       .parent_index = parent_indices[i],
-                      .rest_pose_transform_joint_space = local_transform});
+                      .rest_pose_transform = local_transform});
   }
 
   const string_id id{fbx_skeleton->GetNode()->GetName()};

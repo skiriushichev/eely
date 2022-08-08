@@ -1,4 +1,4 @@
-#include <eely/graph.h>
+#include <eely/base/graph.h>
 
 #include <gtest/gtest.h>
 

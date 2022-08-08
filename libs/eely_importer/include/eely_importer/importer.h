@@ -1,10 +1,10 @@
 #pragma once
 
-#include "eely/clip_uncooked.h"
-#include "eely/skeleton_uncooked.h"
-#include <eely/axis_system.h>
-#include <eely/measurement_unit.h>
-#include <eely/project_uncooked.h>
+#include "eely/clip/clip_uncooked.h"
+#include "eely/skeleton/skeleton_uncooked.h"
+#include <eely/project/axis_system.h>
+#include <eely/project/measurement_unit.h>
+#include <eely/project/project_uncooked.h>
 
 #include <fbxsdk.h>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <eely/math_utils.h>
+#include <eely/math/math_utils.h>
 
 namespace eely {
 struct component_camera final {

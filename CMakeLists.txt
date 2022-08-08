@@ -23,6 +23,7 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
+add_subdirectory(external/acl)
 add_subdirectory(external/bgfx)
 add_subdirectory(external/entt)
 add_subdirectory(external/fbxsdk)

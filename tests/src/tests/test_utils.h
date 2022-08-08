@@ -1,10 +1,10 @@
 #pragma once
 
-#include "eely/clip_utils.h"
-#include "eely/float3.h"
-#include "eely/math_utils.h"
-#include "eely/quaternion.h"
-#include "eely/transform.h"
+#include "eely/math/float3.h"
+#include "eely/math/math_utils.h"
+#include "eely/math/quantization.h"
+#include "eely/math/quaternion.h"
+#include "eely/math/transform.h"
 
 #include <gtest/gtest.h>
 
@@ -49,7 +49,8 @@ inline void expect_transform_near(const transform& a,
   expect_float3_near(a.scale, b.scale, epsilon);
 }
 
-inline float calculate_acceptable_quantize_error(const eely::float_quantize_params& params)
+inline float calculate_acceptable_quantize_error(
+    const eely::internal::float_quantize_params& params)
 {
   // `float_quantize` truncates float quantized value to `uint16_t` now,
   // thus maximum error is one quant, plus some epsilon for floating point accuracy

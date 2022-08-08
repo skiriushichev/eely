@@ -1,10 +1,10 @@
 #include "tests/test_utils.h"
 
-#include "eely/quaternion.h"
-#include <eely/project.h>
-#include <eely/project_uncooked.h>
-#include <eely/skeleton.h>
-#include <eely/skeleton_pose.h>
+#include "eely/math/quaternion.h"
+#include <eely/project/project.h>
+#include <eely/project/project_uncooked.h>
+#include <eely/skeleton/skeleton.h>
+#include <eely/skeleton/skeleton_pose.h>
 
 #include <gtest/gtest.h>
 
@@ -26,15 +26,13 @@ TEST(skeleton_pose, skeleton_pose)
 
     auto skeleton_uncooked = std::make_unique<eely::skeleton_uncooked>("test_skeleton");
     skeleton_uncooked->set_joints(
-        {{.id = "root",
-          .parent_index = std::nullopt,
-          .rest_pose_transform_joint_space = transform{}},
+        {{.id = "root", .parent_index = std::nullopt, .rest_pose_transform = transform{}},
          {.id = "child_0",
           .parent_index = 0,
-          .rest_pose_transform_joint_space = transform{float3{-1.0F, 0.0F, 0.0F}}},
+          .rest_pose_transform = transform{float3{-1.0F, 0.0F, 0.0F}}},
          {.id = "child_1",
           .parent_index = 0,
-          .rest_pose_transform_joint_space = transform{float3{1.0F, 0.0F, 0.0F}}}});
+          .rest_pose_transform = transform{float3{1.0F, 0.0F, 0.0F}}}});
 
     EXPECT_EQ(skeleton_uncooked->get_id(), "test_skeleton");
 

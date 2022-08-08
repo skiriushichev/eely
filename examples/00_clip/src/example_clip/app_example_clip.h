@@ -3,7 +3,7 @@
 #include <eely_app/app.h>
 #include <eely_app/scene.h>
 
-#include <eely/project.h>
+#include <eely/project/project.h>
 
 #include <entt/entt.hpp>
 

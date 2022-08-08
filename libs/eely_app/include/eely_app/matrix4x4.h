@@ -1,9 +1,9 @@
 #pragma once
 
-#include <eely/float3.h>
-#include <eely/float4.h>
-#include <eely/math_utils.h>
-#include <eely/transform.h>
+#include <eely/math/float3.h>
+#include <eely/math/float4.h>
+#include <eely/math/math_utils.h>
+#include <eely/math/transform.h>
 
 #include <gsl/util>
 

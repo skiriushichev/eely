@@ -9,27 +9,31 @@ IncludeBlocks: Regroup
 IncludeCategories:
   - Regex:           '^("|<)eely_app[\/]'
     Priority:        1
-  - Regex:           '^("|<)eely[\/]'
+  - Regex:           '^("|<)eely_importer[\/]'
     Priority:        2
-  - Regex:           '^<(bx|bimg|bgfx)\/*'
+  - Regex:           '^("|<)eely[\/]'
     Priority:        3
-  - Regex:           '^<entt\/*'
+  - Regex:           '^<(acl)\/*'
     Priority:        4
-  - Regex:           '^<fbxsdk\/*'
+  - Regex:           '^<(bx|bimg|bgfx)\/*'
     Priority:        5
-  - Regex:           '^<fmt\/*'
+  - Regex:           '^<entt\/*'
     Priority:        6
-  - Regex:           '^<gsl\/*'
+  - Regex:           '^<fbxsdk\/*'
     Priority:        7
-  - Regex:           '^<gtest\/*'
+  - Regex:           '^<fmt\/*'
     Priority:        8
-  - Regex:           '^<gmock\/*'
+  - Regex:           '^<gsl\/*'
     Priority:        9
-  - Regex:           '^<imgui*'
+  - Regex:           '^<gtest\/*'
     Priority:        10
-  - Regex:           '^<SDL.*'
+  - Regex:           '^<gmock\/*'
     Priority:        11
-  - Regex:           '^<.*>'
+  - Regex:           '^<imgui*'
     Priority:        12
+  - Regex:           '^<SDL.*'
+    Priority:        13
+  - Regex:           '^<.*>'
+    Priority:        14
   - Regex:           '.*'
     Priority:        0

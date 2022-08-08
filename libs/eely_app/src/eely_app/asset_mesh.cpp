@@ -1,6 +1,6 @@
 #include "eely_app/asset_mesh.h"
 
-#include <eely/string_id.h>
+#include <eely/base/string_id.h>
 
 #include <bgfx/bgfx.h>
 

@@ -6,7 +6,7 @@
 #include "eely_app/asset_uniform.h"
 #include "eely_app/inputs.h"
 
-#include <eely/time_utils.h>
+#include <eely/base/time_utils.h>
 
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>

@@ -1,8 +1,8 @@
 #include "tests/test_utils.h"
 
-#include <eely/bit_reader.h>
-#include <eely/bit_writer.h>
-#include <eely/float3.h>
+#include <eely/base/bit_reader.h>
+#include <eely/base/bit_writer.h>
+#include <eely/math/float3.h>
 
 #include <gtest/gtest.h>
 

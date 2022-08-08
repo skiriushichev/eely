@@ -1,6 +1,6 @@
 #pragma once
 
-#include <eely/clip_player_base.h>
+#include <eely/clip/clip_player_base.h>
 
 #include <memory>
 

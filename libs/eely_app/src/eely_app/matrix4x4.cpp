@@ -1,10 +1,10 @@
 #include "eely_app/matrix4x4.h"
 
-#include <eely/float3.h>
-#include <eely/float4.h>
-#include <eely/math_utils.h>
-#include <eely/quaternion.h>
-#include <eely/transform.h>
+#include <eely/math/float3.h>
+#include <eely/math/float4.h>
+#include <eely/math/math_utils.h>
+#include <eely/math/quaternion.h>
+#include <eely/math/transform.h>
 
 #include <gsl/util>
 

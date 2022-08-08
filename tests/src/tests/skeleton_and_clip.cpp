@@ -1,21 +1,19 @@
 #include "tests/test_utils.h"
 
-#include "eely/clip_utils.h"
-#include "eely/math_utils.h"
-#include <eely/axis_system.h>
-#include <eely/bit_reader.h>
-#include <eely/bit_writer.h>
-#include <eely/clip.h>
-#include <eely/clip_player_base.h>
-#include <eely/clip_player_uncompressed.h>
-#include <eely/clip_uncooked.h>
-#include <eely/measurement_unit.h>
-#include <eely/project.h>
-#include <eely/project_uncooked.h>
-#include <eely/quaternion.h>
-#include <eely/skeleton.h>
-#include <eely/skeleton_pose.h>
-#include <eely/skeleton_uncooked.h>
+#include "eely/math/math_utils.h"
+#include <eely/base/bit_reader.h>
+#include <eely/base/bit_writer.h>
+#include <eely/clip/clip.h>
+#include <eely/clip/clip_player_base.h>
+#include <eely/clip/clip_uncooked.h>
+#include <eely/math/quaternion.h>
+#include <eely/project/axis_system.h>
+#include <eely/project/measurement_unit.h>
+#include <eely/project/project.h>
+#include <eely/project/project_uncooked.h>
+#include <eely/skeleton/skeleton.h>
+#include <eely/skeleton/skeleton_pose.h>
+#include <eely/skeleton/skeleton_uncooked.h>
 
 #include <gtest/gtest.h>
 
@@ -25,7 +23,7 @@
 #include <variant>
 #include <vector>
 
-static void test_skeleton_and_cip_with_scheme(eely::compression_scheme compression_scheme)
+static void test_skeleton_and_cip_with_scheme(eely::clip_compression_scheme compression_scheme)
 {
   using namespace eely;
 
@@ -58,15 +56,13 @@ static void test_skeleton_and_cip_with_scheme(eely::compression_scheme compressi
 
     auto skeleton_uncooked = std::make_unique<eely::skeleton_uncooked>("test_skeleton");
     skeleton_uncooked->set_joints(
-        {{.id = "root",
-          .parent_index = std::nullopt,
-          .rest_pose_transform_joint_space = transform{}},
+        {{.id = "root", .parent_index = std::nullopt, .rest_pose_transform = transform{}},
          {.id = "child_0",
           .parent_index = 0,
-          .rest_pose_transform_joint_space = transform{float3{-1.0F, 0.0F, 0.0F}}},
+          .rest_pose_transform = transform{float3{-1.0F, 0.0F, 0.0F}}},
          {.id = "child_1",
           .parent_index = 0,
-          .rest_pose_transform_joint_space = transform{float3{1.0F, 0.0F, 0.0F}}}});
+          .rest_pose_transform = transform{float3{1.0F, 0.0F, 0.0F}}}});
 
     EXPECT_EQ(skeleton_uncooked->get_id(), "test_skeleton");
 
@@ -271,5 +267,5 @@ static void test_skeleton_and_cip_with_scheme(eely::compression_scheme compressi
 
 TEST(skeleton_and_clip, cook_and_play)
 {
-  test_skeleton_and_cip_with_scheme(eely::compression_scheme::uncompressed);
+  test_skeleton_and_cip_with_scheme(eely::clip_compression_scheme::none);
 }

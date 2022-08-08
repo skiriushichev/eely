@@ -1,6 +1,6 @@
 #pragma once
 
-#include <eely/transform.h>
+#include <eely/math/transform.h>
 
 namespace eely {
 struct component_transform final {

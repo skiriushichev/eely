@@ -1,7 +1,7 @@
 #pragma once
 
-#include <eely/skeleton.h>
-#include <eely/skeleton_pose.h>
+#include <eely/skeleton/skeleton.h>
+#include <eely/skeleton/skeleton_pose.h>
 
 namespace eely {
 struct component_skeleton final {

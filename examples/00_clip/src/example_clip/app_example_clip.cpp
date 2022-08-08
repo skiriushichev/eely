@@ -11,14 +11,16 @@
 #include <eely_app/system_render.h>
 #include <eely_app/system_skeleton.h>
 
-#include <eely/axis_system.h>
-#include <eely/bit_writer.h>
-#include <eely/clip.h>
-#include <eely/measurement_unit.h>
-#include <eely/project.h>
-#include <eely/project_uncooked.h>
-#include <eely/quaternion.h>
-#include <eely/skeleton.h>
+#include <eely_importer/importer.h>
+
+#include <eely/base/bit_writer.h>
+#include <eely/clip/clip.h>
+#include <eely/math/quaternion.h>
+#include <eely/project/axis_system.h>
+#include <eely/project/measurement_unit.h>
+#include <eely/project/project.h>
+#include <eely/project/project_uncooked.h>
+#include <eely/skeleton/skeleton.h>
 
 #include <imgui.h>
 
@@ -41,7 +43,7 @@ static std::unique_ptr<project> import_and_cook_resources()
 
   const skeleton_uncooked& skeleton_uncooked{importer.import_skeleton(0)};
   clip_uncooked& clip_uncooked{importer.import_clip(0, skeleton_uncooked)};
-  clip_uncooked.set_compression_scheme(compression_scheme::compressed_fixed);
+  clip_uncooked.set_compression_scheme(clip_compression_scheme::fixed);
 
   static constexpr size_t buffer_size_bytes{gsl::narrow_cast<size_t>(1024 * 256)};
   std::array<std::byte, buffer_size_bytes> buffer;

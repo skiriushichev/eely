@@ -1,7 +1,7 @@
 #include "tests/test_utils.h"
 
-#include "eely/quaternion.h"
-#include <eely/transform.h>
+#include "eely/math/quaternion.h"
+#include <eely/math/transform.h>
 
 #include <gtest/gtest.h>
 
