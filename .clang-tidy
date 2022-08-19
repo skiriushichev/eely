@@ -16,7 +16,7 @@ Checks: 'bugprone-*,cppcoreguidelines-*,-cppcoreguidelines-avoid-magic-numbers,-
 WarningsAsErrors: '*'
 CheckOptions:
   - key: bugprone-easily-swappable-parameters.IgnoredParameterNames
-    value: 'x;y;z;yaw;pitch;roll'
+    value: 'x;y;z;yaw;pitch;roll;begin;end;first;second'
   - key: cppcoreguidelines-owning-memory.LegacyResourceProducers
     value: 'SDL_CreateWindow'
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor

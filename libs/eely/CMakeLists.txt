@@ -8,6 +8,11 @@ set(SOURCE_FILES
     include/eely/base/graph.h
     include/eely/base/string_id.h
     include/eely/base/time_utils.h
+    include/eely/btree/btree_player_node_add.h
+    include/eely/btree/btree_player_node_base.h
+    include/eely/btree/btree_player_node_blend.h
+    include/eely/btree/btree_player_node_clip.h
+    include/eely/btree/btree_player.h
     include/eely/clip/clip_compression_scheme.h
     include/eely/clip/clip_cooking_none_fixed.h
     include/eely/clip/clip_cursor.h
@@ -22,6 +27,11 @@ set(SOURCE_FILES
     include/eely/clip/clip_uncooked.h
     include/eely/clip/clip_utils.h
     include/eely/clip/clip.h
+    include/eely/job/job_add.h
+    include/eely/job/job_base.h
+    include/eely/job/job_blend.h
+    include/eely/job/job_queue.h
+    include/eely/job/job_play.h
     include/eely/math/float3.h
     include/eely/math/float4.h
     include/eely/math/math_utils.h
@@ -35,13 +45,20 @@ set(SOURCE_FILES
     include/eely/project/resource_base.h
     include/eely/project/resource_uncooked.h
     include/eely/project/resource.h
+    include/eely/skeleton/skeleton_pose_pool.h
     include/eely/skeleton/skeleton_pose.h
     include/eely/skeleton/skeleton_uncooked.h
     include/eely/skeleton/skeleton_utils.h
     include/eely/skeleton/skeleton.h
+    include/eely/skeleton_mask/skeleton_mask_uncooked.h
+    include/eely/skeleton_mask/skeleton_mask.h
     src/eely/base/bit_reader.cpp
     src/eely/base/bit_writer.cpp
     src/eely/base/string_id.cpp
+    src/eely/btree/btree_player_node_add.cpp
+    src/eely/btree/btree_player_node_blend.cpp
+    src/eely/btree/btree_player_node_clip.cpp
+    src/eely/btree/btree_player.cpp
     src/eely/clip/clip_cooking_none_fixed.cpp
     src/eely/clip/clip_cursor.cpp
     src/eely/clip/clip_impl_acl.cpp
@@ -51,7 +68,13 @@ set(SOURCE_FILES
     src/eely/clip/clip_player_fixed.cpp
     src/eely/clip/clip_player_none.cpp
     src/eely/clip/clip_uncooked.cpp
+    src/eely/clip/clip_utils.cpp
     src/eely/clip/clip.cpp
+    src/eely/job/job_add.cpp
+    src/eely/job/job_base.cpp
+    src/eely/job/job_blend.cpp
+    src/eely/job/job_queue.cpp
+    src/eely/job/job_play.cpp
     src/eely/math/float3.cpp
     src/eely/math/quantization.cpp
     src/eely/math/quaternion.cpp
@@ -61,10 +84,14 @@ set(SOURCE_FILES
     src/eely/project/resource_base.cpp
     src/eely/project/resource_uncooked.cpp
     src/eely/project/resource.cpp
+    src/eely/skeleton/skeleton_pose_pool.cpp
     src/eely/skeleton/skeleton_pose.cpp
     src/eely/skeleton/skeleton_uncooked.cpp
-    src/eely/skeleton/skeleton.cpp)
+    src/eely/skeleton/skeleton.cpp
+    src/eely/skeleton_mask/skeleton_mask_uncooked.cpp
+    src/eely/skeleton_mask/skeleton_mask.cpp)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} PUBLIC external_acl external_fmt external_gsl)
+target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:DEBUG>:EELY_DEBUG>)

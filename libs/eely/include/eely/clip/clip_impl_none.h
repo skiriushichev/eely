@@ -22,7 +22,10 @@ class clip_impl_none final : public clip_impl_base {
 public:
   clip_impl_none(bit_reader& reader);
 
-  clip_impl_none(const clip_uncooked& uncooked, const skeleton& skeleton);
+  clip_impl_none(float duration_s,
+                 const std::vector<clip_uncooked_track>& tracks,
+                 bool is_additive,
+                 const skeleton& skeleton);
 
   void serialize(bit_writer& writer) const override;
 

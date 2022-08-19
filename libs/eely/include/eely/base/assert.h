@@ -9,16 +9,16 @@
 // so that they are noop in release builds.
 // Otherwise they can heavily affect perfomance in critical paths.
 
-#if defined(NDEBUG)
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define EXPECTS(...)
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ENSURES(...)
-#else
+#if defined(EELY_DEBUG)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define EXPECTS(...) Expects(__VA_ARGS__)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ENSURES(...) Ensures(__VA_ARGS__)
+#else
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EXPECTS(...)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ENSURES(...)
 #endif

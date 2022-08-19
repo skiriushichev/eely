@@ -109,7 +109,7 @@ void cursor_reset(cursor& cursor);
 void cursor_calculate_pose(const cursor& c, float time_s, skeleton_pose& out_pose);
 
 // Collect joints components participating in a clip.
-void joint_components_collect(const std::vector<clip_uncooked::track>& tracks,
+void joint_components_collect(const std::vector<clip_uncooked_track>& tracks,
                               const skeleton& skeleton,
                               std::vector<joint_components>& out_joints_components);
 

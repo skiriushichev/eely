@@ -15,13 +15,13 @@
 #include <vector>
 
 namespace eely::internal {
-void joint_components_collect(const std::vector<clip_uncooked::track>& tracks,
+void joint_components_collect(const std::vector<clip_uncooked_track>& tracks,
                               const skeleton& skeleton,
                               std::vector<joint_components>& out_joints_components)
 {
   out_joints_components.reserve(tracks.size());
 
-  for (const clip_uncooked::track& track : tracks) {
+  for (const clip_uncooked_track& track : tracks) {
     const std::optional<gsl::index> joint_index_opt{skeleton.get_joint_index(track.joint_id)};
     if (!joint_index_opt.has_value()) {
       continue;

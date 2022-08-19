@@ -24,7 +24,6 @@
 
 #include <imgui.h>
 
-#include <eely_importer/importer.h>
 #include <filesystem>
 #include <memory>
 
@@ -36,7 +35,9 @@ static std::unique_ptr<project> import_and_cook_resources()
 {
   const std::filesystem::path fbx_path{get_executable_dir() / "res/sitting_clap.fbx"};
 
-  // Import skeleton and animation clip from FBX into uncooked project
+  // Import resources (a skeleton and an animation clip) from FBX into uncooked project
+  // and cook into a runtime project.
+  // This can also be done offline in the editor
 
   project_uncooked project_uncooked{measurement_unit::meters, axis_system::y_up_x_right_z_forward};
   importer importer{project_uncooked, fbx_path};
@@ -50,6 +51,8 @@ static std::unique_ptr<project> import_and_cook_resources()
   bit_writer writer{buffer};
 
   project::cook(project_uncooked, writer);
+
+  // Load runtime project
 
   bit_reader reader{buffer};
   return std::make_unique<project>(reader);

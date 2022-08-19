@@ -169,7 +169,7 @@ clip_uncooked& importer::import_clip(const gsl::index animation_index,
 {
   const auto& [fbx_anim_stack, fbx_anim_layer] = _fbx_animations[animation_index];
 
-  std::vector<clip_uncooked::track> tracks;
+  std::vector<clip_uncooked_track> tracks;
   collect_tracks_recursively(fbx_anim_layer, _fbx_scene->GetRootNode(), skeleton, tracks);
 
   const string_id id{_filename};
@@ -239,7 +239,7 @@ void importer::collect_fbx_skeletons_recursively(
 void importer::collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
                                           FbxNode* fbx_node,
                                           const skeleton_uncooked& skeleton,
-                                          std::vector<clip_uncooked::track>& out_tracks)
+                                          std::vector<clip_uncooked_track>& out_tracks)
 {
   enum property { translation = 1 << 0, rotation = 1 << 1, scale = 1 << 2 };
 
@@ -290,7 +290,7 @@ void importer::collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
     const FbxTime& first_fbx_time{time_to_properties.begin()->first};
     const float start_time_s{gsl::narrow<float>(first_fbx_time.GetSecondDouble())};
 
-    clip_uncooked::track track;
+    clip_uncooked_track track;
     track.joint_id = fbx_node->GetName();
 
     for (const auto& [fbx_time, props] : time_to_properties) {

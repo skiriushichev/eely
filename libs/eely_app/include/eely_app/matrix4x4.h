@@ -117,7 +117,7 @@ struct clip_space_params final {
 [[nodiscard]] float4 matrix4x4_transform(const matrix4x4& m, const float4& f);
 
 // Return inverse of a matrix.
-[[nodiscard]] auto matrix4x4_inverse(const matrix4x4& m) -> matrix4x4;
+[[nodiscard]] matrix4x4 matrix4x4_inverse(const matrix4x4& m);
 
 // Return `true` if corresponding components of two `matrix4x4`s are within
 // specified epsilon.

@@ -10,6 +10,7 @@
 #include <gsl/narrow>
 #include <gsl/util>
 
+#include <algorithm>
 #include <bit>
 #include <optional>
 #include <vector>
@@ -72,5 +73,16 @@ const std::vector<skeleton_uncooked::joint>& skeleton_uncooked::get_joints() con
 void skeleton_uncooked::set_joints(std::vector<skeleton_uncooked::joint> joints)
 {
   _joints = std::move(joints);
+}
+
+const skeleton_uncooked::joint* skeleton_uncooked::get_joint(const string_id& joint_id) const
+{
+  const auto iter{std::find_if(_joints.begin(), _joints.end(),
+                               [&joint_id](const joint& j) { return j.id == joint_id; })};
+  if (iter == _joints.end()) {
+    return nullptr;
+  }
+
+  return &(*iter);
 }
 }  // namespace eely

@@ -3,6 +3,8 @@
 #include "eely/base/bit_reader.h"
 #include "eely/project/resource_base.h"
 
+#include <unordered_set>
+
 namespace eely {
 // Base class for every uncooked resource.
 // Uncooked resources cannot be used at runtime, must first be cooked,
@@ -12,7 +14,7 @@ class resource_uncooked : public resource_base {
 
 public:
   // Collect ids of all dependencies for this resource.
-  virtual void collect_dependencies(std::vector<string_id>& out_dependencies) const;
+  virtual void collect_dependencies(std::unordered_set<string_id>& out_dependencies) const;
 };
 
 // Serialize uncooked resource's type and data into a memory buffer.

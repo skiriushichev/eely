@@ -10,6 +10,7 @@
 
 #include <concepts>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace eely {
 // Represents a set of uncooked resources used in an application.
@@ -83,13 +84,17 @@ void project_uncooked::for_each_resource_topological(const TFn& fn) const
     resource_id_to_vertex_id[id] = vertex.id;
   }
 
-  std::vector<string_id> dependencies_storage;
+  std::unordered_set<string_id> dependencies_storage;
   for (const auto& vertex : resources_graph.get_vertices()) {
     const resource_uncooked* r{vertex.data};
     r->collect_dependencies(dependencies_storage);
 
     for (const string_id& dependency : dependencies_storage) {
-      resources_graph.add_edge(vertex.id, resource_id_to_vertex_id[dependency]);
+      if (dependency.empty()) {
+        continue;
+      }
+
+      resources_graph.add_edge(vertex.id, resource_id_to_vertex_id.at(dependency));
     }
 
     dependencies_storage.clear();

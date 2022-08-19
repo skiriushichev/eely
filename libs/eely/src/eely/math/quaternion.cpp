@@ -43,7 +43,10 @@ quaternion quaternion_normalized(const quaternion& q)
   const float length{quaternion_length(q)};
   EXPECTS(length > 0.0F);
 
-  return quaternion{q.x / length, q.y / length, q.z / length, q.w / length};
+  const float length_inversed{1.0F / length};
+
+  return quaternion{q.x * length_inversed, q.y * length_inversed, q.z * length_inversed,
+                    q.w * length_inversed};
 }
 
 quaternion quaternion_inverse(const quaternion& q)
@@ -121,8 +124,9 @@ quaternion quaternion_slerp(const quaternion& q0, const quaternion& q1, float t)
     k1 = std::sin(k1 * angle) * sin_inversed;
   }
 
-  return quaternion{k0 * q0.x + k1 * q1_shortest.x, k0 * q0.y + k1 * q1_shortest.y,
-                    k0 * q0.z + k1 * q1_shortest.z, k0 * q0.w + k1 * q1_shortest.w};
+  return quaternion_normalized(
+      quaternion{k0 * q0.x + k1 * q1_shortest.x, k0 * q0.y + k1 * q1_shortest.y,
+                 k0 * q0.z + k1 * q1_shortest.z, k0 * q0.w + k1 * q1_shortest.w});
 }
 
 bool quaternion_near(const quaternion& q0, const quaternion& q1, const float epsilon)

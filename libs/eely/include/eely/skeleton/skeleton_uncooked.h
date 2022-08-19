@@ -43,6 +43,9 @@ public:
   // Set skeleton joints.
   void set_joints(std::vector<joint> joints);
 
+  // Get joint with specified id.
+  [[nodiscard]] const joint* get_joint(const string_id& joint_id) const;
+
 private:
   std::vector<joint> _joints;
 };

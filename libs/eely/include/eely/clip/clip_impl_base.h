@@ -11,6 +11,8 @@ namespace eely::internal {
 struct clip_metadata_base {
   virtual ~clip_metadata_base() = default;
 
+  bool is_additive{false};
+
   // Clip duration in seconds.
   float duration_s{0.0F};
 };

@@ -10,6 +10,8 @@
 #include "eely/project/resource_uncooked.h"
 #include "eely/skeleton/skeleton.h"
 #include "eely/skeleton/skeleton_uncooked.h"
+#include "eely/skeleton_mask/skeleton_mask.h"
+#include "eely/skeleton_mask/skeleton_mask_uncooked.h"
 
 #include <bit>
 #include <memory>
@@ -38,7 +40,7 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
 
   project tmp_project;
 
-  const auto cook_resource = [&tmp_project,
+  const auto cook_resource = [&tmp_project, &project_uncooked,
                               &resources_ordered](const resource_uncooked* resource_uncooked) {
     std::unique_ptr<resource> resource_cooked;
 
@@ -47,6 +49,12 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
     }
     else if (const auto* ru{dynamic_cast<const clip_uncooked*>(resource_uncooked)}) {
       resource_cooked = std::make_unique<clip>(tmp_project, *ru);
+    }
+    else if (const auto* ru{dynamic_cast<const clip_additive_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<clip>(tmp_project, project_uncooked, *ru);
+    }
+    else if (const auto* ru{dynamic_cast<const skeleton_mask_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<skeleton_mask>(tmp_project, *ru);
     }
     else {
       EXPECTS(false);

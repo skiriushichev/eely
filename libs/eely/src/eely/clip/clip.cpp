@@ -8,6 +8,7 @@
 #include "eely/clip/clip_impl_fixed.h"
 #include "eely/clip/clip_impl_none.h"
 #include "eely/clip/clip_uncooked.h"
+#include "eely/clip/clip_utils.h"
 #include "eely/project/project.h"
 #include "eely/project/resource.h"
 #include "eely/skeleton/skeleton.h"
@@ -48,17 +49,53 @@ clip::clip(const project& project, const clip_uncooked& uncooked) : resource(unc
   const skeleton& skeleton{
       *project.get_resource<eely::skeleton>(uncooked.get_target_skeleton_id())};
 
+  const float duration_s{uncooked.get_duration_s()};
+  const std::vector<clip_uncooked_track>& tracks{uncooked.get_tracks()};
+
   switch (uncooked.get_compression_scheme()) {
     case clip_compression_scheme::none: {
-      _impl = std::make_unique<clip_impl_none>(uncooked, skeleton);
+      _impl = std::make_unique<clip_impl_none>(duration_s, tracks, false, skeleton);
     } break;
 
     case clip_compression_scheme::fixed: {
-      _impl = std::make_unique<clip_impl_fixed>(uncooked, skeleton);
+      _impl = std::make_unique<clip_impl_fixed>(duration_s, tracks, false, skeleton);
     } break;
 
     case clip_compression_scheme::acl: {
-      _impl = std::make_unique<clip_impl_acl>(uncooked, skeleton);
+      _impl = std::make_unique<clip_impl_acl>(duration_s, tracks, false, skeleton);
+    } break;
+
+    default: {
+      EXPECTS(false);
+    } break;
+  }
+}
+
+clip::clip(const project& project,
+           const project_uncooked& project_uncooked,
+           const clip_additive_uncooked& clip_uncooked)
+    : resource(clip_uncooked.get_id())
+{
+  using namespace internal;
+
+  const skeleton& skeleton{
+      *project.get_resource<eely::skeleton>(clip_uncooked.get_target_skeleton_id())};
+
+  float duration_s{0.0F};
+  std::vector<clip_uncooked_track> tracks_additive;
+  clip_calculate_additive_tracks(project_uncooked, clip_uncooked, duration_s, tracks_additive);
+
+  switch (clip_uncooked.get_compression_scheme()) {
+    case clip_compression_scheme::none: {
+      _impl = std::make_unique<clip_impl_none>(duration_s, tracks_additive, true, skeleton);
+    } break;
+
+    case clip_compression_scheme::fixed: {
+      _impl = std::make_unique<clip_impl_fixed>(duration_s, tracks_additive, true, skeleton);
+    } break;
+
+    case clip_compression_scheme::acl: {
+      _impl = std::make_unique<clip_impl_acl>(duration_s, tracks_additive, true, skeleton);
     } break;
 
     default: {

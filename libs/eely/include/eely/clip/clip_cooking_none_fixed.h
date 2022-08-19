@@ -43,8 +43,8 @@ struct cooked_key final {
   std::optional<float3> scale;
 };
 
-// Precision data for `remove_rest_pose_tracks`.
-struct remove_rest_pose_tracks_precision final {
+// Precision data for `remove_rest_pose_tracks` and `linear_key_reduction`.
+struct track_reduction_precision final {
   float rotation_rad{deg_to_rad(0.001F)};
   float translation{0.001F};
   float scale{0.001F};
@@ -53,15 +53,25 @@ struct remove_rest_pose_tracks_precision final {
 // Cook tracks into a single buffer, using provided writer.
 template <typename TWriter>
 requires std::invocable<TWriter, const cooked_key&>
-void clip_cook(const std::vector<clip_uncooked::track>& tracks,
+void clip_cook(const std::vector<clip_uncooked_track>& tracks,
                const skeleton& skeleton,
                TWriter& writer);
 
-// Remove tracks that match rest pose with specified precision.
-std::vector<clip_uncooked::track> remove_rest_pose_tracks(
-    const std::vector<clip_uncooked::track>& tracks,
+// Remove keys that match rest pose with specified precision.
+std::vector<clip_uncooked_track> remove_rest_pose_keys(
+    const std::vector<clip_uncooked_track>& tracks,
     const skeleton& skeleton,
-    const remove_rest_pose_tracks_precision& precision = remove_rest_pose_tracks_precision{});
+    const track_reduction_precision& precision = track_reduction_precision{});
+
+// Remove keys that can be interpolated from their neighbours
+// and still have the same value with specified precision.
+// This reduces data size in some cases, and also allows us to generate clips
+// procedurally by sampling at specified rate (e.g. when generating additive clip).
+// After sampling linear key reduction will remove unneeded keys during cooking,
+// on all compression schemes.
+std::vector<clip_uncooked_track> linear_key_reduction(
+    const std::vector<clip_uncooked_track>& tracks,
+    const track_reduction_precision& precision = track_reduction_precision{});
 
 // Implementation
 
@@ -85,12 +95,12 @@ struct key_component final {
 
 bool key_component_compare(const key_component& a, const key_component& b);
 
-std::vector<key_component> key_component_collect(const std::vector<clip_uncooked::track>& tracks,
+std::vector<key_component> key_component_collect(const std::vector<clip_uncooked_track>& tracks,
                                                  const skeleton& skeleton);
 
 template <typename TWriter>
 requires std::invocable<TWriter, const cooked_key&>
-void clip_cook(const std::vector<clip_uncooked::track>& tracks,
+void clip_cook(const std::vector<clip_uncooked_track>& tracks,
                const skeleton& skeleton,
                TWriter& writer)
 {

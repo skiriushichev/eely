@@ -32,7 +32,10 @@ class clip_impl_fixed final : public clip_impl_base {
 public:
   clip_impl_fixed(bit_reader& reader);
 
-  clip_impl_fixed(const clip_uncooked& uncooked, const skeleton& skeleton);
+  clip_impl_fixed(float duration_s,
+                  const std::vector<clip_uncooked_track>& tracks,
+                  bool is_additive,
+                  const skeleton& skeleton);
 
   void serialize(bit_writer& writer) const override;
 

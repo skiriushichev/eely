@@ -57,7 +57,7 @@ private:
   static void collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
                                          FbxNode* fbx_node,
                                          const skeleton_uncooked& skeleton,
-                                         std::vector<clip_uncooked::track>& out_tracks);
+                                         std::vector<clip_uncooked_track>& out_tracks);
 
   std::string _filename;
   project_uncooked& _project;

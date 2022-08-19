@@ -28,6 +28,13 @@ void clip_player_fixed::play(const float time_s, skeleton_pose& out_pose)
 {
   using flags = compression_key_flags;
 
+  if (_metadata.is_additive) {
+    out_pose.reset(skeleton_pose::type::additive);
+  }
+  else {
+    out_pose.reset(skeleton_pose::type::absolute);
+  }
+
   if (time_s < _cursor.last_play_time_s) {
     // Cursor cannot move backwards, need to start over
     cursor_reset(_cursor);

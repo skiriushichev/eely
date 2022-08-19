@@ -61,6 +61,13 @@ float clip_player_acl::get_duration_s()
 
 void clip_player_acl::play(const float time_s, skeleton_pose& out_pose)
 {
+  if (_metadata.is_additive) {
+    out_pose.reset(skeleton_pose::type::additive);
+  }
+  else {
+    out_pose.reset(skeleton_pose::type::absolute);
+  }
+
   out_pose.sequence_start(_metadata.shallow_joint_index);
 
   acl_output_writer writer{.pose = &out_pose};

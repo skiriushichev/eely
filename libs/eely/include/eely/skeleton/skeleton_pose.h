@@ -1,8 +1,10 @@
 #pragma once
 
+#include "eely/math/quaternion.h"
 #include "eely/math/transform.h"
 #include "eely/skeleton/skeleton.h"
 
+#include <gsl/narrow>
 #include <gsl/pointers>
 #include <gsl/util>
 
@@ -14,8 +16,13 @@ namespace eely {
 // Pose is always linked to the specific skeleton, and should never outlive it.
 class skeleton_pose final {
 public:
+  // Descripte type of a pose.
+  // Type defines how this pose is used and what operations are valid.
+  // E.g. you can only add additive poses to other poses.
+  enum class type { absolute, additive };
+
   // Create pose for a skeleton.
-  skeleton_pose(const skeleton& skeleton);
+  skeleton_pose(const skeleton& skeleton, type pose_type = type::absolute);
 
   // Return transform of a joint with specified index, elative to its parent joint.
   [[nodiscard]] const transform& get_transform_joint_space(gsl::index index) const;
@@ -49,8 +56,16 @@ public:
   // relative to the skeleton object.
   [[nodiscard]] const transform& get_transform_object_space(gsl::index index) const;
 
-  // Reset to the rest pose.
-  void reset();
+  // Return number of joints in a pose.
+  [[nodiscard]] gsl::index get_joints_count() const;
+
+  // Return skeleton this pose is for.
+  [[nodiscard]] const skeleton& get_skeleton() const;
+
+  // Reset pose.
+  // Absolute poses reset to rest pose,
+  // and additive poses reset to identities.
+  void reset(type pose_type = type::absolute);
 
 private:
   void recalculate_object_space_transforms() const;
@@ -67,6 +82,14 @@ private:
   // Used to optimize object space recalculations (by ignoring joints that are unchanged).
   mutable std::optional<gsl::index> _shallow_changed_joint_index;
 };
+
+// Blend between two poses.
+void skeleton_pose_blend(const skeleton_pose& p0,
+                         const skeleton_pose& p1,
+                         float weight,
+                         skeleton_pose& out_result);
+
+void skeleton_pose_add(const skeleton_pose& p0, const skeleton_pose& p1, skeleton_pose& out_result);
 
 // Implementation
 
@@ -93,6 +116,7 @@ inline void skeleton_pose::sequence_start(gsl::index shallow_index)
 inline void skeleton_pose::sequence_set_transform_joint_space(const gsl::index index,
                                                               const transform& transform)
 {
+  EXPECTS(float_near(quaternion_length(transform.rotation), 1.0F, 1e-3F));
   _transforms_joint_space[index] = transform;
 }
 
@@ -118,5 +142,15 @@ inline const transform& skeleton_pose::get_transform_object_space(const gsl::ind
 {
   recalculate_object_space_transforms();
   return _transforms_object_space[index];
+}
+
+inline gsl::index skeleton_pose::get_joints_count() const
+{
+  return gsl::narrow<gsl::index>(_transforms_joint_space.size());
+}
+
+inline const skeleton& skeleton_pose::get_skeleton() const
+{
+  return *_skeleton;
 }
 }  // namespace eely

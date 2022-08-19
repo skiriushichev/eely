@@ -19,6 +19,13 @@ public:
   // Construct clip from an uncooked counterpart.
   explicit clip(const project& project, const clip_uncooked& uncooked);
 
+  // Construct clip from an uncooked additive counterpart.
+  // Uncooked project is required as well,
+  // because we need uncooked animations for diff calculation.
+  explicit clip(const project& project,
+                const project_uncooked& project_uncooked,
+                const clip_additive_uncooked& clip_uncooked);
+
   // Serialize clip into a memory buffer.
   void serialize(bit_writer& writer) const override;
 

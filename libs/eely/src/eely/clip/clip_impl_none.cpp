@@ -86,6 +86,8 @@ clip_impl_none::clip_impl_none(bit_reader& reader)
   _metadata.duration_s = bit_cast<float>(reader.read(32));
   EXPECTS(_metadata.duration_s >= 0.0F);
 
+  _metadata.is_additive = reader.read(1) == 1U;
+
   const gsl::index metadata_joint_components_size{reader.read(bits_joints_count)};
   _metadata.joints_components.resize(metadata_joint_components_size);
   for (gsl::index i{0}; i < metadata_joint_components_size; ++i) {
@@ -107,14 +109,18 @@ clip_impl_none::clip_impl_none(bit_reader& reader)
   }
 }
 
-clip_impl_none::clip_impl_none(const clip_uncooked& uncooked, const skeleton& skeleton)
+clip_impl_none::clip_impl_none(const float duration_s,
+                               const std::vector<clip_uncooked_track>& tracks,
+                               const bool is_additive,
+                               const skeleton& skeleton)
 {
-  const std::vector<clip_uncooked::track> reduced_tracks{
-      remove_rest_pose_tracks(uncooked.get_tracks(), skeleton)};
+  std::vector<clip_uncooked_track> reduced_tracks{remove_rest_pose_keys(tracks, skeleton)};
+  reduced_tracks = linear_key_reduction(reduced_tracks);
 
   // Metadata
 
-  _metadata.duration_s = uncooked.get_duration_s();
+  _metadata.duration_s = duration_s;
+  _metadata.is_additive = is_additive;
   joint_components_collect(reduced_tracks, skeleton, _metadata.joints_components);
 
   // Data
@@ -128,6 +134,7 @@ void clip_impl_none::serialize(bit_writer& writer) const
   // Metadata
 
   writer.write({.value = bit_cast<uint32_t>(_metadata.duration_s), .size_bits = 32});
+  writer.write({.value = _metadata.is_additive ? 1U : 0U, .size_bits = 1});
 
   writer.write({.value = gsl::narrow<uint32_t>(_metadata.joints_components.size()),
                 .size_bits = bits_joints_count});

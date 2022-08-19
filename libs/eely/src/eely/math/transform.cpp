@@ -38,6 +38,23 @@ float3 transform_location(const transform& t0, const float3& l)
   return result;
 }
 
+transform transform_inverse(const transform& t)
+{
+  transform inverse;
+  inverse.rotation = quaternion_normalized(quaternion_inverse(t.rotation));
+  inverse.scale = float3{1.0F / t.scale.x, 1.0F / t.scale.y, 1.0F / t.scale.z};
+  inverse.translation = vector_rotate(-t.translation * inverse.scale, inverse.rotation);
+
+  EXPECTS(transform_near(t * inverse, transform::identity, 1e-3F));
+
+  return inverse;
+}
+
+transform transform_diff(const transform& t0, const transform& t1)
+{
+  return transform_inverse(t1) * t0;
+}
+
 bool transform_near(const transform& t0, const transform& t1, float epsilon)
 {
   return float3_near(t0.translation, t1.translation, epsilon) &&
