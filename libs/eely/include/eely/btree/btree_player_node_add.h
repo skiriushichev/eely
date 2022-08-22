@@ -1,3 +1,4 @@
+#include "eely/btree/btree_node_add.h"
 #include "eely/btree/btree_player_node_base.h"
 #include "eely/job/job_add.h"
 

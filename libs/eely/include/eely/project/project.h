@@ -37,7 +37,7 @@ public:
 
 private:
   // Used only during cooking
-  project() = default;
+  explicit project() = default;
 
   std::unordered_map<string_id, std::unique_ptr<resource>> _resources;
 };

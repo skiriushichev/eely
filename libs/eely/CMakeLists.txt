@@ -8,11 +8,17 @@ set(SOURCE_FILES
     include/eely/base/graph.h
     include/eely/base/string_id.h
     include/eely/base/time_utils.h
+    include/eely/btree/btree_node_add.h
+    include/eely/btree/btree_node_base.h
+    include/eely/btree/btree_node_blend.h
+    include/eely/btree/btree_node_clip.h
     include/eely/btree/btree_player_node_add.h
     include/eely/btree/btree_player_node_base.h
     include/eely/btree/btree_player_node_blend.h
     include/eely/btree/btree_player_node_clip.h
     include/eely/btree/btree_player.h
+    include/eely/btree/btree_uncooked.h
+    include/eely/btree/btree.h
     include/eely/clip/clip_compression_scheme.h
     include/eely/clip/clip_cooking_none_fixed.h
     include/eely/clip/clip_cursor.h
@@ -55,10 +61,17 @@ set(SOURCE_FILES
     src/eely/base/bit_reader.cpp
     src/eely/base/bit_writer.cpp
     src/eely/base/string_id.cpp
+    src/eely/btree/btree_node_add.cpp
+    src/eely/btree/btree_node_base.cpp
+    src/eely/btree/btree_node_blend.cpp
+    src/eely/btree/btree_node_clip.cpp
     src/eely/btree/btree_player_node_add.cpp
+    src/eely/btree/btree_player_node_base.cpp
     src/eely/btree/btree_player_node_blend.cpp
     src/eely/btree/btree_player_node_clip.cpp
     src/eely/btree/btree_player.cpp
+    src/eely/btree/btree_uncooked.cpp
+    src/eely/btree/btree.cpp
     src/eely/clip/clip_cooking_none_fixed.cpp
     src/eely/clip/clip_cursor.cpp
     src/eely/clip/clip_impl_acl.cpp
@@ -95,3 +108,8 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} PUBLIC external_acl external_fmt external_gsl)
 target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:DEBUG>:EELY_DEBUG>)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+message(STATUS "foo include dir: ${CMAKE_CXX_COMPILER_ID}")

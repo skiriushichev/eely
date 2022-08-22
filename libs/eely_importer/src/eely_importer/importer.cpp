@@ -144,7 +144,7 @@ skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_index)
 
   std::vector<skeleton_uncooked::joint> joints;
 
-  const size_t joints_count{fbx_joints.size()};
+  const gsl::index joints_count{std::ssize(fbx_joints)};
   for (gsl::index i{0}; i < joints_count; ++i) {
     FbxNode* fbx_node{fbx_joints[i]->GetNode()};
     const bool is_root{!parent_indices[i].has_value()};
@@ -242,8 +242,6 @@ void importer::collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
                                           std::vector<clip_uncooked_track>& out_tracks)
 {
   enum property { translation = 1 << 0, rotation = 1 << 1, scale = 1 << 2 };
-
-  auto name = fbx_node->GetName();
 
   const std::vector<skeleton_uncooked::joint>& joints{skeleton.get_joints()};
   const auto joint_find_iter{std::find_if(joints.begin(), joints.end(), [fbx_node](const auto& j) {

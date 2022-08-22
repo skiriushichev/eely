@@ -100,7 +100,7 @@ clip_impl_none::clip_impl_none(bit_reader& reader)
 
   // Data
 
-  const size_t data_size{reader.read(32)};
+  const gsl::index data_size{reader.read(32)};
   EXPECTS(data_size > 0);
 
   _data.resize(data_size);

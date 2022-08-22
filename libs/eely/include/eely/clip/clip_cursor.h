@@ -106,7 +106,7 @@ void cursor_init(cursor& cursor, const std::vector<joint_components>& joints_com
 void cursor_reset(cursor& cursor);
 
 // Calculate skeleton pose based on current cursor state.
-void cursor_calculate_pose(const cursor& c, float time_s, skeleton_pose& out_pose);
+void cursor_calculate_pose(const cursor& cursor, float time_s, skeleton_pose& out_pose);
 
 // Collect joints components participating in a clip.
 void joint_components_collect(const std::vector<clip_uncooked_track>& tracks,

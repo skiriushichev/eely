@@ -20,8 +20,7 @@ static input_digital input_digital_promote(const input_digital initial)
   }
 }
 
-static input_digital input_digital_promote(const input_digital initial,
-                                           const bool pressed)
+static input_digital input_digital_promote(const input_digital initial, const bool pressed)
 {
   if (pressed) {
     switch (initial) {
@@ -53,20 +52,17 @@ static input_digital input_digital_promote(const input_digital initial,
 
 void inputs::update_begin()
 {
-  std::for_each(
-      _keyboard_buttons.begin(), _keyboard_buttons.end(),
-      [](input_digital& button) { button = input_digital_promote(button); });
-  std::for_each(
-      _mouse_buttons.begin(), _mouse_buttons.end(),
-      [](input_digital& button) { button = input_digital_promote(button); });
+  std::for_each(_keyboard_buttons.begin(), _keyboard_buttons.end(),
+                [](input_digital& button) { button = input_digital_promote(button); });
+  std::for_each(_mouse_buttons.begin(), _mouse_buttons.end(),
+                [](input_digital& button) { button = input_digital_promote(button); });
 
   _mouse_cursor_delta = input_analog{0.0F, 0.0F};
 }
 
 void inputs::update_end() {}
 
-void inputs::update_keyboard_button(const SDL_Scancode scancode,
-                                    const bool pressed)
+void inputs::update_keyboard_button(const SDL_Scancode scancode, const bool pressed)
 {
   input_digital& button{gsl::at(_keyboard_buttons, scancode)};
   button = input_digital_promote(button, pressed);
@@ -78,8 +74,7 @@ void inputs::update_mouse_button(const Uint8 button_index, const bool pressed)
   button = input_digital_promote(button, pressed);
 }
 
-void inputs::update_mouse_cursor(const input_analog& absolute,
-                                 const input_analog& relative)
+void inputs::update_mouse_cursor(const input_analog& absolute, const input_analog& relative)
 {
   _mouse_cursor = absolute;
   _mouse_cursor_delta = relative;

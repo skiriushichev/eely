@@ -12,7 +12,7 @@
 
 namespace eely {
 bit_reader::bit_reader(const std::span<const std::byte>& data)
-    : _data{data.data()}, _data_size_bits{gsl::narrow<gsl::index>(data.size() * 8)}
+    : _data{data.data()}, _data_size_bits{std::ssize(data) * 8}
 {
   EXPECTS(_data != nullptr);
   EXPECTS(_data_size_bits > 0);
@@ -65,7 +65,7 @@ uint32_t bit_reader::read(const gsl::index size_bits)
   }
 
   if (size_bits < 32) {
-    result &= (1 << size_bits) - 1;
+    result &= (1U << size_bits) - 1;
   }
 
   _position_bits += size_bits;

@@ -156,12 +156,13 @@ void clip_calculate_additive_tracks(const project_uncooked& project,
       // Calculate diff with rest pose transform
       base_track_samples.push_back(skeleton.get_joint(joint_id)->rest_pose_transform);
     }
+    else {
+      const clip_uncooked_track& base_track{*base_track_find_iter};
+      clip_sample_track(base_track, skeleton.get_joint(joint_id)->rest_pose_transform,
+                        base_sampling_info, base_track_samples);
+    }
 
     // Sampling could give either 1 sample or the same number as source
-
-    const clip_uncooked_track& base_track{*base_track_find_iter};
-    clip_sample_track(base_track, skeleton.get_joint(joint_id)->rest_pose_transform,
-                      base_sampling_info, base_track_samples);
 
     for (size_t i = 0; i < kvp.second.size(); ++i) {
       const float time_s{source_sampling_info.time_from_s +

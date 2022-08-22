@@ -22,7 +22,7 @@ public:
   enum class type { absolute, additive };
 
   // Create pose for a skeleton.
-  skeleton_pose(const skeleton& skeleton, type pose_type = type::absolute);
+  explicit skeleton_pose(const skeleton& skeleton, type pose_type = type::absolute);
 
   // Return transform of a joint with specified index, elative to its parent joint.
   [[nodiscard]] const transform& get_transform_joint_space(gsl::index index) const;
@@ -146,7 +146,7 @@ inline const transform& skeleton_pose::get_transform_object_space(const gsl::ind
 
 inline gsl::index skeleton_pose::get_joints_count() const
 {
-  return gsl::narrow<gsl::index>(_transforms_joint_space.size());
+  return std::ssize(_transforms_joint_space);
 }
 
 inline const skeleton& skeleton_pose::get_skeleton() const

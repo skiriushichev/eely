@@ -20,7 +20,7 @@ public:
 
   // Return a read-only result pose.
   // Should only be called after this job is executed.
-  const skeleton_pose_pool::ptr& get_result_pose();
+  [[nodiscard]] const skeleton_pose_pool::ptr& get_result_pose() const;
 
   // Transfer ownership of a result pose to another job.
   // Should only be called after this job is executed.

@@ -21,6 +21,7 @@
 #include <cstdint>
 
 namespace eely {
+/* TODO: use later
 static void render_coordinate_system(app& app, const transform& transform)
 {
   static const string_id coordinate_system_mesh_id{"coordinate_system"};
@@ -82,6 +83,7 @@ static void render_coordinate_system(app& app, const transform& transform)
 
   bgfx::submit(0, material.get_program_handle());
 }
+*/
 
 static void render_skeleton(app& app,
                             const component_skeleton& component_skeleton,

@@ -24,12 +24,12 @@ struct clip_metadata_acl final : public clip_metadata_base {
 // Implementation for clips clips compressed with `clip_compression_scheme::acl`.
 class clip_impl_acl final : public clip_impl_base {
 public:
-  clip_impl_acl(bit_reader& reader);
+  explicit clip_impl_acl(bit_reader& reader);
 
-  clip_impl_acl(float duration_s,
-                const std::vector<clip_uncooked_track>& tracks,
-                bool is_additive,
-                const skeleton& skeleton);
+  explicit clip_impl_acl(float duration_s,
+                         const std::vector<clip_uncooked_track>& tracks,
+                         bool is_additive,
+                         const skeleton& skeleton);
 
   void serialize(bit_writer& writer) const override;
 

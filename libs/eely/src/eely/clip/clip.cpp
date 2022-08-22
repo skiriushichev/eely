@@ -16,7 +16,7 @@
 #include <memory>
 
 namespace eely {
-clip::clip(bit_reader& reader) : resource(reader)
+clip::clip(const project& project, bit_reader& reader) : resource(project, reader)
 {
   using namespace internal;
 
@@ -42,7 +42,8 @@ clip::clip(bit_reader& reader) : resource(reader)
   }
 }
 
-clip::clip(const project& project, const clip_uncooked& uncooked) : resource(uncooked.get_id())
+clip::clip(const project& project, const clip_uncooked& uncooked)
+    : resource(project, uncooked.get_id())
 {
   using namespace internal;
 
@@ -74,7 +75,7 @@ clip::clip(const project& project, const clip_uncooked& uncooked) : resource(unc
 clip::clip(const project& project,
            const project_uncooked& project_uncooked,
            const clip_additive_uncooked& clip_uncooked)
-    : resource(clip_uncooked.get_id())
+    : resource(project, clip_uncooked.get_id())
 {
   using namespace internal;
 

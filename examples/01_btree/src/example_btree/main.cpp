@@ -6,6 +6,6 @@ int main(int /*argc*/, char** /*argv*/)
 {
   using namespace eely;
 
-  app_example_btree app{1024, 768, "Example: blendtree"};
+  app_example_btree app{1024, 768, "Example: blend tree"};
   return app.run();
 }

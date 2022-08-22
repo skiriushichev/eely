@@ -9,6 +9,8 @@
 #include "eely/math/transform.h"
 #include "eely/skeleton/skeleton.h"
 
+#include <gsl/narrow>
+
 #include <limits>
 #include <optional>
 #include <vector>
@@ -129,7 +131,7 @@ void clip_cook(const std::vector<clip_uncooked_track>& tracks,
 
   cooked_key key_to_write;
 
-  const size_t key_components_size{key_components.size()};
+  const gsl::index key_components_size{std::ssize(key_components)};
   EXPECTS(key_components_size > 0);
   for (gsl::index i{0}; i < key_components_size; ++i) {
     const key_component& key_ext{key_components[i]};

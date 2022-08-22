@@ -12,7 +12,7 @@ void job_base::execute(const job_queue& queue)
   _result = execute_impl(queue);
 }
 
-const skeleton_pose_pool::ptr& job_base::get_result_pose()
+const skeleton_pose_pool::ptr& job_base::get_result_pose() const
 {
   return _result;
 }

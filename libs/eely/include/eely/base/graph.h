@@ -41,7 +41,7 @@ private:
 // Traverse graph so that each vertex is visited only after all of its
 // dependencies are visited.
 // Graph traversal is written into `output_iterator`.
-// If topological sort isn't possible (i.e. graph has cycle), return `false`.
+// If topological sort isn't possible (i.e. graph has a cycle), return `false`.
 template <typename TData, typename TOutputIterator>
 [[nodiscard]] bool graph_topological_traversal(const graph<TData>& graph,
                                                TOutputIterator output_iterator);
@@ -63,7 +63,7 @@ const std::vector<typename graph<TData>::vertex>& graph<TData>::get_vertices() c
 template <typename TData>
 const typename graph<TData>::vertex& graph<TData>::add_vertex(TData data)
 {
-  _vertices.push_back({.id = gsl::narrow<gsl::index>(_vertices.size()),
+  _vertices.push_back({.id = std::ssize(_vertices),
                        .data = std::move(data),
                        .adjacency_list = std::vector<gsl::index>{}});
   return _vertices.back();
@@ -72,7 +72,7 @@ const typename graph<TData>::vertex& graph<TData>::add_vertex(TData data)
 template <typename TData>
 void graph<TData>::add_edge(const gsl::index from, const gsl::index to)
 {
-  EXPECTS(from < _vertices.size() && to < _vertices.size());
+  EXPECTS(from < std::ssize(_vertices) && to < std::ssize(_vertices));
 
   std::vector<gsl::index>& adjacency_list = _vertices[from].adjacency_list;
   EXPECTS(std::find(adjacency_list.begin(), adjacency_list.end(), to) == adjacency_list.end());

@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace eely {
-skeleton_mask::skeleton_mask(bit_reader& reader) : resource(reader)
+skeleton_mask::skeleton_mask(const project& project, bit_reader& reader) : resource(project, reader)
 {
   gsl::index weights_count{reader.read(internal::bits_joints_count)};
 
@@ -24,7 +24,7 @@ skeleton_mask::skeleton_mask(bit_reader& reader) : resource(reader)
 }
 
 skeleton_mask::skeleton_mask(const project& project, const skeleton_mask_uncooked& uncooked)
-    : resource(uncooked.get_id())
+    : resource(project, uncooked.get_id())
 {
   const skeleton& skeleton{
       *project.get_resource<eely::skeleton>(uncooked.get_target_skeleton_id())};

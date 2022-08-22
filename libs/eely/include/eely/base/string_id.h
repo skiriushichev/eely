@@ -9,9 +9,9 @@ namespace eely {
 // TODO: hashed string
 using string_id = std::string;
 
-// Serialize string id into memory buffer.
+// Serialize string id into a memory buffer.
 void string_id_serialize(const string_id& id, bit_writer& writer);
 
-// Deserialize string id from memory buffer.
+// Deserialize string id from a memory buffer.
 string_id string_id_deserialize(bit_reader& reader);
 }  // namespace eely

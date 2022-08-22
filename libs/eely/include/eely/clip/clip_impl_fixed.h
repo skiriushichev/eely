@@ -30,12 +30,12 @@ struct clip_metadata_fixed final : public clip_metadata_base {
 // Implementation for clips compressed with `clip_compression_scheme::fixed`.
 class clip_impl_fixed final : public clip_impl_base {
 public:
-  clip_impl_fixed(bit_reader& reader);
+  explicit clip_impl_fixed(bit_reader& reader);
 
-  clip_impl_fixed(float duration_s,
-                  const std::vector<clip_uncooked_track>& tracks,
-                  bool is_additive,
-                  const skeleton& skeleton);
+  explicit clip_impl_fixed(float duration_s,
+                           const std::vector<clip_uncooked_track>& tracks,
+                           bool is_additive,
+                           const skeleton& skeleton);
 
   void serialize(bit_writer& writer) const override;
 

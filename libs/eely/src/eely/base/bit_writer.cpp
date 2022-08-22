@@ -12,7 +12,7 @@
 
 namespace eely {
 bit_writer::bit_writer(const std::span<std::byte>& data)
-    : _data{data.data()}, _data_size_bits{gsl::narrow<gsl::index>(data.size() * 8)}
+    : _data{data.data()}, _data_size_bits{std::ssize(data) * 8}
 {
   EXPECTS(_data != nullptr);
   EXPECTS(_data_size_bits > 0);

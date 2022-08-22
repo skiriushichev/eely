@@ -18,7 +18,7 @@ gsl::index job_queue::add_job(job_base& job)
 {
   EXPECTS(std::find(_jobs.begin(), _jobs.end(), &job) == _jobs.end());
   _jobs.push_back(&job);
-  return gsl::narrow<gsl::index>(_jobs.size() - 1);
+  return std::ssize(_jobs) - 1;
 }
 
 skeleton_pose_pool& job_queue::get_pose_pool() const

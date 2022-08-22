@@ -9,7 +9,14 @@ class project;
 // Cooked resources are used at runtime,
 // and their structures and interface are optimized for that purpose.
 class resource : public resource_base {
-  using resource_base::resource_base;
+public:
+  explicit resource(const project& project, bit_reader& reader);
+  explicit resource(const project& project, string_id id);
+
+  [[nodiscard]] const project& get_project() const;
+
+private:
+  const project& _project;
 };
 
 // Serialize resource's type and data into a memory buffer.

@@ -19,10 +19,10 @@ namespace eely {
 class skeleton final : public resource {
 public:
   // Construct a skeleton from a memory buffer.
-  explicit skeleton(bit_reader& reader);
+  explicit skeleton(const project& project, bit_reader& reader);
 
   // Construct a skeleton from an uncooked counterpart.
-  explicit skeleton(const skeleton_uncooked& uncooked);
+  explicit skeleton(const project& project, const skeleton_uncooked& uncooked);
 
   // Serialize skeleton into memory buffer.
   void serialize(bit_writer& writer) const override;

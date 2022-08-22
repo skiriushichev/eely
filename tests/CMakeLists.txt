@@ -18,3 +18,7 @@ set(SOURCE_FILES
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_link_libraries(${PROJECT_NAME} PRIVATE eely eely_app external_googletest)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()

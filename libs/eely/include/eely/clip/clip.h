@@ -14,7 +14,7 @@ namespace eely {
 class clip final : public resource {
 public:
   // Construct clip from a memory buffer.
-  explicit clip(bit_reader& reader);
+  explicit clip(const project& project, bit_reader& reader);
 
   // Construct clip from an uncooked counterpart.
   explicit clip(const project& project, const clip_uncooked& uncooked);

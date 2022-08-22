@@ -102,7 +102,6 @@ TEST(quantization, quaternions)
     const quaternion q_dequantized{quantize_and_dequantize(q)};
 
     for (gsl::index i{0}; i < 4; ++i) {
-      const float diff{std::abs(quaternion_get_at(q, i) - quaternion_get_at(q_dequantized, i))};
       EXPECT_NEAR(quaternion_get_at(q, i), quaternion_get_at(q_dequantized, i), acceptible_error);
     }
   };

@@ -20,12 +20,12 @@ struct clip_metadata_none final : public clip_metadata_base {
 // Implementation for uncompressed clips.
 class clip_impl_none final : public clip_impl_base {
 public:
-  clip_impl_none(bit_reader& reader);
+  explicit clip_impl_none(bit_reader& reader);
 
-  clip_impl_none(float duration_s,
-                 const std::vector<clip_uncooked_track>& tracks,
-                 bool is_additive,
-                 const skeleton& skeleton);
+  explicit clip_impl_none(float duration_s,
+                          const std::vector<clip_uncooked_track>& tracks,
+                          bool is_additive,
+                          const skeleton& skeleton);
 
   void serialize(bit_writer& writer) const override;
 

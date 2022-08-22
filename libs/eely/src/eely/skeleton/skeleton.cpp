@@ -18,13 +18,14 @@
 #include <vector>
 
 namespace eely {
-skeleton::skeleton(const skeleton_uncooked& uncooked) : resource(uncooked.get_id())
+skeleton::skeleton(const project& project, const skeleton_uncooked& uncooked)
+    : resource(project, uncooked.get_id())
 {
   using namespace eely::internal;
 
   const std::vector<skeleton_uncooked::joint>& joints{uncooked.get_joints()};
 
-  const gsl::index joints_count{gsl::narrow<gsl::index>(joints.size())};
+  const gsl::index joints_count{std::ssize(joints)};
 
   EXPECTS(joints_count > 0);
   EXPECTS(joints_count < joints_max_count);
@@ -43,7 +44,7 @@ skeleton::skeleton(const skeleton_uncooked& uncooked) : resource(uncooked.get_id
   }
 }
 
-skeleton::skeleton(bit_reader& reader) : resource(reader)
+skeleton::skeleton(const project& project, bit_reader& reader) : resource(project, reader)
 {
   using namespace eely::internal;
 
@@ -72,7 +73,7 @@ void skeleton::serialize(bit_writer& writer) const
 
   resource_base::serialize(writer);
 
-  const gsl::index joints_count{gsl::narrow<gsl::index>(_joint_ids.size())};
+  const gsl::index joints_count{std::ssize(_joint_ids)};
 
   writer.write({.value = gsl::narrow_cast<uint32_t>(joints_count), .size_bits = bits_joints_count});
 
@@ -92,7 +93,7 @@ void skeleton::serialize(bit_writer& writer) const
 
 gsl::index skeleton::get_joints_count() const
 {
-  return gsl::narrow<gsl::index>(_joint_ids.size());
+  return std::ssize(_joint_ids);
 }
 
 const string_id& skeleton::get_joint_id(gsl::index index) const
@@ -102,7 +103,8 @@ const string_id& skeleton::get_joint_id(gsl::index index) const
 
 std::optional<gsl::index> skeleton::get_joint_index(const string_id& id) const
 {
-  for (gsl::index i{0}; i < _joint_ids.size(); ++i) {
+  const gsl::index joints_count{std::ssize(_joint_ids)};
+  for (gsl::index i{0}; i < joints_count; ++i) {
     if (_joint_ids[i] == id) {
       return i;
     }

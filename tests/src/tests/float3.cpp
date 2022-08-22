@@ -147,9 +147,6 @@ TEST(float3, utils)
 
   // vector_dot
   {
-    const float3 a{3.2F, 0.15F, -11.39F};
-    const float3 b{0.19F, 2.2F, -7.19F};
-
     const float dot{vector_dot(float3{3.2F, 0.15F, -11.39F}, float3{0.19F, 2.2F, -7.19F})};
     EXPECT_NEAR(dot, 82.8321F, epsilon);
   }

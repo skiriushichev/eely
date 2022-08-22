@@ -132,7 +132,9 @@ static void test_skeleton_and_cip_with_scheme(eely::clip_compression_scheme comp
 
   const auto calculate_joint_scale_acceptible_error = []() { return epsilon_default; };
 
-  const float acceptible_error_quaternion = [compression_scheme]() { return epsilon_default; }();
+  const float acceptible_error_quaternion = [/*compression_scheme*/]() {
+    return epsilon_default;
+  }();
 
   const float acceptible_error_root_translation{calculate_joint_translation_acceptible_error()};
 

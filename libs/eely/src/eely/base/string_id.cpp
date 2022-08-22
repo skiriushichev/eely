@@ -20,7 +20,7 @@ void string_id_serialize(const string_id& id, bit_writer& writer)
 
 string_id string_id_deserialize(bit_reader& reader)
 {
-  const size_t size{reader.read(bits_size)};
+  const gsl::index size{reader.read(bits_size)};
   string_id id(size, 0);
 
   for (gsl::index i{0}; i < size; ++i) {

@@ -8,6 +8,9 @@
 #include "eely/math/quantization.h"
 #include "eely/skeleton/skeleton_pose.h"
 
+#include <gsl/narrow>
+#include <gsl/util>
+
 #include <cstdint>
 #include <span>
 
@@ -49,7 +52,9 @@ void clip_player_fixed::play(const float time_s, skeleton_pose& out_pose)
   gsl::index cursor_scale_index{0};
   gsl::index metadata_index{0};
 
-  while (data_pos < _data.size()) {
+  const gsl::index data_size{std::ssize(_data)};
+
+  while (data_pos < data_size) {
     const uint16_t header{_data[data_pos]};
 
     const bool has_joint_index{has_flag(header, flags::has_joint_index)};

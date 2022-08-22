@@ -34,10 +34,12 @@ void btree_player_node_blend::on_params_changed(const context& context)
   // Select up to two children that this node is going to blend
   // And calculate blending coefficient
 
+  const gsl::index children_size{std::ssize(_children)};
+
   const float param_value{context.params.get_float(_param_id)};
 
   gsl::index upper_bound_child_index{-1};
-  for (gsl::index i{0}; i < _children.size(); ++i) {
+  for (gsl::index i{0}; i < children_size; ++i) {
     const child& c{_children[i]};
     if (c.param_value >= param_value) {
       upper_bound_child_index = i;

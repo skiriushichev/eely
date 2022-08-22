@@ -18,28 +18,28 @@ struct matrix4x4 final {
   static const matrix4x4 identity;
 
   // Create uninitialized matrix.
-  matrix4x4();
+  explicit matrix4x4();
 
   // Create matrix with specified values.
-  matrix4x4(float m00,
-            float m01,
-            float m02,
-            float m03,
+  explicit matrix4x4(float m00,
+                     float m01,
+                     float m02,
+                     float m03,
 
-            float m10,
-            float m11,
-            float m12,
-            float m13,
+                     float m10,
+                     float m11,
+                     float m12,
+                     float m13,
 
-            float m20,
-            float m21,
-            float m22,
-            float m23,
+                     float m20,
+                     float m21,
+                     float m22,
+                     float m23,
 
-            float m30,
-            float m31,
-            float m32,
-            float m33);
+                     float m30,
+                     float m31,
+                     float m32,
+                     float m33);
 
   [[nodiscard]] float operator()(gsl::index r, gsl::index c) const;
   [[nodiscard]] float& operator()(gsl::index r, gsl::index c);

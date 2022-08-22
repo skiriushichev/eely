@@ -63,6 +63,8 @@ clip_uncooked::clip_uncooked(bit_reader& reader) : resource_uncooked(reader)
 
       t.keys[time_s] = k;
     }
+
+    _tracks.push_back(std::move(t));
   }
 }
 
@@ -82,7 +84,7 @@ void clip_uncooked::serialize(bit_writer& writer) const
   writer.write({.value = static_cast<uint32_t>(_compression_scheme),
                 .size_bits = bits_clip_compression_scheme});
 
-  const gsl::index tracks_count{gsl::narrow<gsl::index>(_tracks.size())};
+  const gsl::index tracks_count{std::ssize(_tracks)};
   EXPECTS(tracks_count <= joints_max_count);
   writer.write({.value = gsl::narrow_cast<uint32_t>(tracks_count), .size_bits = bits_joints_count});
 
@@ -91,7 +93,7 @@ void clip_uncooked::serialize(bit_writer& writer) const
 
     string_id_serialize(t.joint_id, writer);
 
-    const gsl::index keys_count{gsl::narrow<gsl::index>(t.keys.size())};
+    const gsl::index keys_count{std::ssize(t.keys)};
     writer.write({.value = gsl::narrow_cast<uint32_t>(keys_count), .size_bits = bits_keys_count});
 
     for (const auto& [time, key] : t.keys) {

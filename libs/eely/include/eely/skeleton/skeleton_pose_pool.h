@@ -16,8 +16,8 @@ public:
   // Deleter for `unique_ptr` that returns pose back to the pool it was taken from.
   // Should never outlive the pool.
   struct deleter final {
-    deleter() = default;
-    deleter(skeleton_pose_pool& pool);
+    explicit deleter() = default;
+    explicit deleter(skeleton_pose_pool& pool);
 
     void operator()(skeleton_pose* ptr);
 
@@ -41,7 +41,7 @@ public:
 
 private:
   // For returning back poses into the pool once unique ptr is destroyed
-  friend class deleter;
+  friend struct deleter;
 
   const skeleton& _skeleton;
   std::vector<std::unique_ptr<skeleton_pose>> _poses;

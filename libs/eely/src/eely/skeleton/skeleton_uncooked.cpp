@@ -45,7 +45,7 @@ void skeleton_uncooked::serialize(bit_writer& writer) const
 
   resource_uncooked::serialize(writer);
 
-  const gsl::index joints_count{gsl::narrow<gsl::index>(_joints.size())};
+  const gsl::index joints_count{std::ssize(_joints)};
 
   writer.write({.value = gsl::narrow_cast<uint32_t>(joints_count), .size_bits = bits_joints_count});
 

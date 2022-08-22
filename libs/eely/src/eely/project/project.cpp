@@ -3,6 +3,8 @@
 #include "eely/base/assert.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
+#include "eely/btree/btree.h"
+#include "eely/btree/btree_uncooked.h"
 #include "eely/clip/clip.h"
 #include "eely/clip/clip_uncooked.h"
 #include "eely/project/project_uncooked.h"
@@ -45,7 +47,7 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
     std::unique_ptr<resource> resource_cooked;
 
     if (const auto* ru{dynamic_cast<const skeleton_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<skeleton>(*ru);
+      resource_cooked = std::make_unique<skeleton>(tmp_project, *ru);
     }
     else if (const auto* ru{dynamic_cast<const clip_uncooked*>(resource_uncooked)}) {
       resource_cooked = std::make_unique<clip>(tmp_project, *ru);
@@ -55,6 +57,9 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
     }
     else if (const auto* ru{dynamic_cast<const skeleton_mask_uncooked*>(resource_uncooked)}) {
       resource_cooked = std::make_unique<skeleton_mask>(tmp_project, *ru);
+    }
+    else if (const auto* ru{dynamic_cast<const btree_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<btree>(tmp_project, *ru);
     }
     else {
       EXPECTS(false);

@@ -118,10 +118,12 @@ std::unique_ptr<uint8_t, decltype(&std::free)> acl_compress(
     acl_track_description.precision = 0.001F;
     acl_track_description.shell_distance = 0.3F;
 
-    track_qvvf acl_track{track_qvvf::make_reserve(acl_track_description, acl_allocator,
-                                                  track.samples.size(), acl_sample_rate)};
+    const gsl::index samples_size{std::ssize(track.samples)};
 
-    for (gsl::index sample_index{0}; sample_index < track.samples.size(); ++sample_index) {
+    track_qvvf acl_track{track_qvvf::make_reserve(acl_track_description, acl_allocator,
+                                                  samples_size, acl_sample_rate)};
+
+    for (gsl::index sample_index{0}; sample_index < samples_size; ++sample_index) {
       const transform& sample = track.samples[sample_index];
 
       rtm::qvvf acl_qvvf;
@@ -173,12 +175,13 @@ clip_impl_acl::clip_impl_acl(bit_reader& reader)
 
   // Data
 
-  const size_t data_size{reader.read(32)};
+  const gsl::index data_size{reader.read(32)};
   EXPECTS(data_size > 0);
 
   _acl_compressed_tracks_storage = acl_allocate_compressed_tracks_storage(data_size);
 
-  std::span<uint8_t> data_span{_acl_compressed_tracks_storage.get(), data_size};
+  std::span<uint8_t> data_span{_acl_compressed_tracks_storage.get(),
+                               gsl::narrow<size_t>(data_size)};
   for (gsl::index i{0}; i < data_size; ++i) {
     data_span[i] = reader.read(8);
   }

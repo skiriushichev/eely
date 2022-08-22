@@ -33,6 +33,10 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC include src)
 target_link_libraries(${PROJECT_NAME} PUBLIC eely external_bgfx external_entt external_fmt external_gsl external_imgui external_imgui_bgfx external_sdl)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+
 # Create build rule for a shader
 # Only for internal use by "eely_add_app"
 function(eely_internal_add_shader)

@@ -1,7 +1,9 @@
 #pragma once
 
+#include "eely/btree/btree_node_base.h"
 #include "eely/job/job_queue.h"
 #include "eely/params/params.h"
+#include "eely/project/project.h"
 
 #include <gsl/util>
 
@@ -30,11 +32,13 @@ public:
     std::optional<float> sync_phase;
   };
 
+  explicit btree_player_node_base() = default;
+
   virtual ~btree_player_node_base() = default;
 
   // Invoked whenever parameters, bound to the blend tree, are changed.
   // Used to recalculate node state (e.g. which path it takes, what's the duration etc.).
-  virtual void on_params_changed(const context& context) {}
+  virtual void on_params_changed(const context& /*context*/) {}
 
   // Play the node and return index of a root job.
   // This results into a job(s) queued for execution,
@@ -51,6 +55,13 @@ protected:
 private:
   float _duration_s{0.0F};
 };
+
+using btree_player_node_uptr = std::unique_ptr<btree_player_node_base>;
+
+// Create player node from blend tree node.
+btree_player_node_uptr btree_player_node_create(const project& project,
+                                                btree_node_base& node,
+                                                std::vector<btree_player_node_uptr>& player_nodes);
 
 // Implementation
 

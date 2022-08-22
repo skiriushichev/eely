@@ -97,17 +97,19 @@ auto& clip_uncooked_key_get_component(const clip_uncooked_key& key)
 template <typename TVector>
 auto& get_by_joint_index(TVector& data, gsl::index& data_index, gsl::index joint_index)
 {
+  const gsl::index data_size{std::ssize(data)};
+
   const gsl::index initial_index{data_index};
 
   while (true) {
     auto& element{data[data_index]};
-    if (data[data_index].joint_index == joint_index) {
+    if (element.joint_index == joint_index) {
       return element;
     }
 
     ++data_index;
 
-    if (data_index == data.size()) {
+    if (data_index == data_size) {
       data_index = 0;
     }
 

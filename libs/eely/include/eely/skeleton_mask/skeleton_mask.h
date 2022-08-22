@@ -14,7 +14,7 @@
 namespace eely {
 class skeleton_mask final : public resource {
 public:
-  explicit skeleton_mask(bit_reader& reader);
+  explicit skeleton_mask(const project& project, bit_reader& reader);
 
   explicit skeleton_mask(const project& project, const skeleton_mask_uncooked& uncooked);
 

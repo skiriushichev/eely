@@ -15,7 +15,8 @@
 #include <vector>
 
 namespace eely::internal {
-//
+// Return `std::nullopt` if component should be reduced based on its neighbors,
+// otherwise return its original value.
 template <transform_components TComponent>
 static auto linear_key_reduction_component(
     const std::map<float, clip_uncooked_key>& keys,
@@ -172,7 +173,6 @@ std::vector<clip_uncooked_track> linear_key_reduction(
 
     for (auto key_iter{track.keys.cbegin()}; key_iter != track.keys.cend(); ++key_iter) {
       const float& time_s{key_iter->first};
-      const clip_uncooked_key& key{key_iter->second};
 
       clip_uncooked_key reduced_key;
 
