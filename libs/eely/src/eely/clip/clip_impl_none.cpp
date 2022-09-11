@@ -24,7 +24,7 @@ static void write_cooked_key(const cooked_key& key, std::vector<uint32_t>& data)
   if (key.joint_index_changed) {
     flags_and_joint_index |= compression_key_flags::has_joint_index;
 
-    const uint32_t joint_index{gsl::narrow_cast<uint32_t>(key.joint_index)};
+    const uint32_t joint_index{gsl::narrow<uint32_t>(key.joint_index)};
     flags_and_joint_index |= (joint_index << 21);  // 21 for joint index to occupy last 11 bits
   }
 
@@ -93,7 +93,7 @@ clip_impl_none::clip_impl_none(bit_reader& reader)
   for (gsl::index i{0}; i < metadata_joint_components_size; ++i) {
     joint_components j;
     j.joint_index = reader.read(bits_joints_count);
-    j.components = gsl::narrow_cast<int>(reader.read(bits_transform_components));
+    j.components = gsl::narrow<int>(reader.read(bits_transform_components));
 
     _metadata.joints_components[i] = j;
   }
@@ -115,7 +115,8 @@ clip_impl_none::clip_impl_none(const float duration_s,
                                const skeleton& skeleton)
 {
   std::vector<clip_uncooked_track> reduced_tracks{remove_rest_pose_keys(tracks, skeleton)};
-  reduced_tracks = linear_key_reduction(reduced_tracks);
+
+  // TODO: linear key reduction
 
   // Metadata
 

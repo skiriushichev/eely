@@ -3,7 +3,6 @@
 #include <eely_app/app.h>
 #include <eely_app/scene.h>
 
-#include <eely/btree/btree_player.h>
 #include <eely/params/params.h>
 #include <eely/project/project.h>
 
@@ -22,8 +21,6 @@ private:
   std::unique_ptr<project> _project;
   scene _scene;
   entt::entity _character;
-
   params _params;
-  std::unique_ptr<btree_player> _btree_player;
 };
 }  // namespace eely

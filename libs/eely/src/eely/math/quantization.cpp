@@ -20,7 +20,7 @@ uint16_t float_quantize(const float_quantize_params& params)
   const float normalized_value{(params.value - params.range_from) / params.range_length};
   EXPECTS(normalized_value >= 0.0F && normalized_value <= 1.0F + epsilon_asserts);
 
-  const uint16_t max_index{gsl::narrow_cast<uint16_t>((1 << params.bits_count) - 1)};
+  const uint16_t max_index{gsl::narrow<uint16_t>((1 << params.bits_count) - 1)};
   const float scaled_value{normalized_value * static_cast<float>(max_index)};
 
   // TODO: This truncates towards zero. Different rounding can be considered here

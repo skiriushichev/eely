@@ -6,6 +6,7 @@ set(SOURCE_FILES
   include/eely_app/asset_material.h
   include/eely_app/asset_mesh.h
   include/eely_app/asset_uniform.h
+  include/eely_app/component_anim_graph.h
   include/eely_app/component_camera.h
   include/eely_app/component_clip.h
   include/eely_app/component_transform.h

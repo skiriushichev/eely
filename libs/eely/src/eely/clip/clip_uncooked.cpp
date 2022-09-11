@@ -86,7 +86,7 @@ void clip_uncooked::serialize(bit_writer& writer) const
 
   const gsl::index tracks_count{std::ssize(_tracks)};
   EXPECTS(tracks_count <= joints_max_count);
-  writer.write({.value = gsl::narrow_cast<uint32_t>(tracks_count), .size_bits = bits_joints_count});
+  writer.write({.value = gsl::narrow<uint32_t>(tracks_count), .size_bits = bits_joints_count});
 
   for (gsl::index track_index{0}; track_index < tracks_count; ++track_index) {
     const clip_uncooked_track& t{_tracks[track_index]};
@@ -94,7 +94,7 @@ void clip_uncooked::serialize(bit_writer& writer) const
     string_id_serialize(t.joint_id, writer);
 
     const gsl::index keys_count{std::ssize(t.keys)};
-    writer.write({.value = gsl::narrow_cast<uint32_t>(keys_count), .size_bits = bits_keys_count});
+    writer.write({.value = gsl::narrow<uint32_t>(keys_count), .size_bits = bits_keys_count});
 
     for (const auto& [time, key] : t.keys) {
       writer.write({.value = bit_cast<uint32_t>(time), .size_bits = 32});

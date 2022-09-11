@@ -188,7 +188,7 @@ clip_impl_fixed::clip_impl_fixed(bit_reader& reader)
   for (gsl::index i{0}; i < metadata_joint_components_size; ++i) {
     joint_components j;
     j.joint_index = reader.read(bits_joints_count);
-    j.components = gsl::narrow_cast<int>(reader.read(bits_transform_components));
+    j.components = gsl::narrow<int>(reader.read(bits_transform_components));
 
     _metadata.joints_components[i] = j;
   }
@@ -224,7 +224,8 @@ clip_impl_fixed::clip_impl_fixed(const float duration_s,
                                  const skeleton& skeleton)
 {
   std::vector<clip_uncooked_track> reduced_tracks{remove_rest_pose_keys(tracks, skeleton)};
-  reduced_tracks = linear_key_reduction(reduced_tracks);
+
+  // TODO: linear key reduction
 
   // Metadata
 

@@ -45,7 +45,7 @@ struct cooked_key final {
   std::optional<float3> scale;
 };
 
-// Precision data for `remove_rest_pose_tracks` and `linear_key_reduction`.
+// Precision data for `remove_rest_pose_tracks`.
 struct track_reduction_precision final {
   float rotation_rad{deg_to_rad(0.001F)};
   float translation{0.001F};
@@ -63,16 +63,6 @@ void clip_cook(const std::vector<clip_uncooked_track>& tracks,
 std::vector<clip_uncooked_track> remove_rest_pose_keys(
     const std::vector<clip_uncooked_track>& tracks,
     const skeleton& skeleton,
-    const track_reduction_precision& precision = track_reduction_precision{});
-
-// Remove keys that can be interpolated from their neighbours
-// and still have the same value with specified precision.
-// This reduces data size in some cases, and also allows us to generate clips
-// procedurally by sampling at specified rate (e.g. when generating additive clip).
-// After sampling linear key reduction will remove unneeded keys during cooking,
-// on all compression schemes.
-std::vector<clip_uncooked_track> linear_key_reduction(
-    const std::vector<clip_uncooked_track>& tracks,
     const track_reduction_precision& precision = track_reduction_precision{});
 
 // Implementation

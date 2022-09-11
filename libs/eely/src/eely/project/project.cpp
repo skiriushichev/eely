@@ -1,10 +1,12 @@
 #include "eely/project/project.h"
 
+#include "eely/anim_graph/btree/btree.h"
+#include "eely/anim_graph/btree/btree_uncooked.h"
+#include "eely/anim_graph/fsm/fsm.h"
+#include "eely/anim_graph/fsm/fsm_uncooked.h"
 #include "eely/base/assert.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
-#include "eely/btree/btree.h"
-#include "eely/btree/btree_uncooked.h"
 #include "eely/clip/clip.h"
 #include "eely/clip/clip_uncooked.h"
 #include "eely/project/project_uncooked.h"
@@ -60,6 +62,9 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
     }
     else if (const auto* ru{dynamic_cast<const btree_uncooked*>(resource_uncooked)}) {
       resource_cooked = std::make_unique<btree>(tmp_project, *ru);
+    }
+    else if (const auto* ru{dynamic_cast<const fsm_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<fsm>(tmp_project, *ru);
     }
     else {
       EXPECTS(false);

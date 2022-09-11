@@ -21,12 +21,32 @@ gsl::index job_queue::add_job(job_base& job)
   return std::ssize(_jobs) - 1;
 }
 
-skeleton_pose_pool& job_queue::get_pose_pool() const
+skeleton_pose_pool& job_queue::get_pose_pool()
 {
   return _pose_pool;
 }
 
-job_base& job_queue::get_job(gsl::index job_index) const
+gsl::index job_queue::acquire_saved_pose_index()
+{
+  _saved_poses.emplace_back();
+  return std::ssize(_saved_poses) - 1;
+}
+
+void job_queue::save_pose(const job_base& job, gsl::index pose_index)
+{
+  if (_saved_poses[pose_index] == nullptr) {
+    _saved_poses[pose_index] = _pose_pool.borrow();
+  }
+
+  *_saved_poses[pose_index] = *job.get_result_pose();
+}
+
+const skeleton_pose_pool::ptr& job_queue::restore_pose(gsl::index pose_index)
+{
+  return _saved_poses[pose_index];
+}
+
+job_base& job_queue::get_job(gsl::index job_index)
 {
   job_base* result{_jobs.at(job_index)};
   EXPECTS(result != nullptr);

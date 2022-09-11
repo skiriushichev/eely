@@ -4,11 +4,20 @@
 
 #include <gsl/pointers>
 
+#include <bit>
 #include <cstring>
 #include <memory>
 #include <type_traits>
 
 namespace eely {
+// Currently in places where floats are written into memory buffers,
+// constant equal to 32 bits is used. This is temporary until `bit_writer` interface is improved
+static_assert(sizeof(float) == 4);
+
+// No effort is made currently to handle loading projects on machines with different endianess.
+// When it becomes supported, this assert can be removed.
+static_assert(std::endian::native == std::endian::little);
+
 struct align_size_to_params final {
   size_t alignment{0};
   size_t size{0};

@@ -286,13 +286,13 @@ void importer::collect_tracks_recursively(FbxAnimLayer* fbx_anim_layer,
 
   if (!time_to_properties.empty()) {
     const FbxTime& first_fbx_time{time_to_properties.begin()->first};
-    const float start_time_s{gsl::narrow<float>(first_fbx_time.GetSecondDouble())};
+    const float start_time_s{static_cast<float>(first_fbx_time.GetSecondDouble())};
 
     clip_uncooked_track track;
     track.joint_id = fbx_node->GetName();
 
     for (const auto& [fbx_time, props] : time_to_properties) {
-      const float time_s{gsl::narrow_cast<float>(fbx_time.GetSecondDouble()) - start_time_s};
+      const float time_s{static_cast<float>(fbx_time.GetSecondDouble()) - start_time_s};
 
       transform local_transform{evaluate_local_transform(fbx_node, is_root, fbx_time)};
 

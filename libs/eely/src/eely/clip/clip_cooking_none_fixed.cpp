@@ -15,64 +15,6 @@
 #include <vector>
 
 namespace eely::internal {
-// Return `std::nullopt` if component should be reduced based on its neighbors,
-// otherwise return its original value.
-template <transform_components TComponent>
-static auto linear_key_reduction_component(
-    const std::map<float, clip_uncooked_key>& keys,
-    const std::map<float, clip_uncooked_key>::const_iterator& key_iter,
-    const auto& precision) -> typename transform_component_t<TComponent>::optional_type
-{
-  const clip_uncooked_key& key{key_iter->second};
-
-  if (clip_uncooked_key_has_component<TComponent>(key)) {
-    const auto& key_component{clip_uncooked_key_get_component<TComponent>(key)};
-
-    const auto prev_component_iter{find_key_component<TComponent>(
-        std::make_reverse_iterator(key_iter), keys.rend(), [](const auto&) { return true; })};
-
-    if (prev_component_iter == keys.rend()) {
-      // This is a first key with this component
-      return key_component;
-    }
-
-    const auto next_component_iter{find_key_component<TComponent>(
-        std::next(key_iter), keys.cend(), [](const auto&) { return true; })};
-
-    if (next_component_iter == keys.cend()) {
-      // This is a last key with this component
-      return key_component;
-    }
-
-    const auto& from{clip_uncooked_key_get_component<TComponent>(prev_component_iter->second)};
-    const auto& to{clip_uncooked_key_get_component<TComponent>(next_component_iter->second)};
-
-    const float time_range{next_component_iter->first - prev_component_iter->first};
-    const float weight{(key_iter->first - prev_component_iter->first) / time_range};
-
-    if constexpr (TComponent == transform_components::translation ||
-                  TComponent == transform_components::scale) {
-      const float3 lerped{float3_lerp(from, to, weight)};
-      const bool reduced{float3_near(key_component, lerped, precision)};
-      if (!reduced) {
-        return key_component;
-      }
-    }
-    else {
-      static_assert(TComponent == transform_components::rotation);
-
-      const quaternion lerped{quaternion_slerp(from, to, weight)};
-      // TODO: use euler angle values for comparison
-      const bool reduced{quaternion_near(key_component, lerped, precision)};
-      if (!reduced) {
-        return key_component;
-      }
-    }
-  }
-
-  return std::nullopt;
-}
-
 std::tuple<bool, bool, bool> compare_key_with_rest_pose(const clip_uncooked_key& key,
                                                         const transform& rest_pose_transform,
                                                         const track_reduction_precision& precision)
@@ -156,51 +98,6 @@ std::vector<clip_uncooked_track> remove_rest_pose_keys(
     }
 
     reduced_tracks.push_back(reduced_track);
-  }
-
-  return reduced_tracks;
-}
-
-std::vector<clip_uncooked_track> linear_key_reduction(
-    const std::vector<clip_uncooked_track>& tracks,
-    const track_reduction_precision& precision)
-{
-  std::vector<clip_uncooked_track> reduced_tracks;
-
-  for (const clip_uncooked_track& track : tracks) {
-    clip_uncooked_track reduced_track;
-    reduced_track.joint_id = track.joint_id;
-
-    for (auto key_iter{track.keys.cbegin()}; key_iter != track.keys.cend(); ++key_iter) {
-      const float& time_s{key_iter->first};
-
-      clip_uncooked_key reduced_key;
-
-      // First and last component are always copied as-is
-      // Components in between are compared to their interpolated counterpart,
-      // and if they're close enough, omit them
-      // TODO: current algorithm does not take hierarchy into account
-
-      reduced_key.translation = linear_key_reduction_component<transform_components::translation>(
-          track.keys, key_iter, precision.translation);
-
-      reduced_key.rotation = linear_key_reduction_component<transform_components::rotation>(
-          track.keys, key_iter, precision.rotation_rad);
-
-      reduced_key.scale = linear_key_reduction_component<transform_components::scale>(
-          track.keys, key_iter, precision.scale);
-
-      // Add key to reduced track if it has data
-
-      if (reduced_key.translation.has_value() || reduced_key.rotation.has_value() ||
-          reduced_key.scale.has_value()) {
-        reduced_track.keys.insert({time_s, reduced_key});
-      }
-    }
-
-    if (!reduced_track.keys.empty()) {
-      reduced_tracks.push_back(std::move(reduced_track));
-    }
   }
 
   return reduced_tracks;

@@ -1,9 +1,10 @@
 #include "eely/project/resource.h"
 
+#include "eely/anim_graph/btree/btree.h"
+#include "eely/anim_graph/fsm/fsm.h"
 #include "eely/base/assert.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
-#include "eely/btree/btree.h"
 #include "eely/clip/clip.h"
 #include "eely/project/project.h"
 #include "eely/skeleton/skeleton.h"
@@ -15,7 +16,7 @@
 namespace eely {
 static constexpr gsl::index bits_resource_type{4};
 
-enum class resource_type { skeleton, clip, skeleton_mask, btree };
+enum class resource_type { skeleton, clip, skeleton_mask, btree, fsm };
 
 resource::resource(const project& project, bit_reader& reader)
     : resource_base(reader), _project{project}
@@ -47,6 +48,9 @@ void resource_serialize(const resource& resource, bit_writer& writer)
   else if (dynamic_cast<const btree*>(&resource) != nullptr) {
     type = resource_type::btree;
   }
+  else if (dynamic_cast<const fsm*>(&resource) != nullptr) {
+    type = resource_type::fsm;
+  }
   else {
     throw std::runtime_error("Unknown resource type for serialization");
   }
@@ -75,6 +79,10 @@ std::unique_ptr<resource> resource_deserialize(const project& project, bit_reade
 
     case resource_type::btree: {
       return std::make_unique<btree>(project, reader);
+    } break;
+
+    case resource_type::fsm: {
+      return std::make_unique<fsm>(project, reader);
     } break;
 
     default: {

@@ -1,9 +1,10 @@
 #include "eely/project/resource_uncooked.h"
 
+#include "eely/anim_graph/btree/btree_uncooked.h"
+#include "eely/anim_graph/fsm/fsm_uncooked.h"
 #include "eely/base/assert.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
-#include "eely/btree/btree_uncooked.h"
 #include "eely/clip/clip_uncooked.h"
 #include "eely/skeleton/skeleton_uncooked.h"
 #include "eely/skeleton_mask/skeleton_mask_uncooked.h"
@@ -15,7 +16,7 @@
 namespace eely {
 static constexpr gsl::index bits_resource_type{4};
 
-enum class resource_uncooked_type { skeleton, clip, clip_additive, skeleton_mask, btree };
+enum class resource_uncooked_type { skeleton, clip, clip_additive, skeleton_mask, btree, fsm };
 
 void resource_uncooked::collect_dependencies(
     std::unordered_set<string_id>& /*out_dependencies*/) const
@@ -39,6 +40,9 @@ void resource_uncooked_serialize(const resource_uncooked& resource, bit_writer& 
   }
   else if (dynamic_cast<const btree_uncooked*>(&resource) != nullptr) {
     type = resource_uncooked_type::btree;
+  }
+  else if (dynamic_cast<const fsm_uncooked*>(&resource) != nullptr) {
+    type = resource_uncooked_type::fsm;
   }
   else {
     throw std::runtime_error("Unknown resource type for serialization");
@@ -72,6 +76,10 @@ std::unique_ptr<resource_uncooked> resource_uncooked_deserialize(bit_reader& rea
 
     case resource_uncooked_type::btree: {
       return std::make_unique<btree_uncooked>(reader);
+    } break;
+
+    case resource_uncooked_type::fsm: {
+      return std::make_unique<fsm_uncooked>(reader);
     } break;
 
     default: {

@@ -6,6 +6,8 @@
 #include "eely/math/quaternion.h"
 #include "eely/math/transform.h"
 
+#include <gsl/narrow>
+
 #include <gtest/gtest.h>
 
 namespace eely {
@@ -55,7 +57,7 @@ inline float calculate_acceptable_quantize_error(
   // `float_quantize` truncates float quantized value to `uint16_t` now,
   // thus maximum error is one quant, plus some epsilon for floating point accuracy
   const gsl::index quants_count{1 << params.bits_count};
-  const float value_per_quant{params.range_length / gsl::narrow_cast<float>(quants_count - 1)};
+  const float value_per_quant{params.range_length / gsl::narrow<float>(quants_count - 1)};
   EXPECT_TRUE(std::isfinite(value_per_quant));
   return value_per_quant + eely::epsilon_default;
 }

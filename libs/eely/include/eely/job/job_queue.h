@@ -12,7 +12,7 @@ namespace eely::internal {
 class job_base;
 
 // Job queue list jobs to be executed to produce final pose for specified skeleton.
-// Animation graphs and blend trees produce these jobs when traversed.
+// Animation graphs and blendtrees produce these jobs when traversed.
 class job_queue final {
 public:
   // Construct job queue for specified skeleton.
@@ -25,17 +25,20 @@ public:
   void execute(skeleton_pose& out_pose);
 
   // Get job by its index.
-  [[nodiscard]] job_base& get_job(gsl::index job_index) const;
+  [[nodiscard]] job_base& get_job(gsl::index job_index);
 
   // Get pose pool to be used during execution.
-  [[nodiscard]] skeleton_pose_pool& get_pose_pool() const;
+  [[nodiscard]] skeleton_pose_pool& get_pose_pool();
+
+  [[nodiscard]] gsl::index acquire_saved_pose_index();
+
+  void save_pose(const job_base& job, gsl::index pose_index);
+
+  const skeleton_pose_pool::ptr& restore_pose(gsl::index pose_index);
 
 private:
   std::vector<job_base*> _jobs;
-
-  // Pool is mutable because jobs can access the queue when they're invoked,
-  // and they need the pool to acquire poses.
-  // We don't want them to change anything in the queue itself, so it is passed as const.
-  mutable skeleton_pose_pool _pose_pool;
+  skeleton_pose_pool _pose_pool;
+  std::vector<skeleton_pose_pool::ptr> _saved_poses;
 };
 }  // namespace eely::internal

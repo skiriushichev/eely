@@ -24,7 +24,7 @@ string_id string_id_deserialize(bit_reader& reader)
   string_id id(size, 0);
 
   for (gsl::index i{0}; i < size; ++i) {
-    id[i] = gsl::narrow_cast<char>(reader.read(8));
+    id[i] = gsl::narrow<char>(reader.read(8));
   }
 
   return id;

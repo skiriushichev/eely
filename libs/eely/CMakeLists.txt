@@ -1,6 +1,37 @@
 project(eely)
 
 set(SOURCE_FILES
+    include/eely/anim_graph/btree/btree_node_add.h
+    include/eely/anim_graph/btree/btree_node_base.h
+    include/eely/anim_graph/btree/btree_node_blend.h
+    include/eely/anim_graph/btree/btree_node_btree.h
+    include/eely/anim_graph/btree/btree_node_clip.h
+    include/eely/anim_graph/btree/btree_node_fsm.h
+    include/eely/anim_graph/btree/btree_player_node_add.h
+    include/eely/anim_graph/btree/btree_player_node_base.h
+    include/eely/anim_graph/btree/btree_player_node_blend.h
+    include/eely/anim_graph/btree/btree_player_node_btree.h
+    include/eely/anim_graph/btree/btree_player_node_clip.h
+    include/eely/anim_graph/btree/btree_player_node_fsm.h
+    include/eely/anim_graph/btree/btree_player.h
+    include/eely/anim_graph/btree/btree_uncooked.h
+    include/eely/anim_graph/btree/btree.h
+    include/eely/anim_graph/fsm/fsm_node_base.h
+    include/eely/anim_graph/fsm/fsm_node_btree.h
+    include/eely/anim_graph/fsm/fsm_node_fsm.h
+    include/eely/anim_graph/fsm/fsm_node_transition.h
+    include/eely/anim_graph/fsm/fsm_player_node_base.h
+    include/eely/anim_graph/fsm/fsm_player_node_btree.h
+    include/eely/anim_graph/fsm/fsm_player_node_fsm.h
+    include/eely/anim_graph/fsm/fsm_player_node_transition.h
+    include/eely/anim_graph/fsm/fsm_player.h
+    include/eely/anim_graph/fsm/fsm_uncooked.h
+    include/eely/anim_graph/fsm/fsm.h
+    include/eely/anim_graph/anim_graph_base_uncooked.h
+    include/eely/anim_graph/anim_graph_base.h
+    include/eely/anim_graph/anim_graph_node_base.h
+    include/eely/anim_graph/anim_graph_player_node_base.h
+    include/eely/anim_graph/anim_graph_player.h
     include/eely/base/assert.h
     include/eely/base/base_utils.h   
     include/eely/base/bit_reader.h
@@ -8,17 +39,6 @@ set(SOURCE_FILES
     include/eely/base/graph.h
     include/eely/base/string_id.h
     include/eely/base/time_utils.h
-    include/eely/btree/btree_node_add.h
-    include/eely/btree/btree_node_base.h
-    include/eely/btree/btree_node_blend.h
-    include/eely/btree/btree_node_clip.h
-    include/eely/btree/btree_player_node_add.h
-    include/eely/btree/btree_player_node_base.h
-    include/eely/btree/btree_player_node_blend.h
-    include/eely/btree/btree_player_node_clip.h
-    include/eely/btree/btree_player.h
-    include/eely/btree/btree_uncooked.h
-    include/eely/btree/btree.h
     include/eely/clip/clip_compression_scheme.h
     include/eely/clip/clip_cooking_none_fixed.h
     include/eely/clip/clip_cursor.h
@@ -38,6 +58,8 @@ set(SOURCE_FILES
     include/eely/job/job_blend.h
     include/eely/job/job_queue.h
     include/eely/job/job_play.h
+    include/eely/job/job_restore.h
+    include/eely/job/job_save.h
     include/eely/math/float3.h
     include/eely/math/float4.h
     include/eely/math/math_utils.h
@@ -58,20 +80,35 @@ set(SOURCE_FILES
     include/eely/skeleton/skeleton.h
     include/eely/skeleton_mask/skeleton_mask_uncooked.h
     include/eely/skeleton_mask/skeleton_mask.h
+    src/eely/anim_graph/btree/btree_node_add.cpp
+    src/eely/anim_graph/btree/btree_node_blend.cpp
+    src/eely/anim_graph/btree/btree_node_btree.cpp
+    src/eely/anim_graph/btree/btree_node_clip.cpp
+    src/eely/anim_graph/btree/btree_node_fsm.cpp
+    src/eely/anim_graph/btree/btree_player_node_add.cpp
+    src/eely/anim_graph/btree/btree_player_node_base.cpp
+    src/eely/anim_graph/btree/btree_player_node_blend.cpp
+    src/eely/anim_graph/btree/btree_player_node_btree.cpp
+    src/eely/anim_graph/btree/btree_player_node_clip.cpp
+    src/eely/anim_graph/btree/btree_player_node_fsm.cpp
+    src/eely/anim_graph/btree/btree_player.cpp
+    src/eely/anim_graph/btree/btree.cpp
+    src/eely/anim_graph/fsm/fsm_node_btree.cpp
+    src/eely/anim_graph/fsm/fsm_node_fsm.cpp
+    src/eely/anim_graph/fsm/fsm_node_transition.cpp
+    src/eely/anim_graph/fsm/fsm_player_node_base.cpp
+    src/eely/anim_graph/fsm/fsm_player_node_btree.cpp
+    src/eely/anim_graph/fsm/fsm_player_node_fsm.cpp
+    src/eely/anim_graph/fsm/fsm_player_node_transition.cpp
+    src/eely/anim_graph/fsm/fsm_player.cpp
+    src/eely/anim_graph/anim_graph_base_uncooked.cpp
+    src/eely/anim_graph/anim_graph_base.cpp
+    src/eely/anim_graph/anim_graph_node_base.cpp
+    src/eely/anim_graph/anim_graph_player_node_base.cpp
+    src/eely/anim_graph/anim_graph_player.cpp
     src/eely/base/bit_reader.cpp
     src/eely/base/bit_writer.cpp
     src/eely/base/string_id.cpp
-    src/eely/btree/btree_node_add.cpp
-    src/eely/btree/btree_node_base.cpp
-    src/eely/btree/btree_node_blend.cpp
-    src/eely/btree/btree_node_clip.cpp
-    src/eely/btree/btree_player_node_add.cpp
-    src/eely/btree/btree_player_node_base.cpp
-    src/eely/btree/btree_player_node_blend.cpp
-    src/eely/btree/btree_player_node_clip.cpp
-    src/eely/btree/btree_player.cpp
-    src/eely/btree/btree_uncooked.cpp
-    src/eely/btree/btree.cpp
     src/eely/clip/clip_cooking_none_fixed.cpp
     src/eely/clip/clip_cursor.cpp
     src/eely/clip/clip_impl_acl.cpp
@@ -83,15 +120,13 @@ set(SOURCE_FILES
     src/eely/clip/clip_uncooked.cpp
     src/eely/clip/clip_utils.cpp
     src/eely/clip/clip.cpp
-    src/eely/job/job_add.cpp
     src/eely/job/job_base.cpp
-    src/eely/job/job_blend.cpp
     src/eely/job/job_queue.cpp
-    src/eely/job/job_play.cpp
     src/eely/math/float3.cpp
     src/eely/math/quantization.cpp
     src/eely/math/quaternion.cpp
     src/eely/math/transform.cpp
+    src/eely/params/params.cpp
     src/eely/project/project_uncooked.cpp
     src/eely/project/project.cpp
     src/eely/project/resource_base.cpp

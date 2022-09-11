@@ -75,7 +75,7 @@ void skeleton::serialize(bit_writer& writer) const
 
   const gsl::index joints_count{std::ssize(_joint_ids)};
 
-  writer.write({.value = gsl::narrow_cast<uint32_t>(joints_count), .size_bits = bits_joints_count});
+  writer.write({.value = gsl::narrow<uint32_t>(joints_count), .size_bits = bits_joints_count});
 
   for (gsl::index i{0}; i < joints_count; ++i) {
     string_id_serialize(_joint_ids[i], writer);
@@ -83,7 +83,7 @@ void skeleton::serialize(bit_writer& writer) const
 
   for (gsl::index i{0}; i < joints_count; ++i) {
     writer.write(
-        {.value = gsl::narrow_cast<uint32_t>(_joint_parents[i]), .size_bits = bits_joints_count});
+        {.value = gsl::narrow<uint32_t>(_joint_parents[i]), .size_bits = bits_joints_count});
   };
 
   for (gsl::index i{0}; i < joints_count; ++i) {

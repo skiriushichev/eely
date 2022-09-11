@@ -16,7 +16,7 @@ namespace eely::internal {
 class job_base {
 public:
   // Execute the job and write result pose.
-  void execute(const job_queue& queue);
+  void execute(job_queue& queue);
 
   // Return a read-only result pose.
   // Should only be called after this job is executed.
@@ -31,7 +31,7 @@ public:
   void release_result_pose();
 
 private:
-  virtual skeleton_pose_pool::ptr execute_impl(const job_queue& queue) = 0;
+  virtual skeleton_pose_pool::ptr execute_impl(job_queue& queue) = 0;
 
   skeleton_pose_pool::ptr _result;
 };

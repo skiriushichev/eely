@@ -261,7 +261,7 @@ static void test_skeleton_and_cip_with_scheme(eely::clip_compression_scheme comp
   std::mt19937 gen(seed);
   std::uniform_int_distribution<> distr(0, 100);
   for (int i{0}; i < random_samples; ++i) {
-    const float percentage{gsl::narrow_cast<float>(distr(gen)) / 100.0F};
+    const float percentage{gsl::narrow<float>(distr(gen)) / 100.0F};
     const float time_s{player->get_duration_s() * percentage};
     play_and_check_pose(time_s);
   }

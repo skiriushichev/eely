@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace eely::internal {
-void job_base::execute(const job_queue& queue)
+void job_base::execute(job_queue& queue)
 {
   _result = execute_impl(queue);
 }

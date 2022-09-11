@@ -38,6 +38,7 @@ add_subdirectory(libs/eely_app)
 add_subdirectory(libs/eely_importer)
 add_subdirectory(examples/00_clip)
 add_subdirectory(examples/01_btree)
+add_subdirectory(examples/02_state_machine)
 add_subdirectory(extras/eely_editor)
 
 add_subdirectory(tests)

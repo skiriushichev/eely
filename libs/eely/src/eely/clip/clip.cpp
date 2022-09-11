@@ -18,7 +18,7 @@
 namespace eely {
 clip::clip(const project& project, bit_reader& reader) : resource(project, reader)
 {
-  using namespace internal;
+  using namespace eely::internal;
 
   const auto compression_scheme =
       static_cast<clip_compression_scheme>(reader.read(bits_clip_compression_scheme));
@@ -45,7 +45,7 @@ clip::clip(const project& project, bit_reader& reader) : resource(project, reade
 clip::clip(const project& project, const clip_uncooked& uncooked)
     : resource(project, uncooked.get_id())
 {
-  using namespace internal;
+  using namespace eely::internal;
 
   const skeleton& skeleton{
       *project.get_resource<eely::skeleton>(uncooked.get_target_skeleton_id())};
@@ -77,7 +77,7 @@ clip::clip(const project& project,
            const clip_additive_uncooked& clip_uncooked)
     : resource(project, clip_uncooked.get_id())
 {
-  using namespace internal;
+  using namespace eely::internal;
 
   const skeleton& skeleton{
       *project.get_resource<eely::skeleton>(clip_uncooked.get_target_skeleton_id())};

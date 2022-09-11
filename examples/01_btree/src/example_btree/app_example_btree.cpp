@@ -1,6 +1,7 @@
 #include "example_btree/app_example_btree.h"
 
 #include <eely_app/app.h>
+#include <eely_app/component_anim_graph.h>
 #include <eely_app/component_camera.h>
 #include <eely_app/component_skeleton.h>
 #include <eely_app/component_transform.h>
@@ -12,14 +13,13 @@
 
 #include <eely_importer/importer.h>
 
-#include "eely/btree/btree.h"
-#include "eely/btree/btree_node_add.h"
-#include "eely/btree/btree_node_base.h"
-#include "eely/btree/btree_node_blend.h"
-#include "eely/btree/btree_node_clip.h"
-#include "eely/skeleton/skeleton_uncooked.h"
+#include <eely/anim_graph/btree/btree.h>
+#include <eely/anim_graph/btree/btree_node_add.h>
+#include <eely/anim_graph/btree/btree_node_base.h>
+#include <eely/anim_graph/btree/btree_node_blend.h>
+#include <eely/anim_graph/btree/btree_node_clip.h>
+#include <eely/anim_graph/btree/btree_uncooked.h>
 #include <eely/base/bit_writer.h>
-#include <eely/btree/btree_uncooked.h>
 #include <eely/clip/clip.h>
 #include <eely/clip/clip_uncooked.h>
 #include <eely/math/quaternion.h>
@@ -28,6 +28,7 @@
 #include <eely/project/project.h>
 #include <eely/project/project_uncooked.h>
 #include <eely/skeleton/skeleton.h>
+#include <eely/skeleton/skeleton_uncooked.h>
 #include <eely/skeleton_mask/skeleton_mask_uncooked.h>
 
 #include <gsl/util>
@@ -120,7 +121,7 @@ static std::unique_ptr<project> import_and_cook_resources()
 
   btree->set_skeleton_id(skeleton_uncooked.get_id());
 
-  std::vector<std::unique_ptr<btree_node_base>>& nodes{btree->get_nodes()};
+  std::vector<anim_graph_node_uptr>& nodes{btree->get_nodes()};
 
   auto node_walk{std::make_unique<btree_node_clip>()};
   node_walk->set_clip_id("walk");
@@ -184,7 +185,7 @@ static std::unique_ptr<project> import_and_cook_resources()
 
   // Cook project
 
-  static constexpr size_t buffer_size_bytes{gsl::narrow_cast<size_t>(1024 * 1024)};
+  static constexpr size_t buffer_size_bytes{gsl::narrow<size_t>(1024 * 1024)};
   std::array<std::byte, buffer_size_bytes> buffer;
   bit_writer writer{buffer};
 
@@ -217,21 +218,20 @@ app_example_btree::app_example_btree(const unsigned int width,
   // Create character
 
   const skeleton& skeleton{*_project->get_resource<eely::skeleton>("mixamorig:Hips")};
+  const btree& btree{*_project->get_resource<eely::btree>("btree")};
 
   _character = registry.create();
 
   registry.emplace<component_transform>(_character, transform{});
   registry.emplace<component_skeleton>(_character, &skeleton, skeleton_pose(skeleton));
+  registry.emplace<component_anim_graph>(_character,
+                                         std::make_unique<anim_graph_player>(btree, _params));
 
-  // Create blend tree player
+  // Initialize default parameter values
 
-  const btree& btree{*_project->get_resource<eely::btree>("btree")};
-
-  _btree_player = btree.create_player(_params);
-
-  _params.set_float(param_id_speed, 1.0F);
-  _params.set_float(param_id_crouch, 0.0F);
-  _params.set_float(param_id_look_angle, 0.0F);
+  _params.set(param_id_speed, 1.0F);
+  _params.set(param_id_crouch, 0.0F);
+  _params.set(param_id_look_angle, 0.0F);
 }
 
 void app_example_btree::update(const float dt_s)
@@ -248,27 +248,21 @@ void app_example_btree::update(const float dt_s)
           ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse)) {
     float param_value_speed{_params.get_float(param_id_speed)};
     if (ImGui::SliderFloat("Speed", &param_value_speed, 1.0F, 3.0F, "%.2f", 1.0F)) {
-      _params.set_float(param_id_speed, param_value_speed);
+      _params.set(param_id_speed, param_value_speed);
     }
 
     float param_value_crouch{_params.get_float(param_id_crouch)};
     if (ImGui::SliderFloat("Crouch", &param_value_crouch, 0.0F, 1.0F, "%.2f", 1.0F)) {
-      _params.set_float(param_id_crouch, param_value_crouch);
+      _params.set(param_id_crouch, param_value_crouch);
     }
 
     float param_value_look_angle{_params.get_float(param_id_look_angle)};
     if (ImGui::SliderFloat("Look angle", &param_value_look_angle, -45.0F, 45.0F, "%.2f", 1.0F)) {
-      _params.set_float(param_id_look_angle, param_value_look_angle);
+      _params.set(param_id_look_angle, param_value_look_angle);
     }
 
     ImGui::End();
   }
-
-  entt::registry& registry{_scene.get_registry()};
-  component_skeleton& component_skeleton{registry.get<eely::component_skeleton>(_character)};
-
-  // TODO: this should be done by skeleton system
-  _btree_player->play(dt_s, component_skeleton.pose);
 
   _scene.update(dt_s);
 }

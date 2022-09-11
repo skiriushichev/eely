@@ -46,7 +46,7 @@ static std::unique_ptr<project> import_and_cook_resources()
   clip_uncooked& clip_uncooked{importer.import_clip(0, skeleton_uncooked)};
   clip_uncooked.set_compression_scheme(clip_compression_scheme::fixed);
 
-  static constexpr size_t buffer_size_bytes{gsl::narrow_cast<size_t>(1024 * 256)};
+  static constexpr size_t buffer_size_bytes{gsl::narrow<size_t>(1024 * 256)};
   std::array<std::byte, buffer_size_bytes> buffer;
   bit_writer writer{buffer};
 
