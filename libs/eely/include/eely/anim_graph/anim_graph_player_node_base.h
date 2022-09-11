@@ -8,7 +8,7 @@
 
 #include <optional>
 
-namespace eely {
+namespace eely::internal {
 // Execution context for animation graph.
 struct anim_graph_context final {
   // Number of graph's plays made so far.
@@ -28,7 +28,6 @@ struct anim_graph_context final {
   std::optional<float> sync_phase;
 };
 
-namespace internal {
 // Base class for animation graph runtime nodes.
 // These nodes can be played to produces poses.
 class anim_graph_player_node_base {
@@ -97,5 +96,4 @@ inline float anim_graph_player_node_base::get_phase() const
 {
   return _phase;
 }
-}  // namespace internal
-}  // namespace eely
+}  // namespace eely::internal

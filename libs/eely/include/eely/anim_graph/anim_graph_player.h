@@ -31,6 +31,6 @@ public:
 private:
   std::variant<internal::btree_player, internal::fsm_player> _player_variant;
   internal::job_queue _job_queue;
-  anim_graph_context _context;
+  internal::anim_graph_context _context;
 };
 }  // namespace eely

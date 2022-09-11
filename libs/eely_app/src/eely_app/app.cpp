@@ -39,7 +39,7 @@ app::app(const unsigned int width, const unsigned int height, const std::string&
     : _width{width},
       _height{height},
       _timer_ticks_per_s{SDL_GetPerformanceFrequency()},
-      _timer_ticks_per_us{_timer_ticks_per_s / s_to_us},
+      _timer_ticks_per_us{_timer_ticks_per_s / internal::s_to_us},
       _timer_sleep_error_ema_us{0},
       _main_loop_running{false}
 {

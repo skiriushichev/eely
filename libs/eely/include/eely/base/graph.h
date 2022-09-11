@@ -9,7 +9,7 @@
 #include <functional>
 #include <vector>
 
-namespace eely {
+namespace eely::internal {
 // Simple directed graph.
 template <typename TData>
 class graph final {
@@ -83,7 +83,7 @@ void graph<TData>::add_edge(const gsl::index from, const gsl::index to)
 template <typename TData, typename TOutputIterator>
 bool graph_topological_traversal(const graph<TData>& graph, TOutputIterator output_iterator)
 {
-  using vertex = typename eely::graph<TData>::vertex;
+  using vertex = typename eely::internal::graph<TData>::vertex;
 
   enum class mark {
     // Vertex is not visited
@@ -140,4 +140,4 @@ bool graph_topological_traversal(const graph<TData>& graph, TOutputIterator outp
 
   return true;
 }
-}  // namespace eely
+}  // namespace eely::internal

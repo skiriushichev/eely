@@ -236,8 +236,6 @@ app_example_btree::app_example_btree(const unsigned int width,
 
 void app_example_btree::update(const float dt_s)
 {
-  using namespace eely::internal;
-
   bgfx::setViewRect(view_id, 0, 0, get_width(), get_height());
   bgfx::setViewClear(view_id, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, view_clear_color);
 

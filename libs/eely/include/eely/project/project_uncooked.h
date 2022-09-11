@@ -76,6 +76,8 @@ private:
 template <typename TFn>
 void project_uncooked::for_each_resource_topological(const TFn& fn) const
 {
+  using namespace eely::internal;
+
   graph<const resource_uncooked*> resources_graph;
 
   std::unordered_map<string_id, gsl::index> resource_id_to_vertex_id;
@@ -114,6 +116,8 @@ template <typename TRes>
 requires std::derived_from<TRes, resource_uncooked>
 const TRes* project_uncooked::get_resource(const string_id& id) const
 {
+  using namespace eely::internal;
+
   auto iter = _resources.find(id);
   if (iter != _resources.end()) {
     return polymorphic_downcast<const TRes*>(iter->second.get());
@@ -126,6 +130,8 @@ template <typename TRes>
 requires std::derived_from<TRes, resource_uncooked> TRes* project_uncooked::get_resource(
     const string_id& id)
 {
+  using namespace eely::internal;
+
   auto iter = _resources.find(id);
   if (iter != _resources.end()) {
     return polymorphic_downcast<TRes*>(iter->second.get());

@@ -46,6 +46,8 @@ template <typename TRes>
 requires std::derived_from<TRes, resource>
 const TRes* project::get_resource(const string_id& id) const
 {
+  using namespace eely::internal;
+
   auto iter = _resources.find(id);
   if (iter != _resources.end()) {
     return polymorphic_downcast<const TRes*>(iter->second.get());

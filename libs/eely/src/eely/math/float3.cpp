@@ -74,6 +74,8 @@ bool float3_near(const float3& a, const float3& b, const float epsilon)
 
 void float3_serialize(const float3& a, bit_writer& writer)
 {
+  using namespace eely::internal;
+
   writer.write({.value = bit_cast<uint32_t>(a.x), .size_bits = 32});
   writer.write({.value = bit_cast<uint32_t>(a.y), .size_bits = 32});
   writer.write({.value = bit_cast<uint32_t>(a.z), .size_bits = 32});
@@ -81,6 +83,8 @@ void float3_serialize(const float3& a, bit_writer& writer)
 
 float3 float3_deserialize(bit_reader& reader)
 {
+  using namespace eely::internal;
+
   return float3{.x = bit_cast<float>(reader.read(32)),
                 .y = bit_cast<float>(reader.read(32)),
                 .z = bit_cast<float>(reader.read(32))};

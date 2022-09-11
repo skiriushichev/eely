@@ -15,6 +15,8 @@
 namespace eely {
 skeleton_mask::skeleton_mask(const project& project, bit_reader& reader) : resource(project, reader)
 {
+  using namespace eely::internal;
+
   gsl::index weights_count{reader.read(internal::bits_joints_count)};
 
   _weights.resize(weights_count);
@@ -47,6 +49,8 @@ skeleton_mask::skeleton_mask(const project& project, const skeleton_mask_uncooke
 
 void skeleton_mask::serialize(bit_writer& writer) const
 {
+  using namespace eely::internal;
+
   resource_base::serialize(writer);
 
   writer.write(

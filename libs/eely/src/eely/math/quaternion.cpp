@@ -137,6 +137,8 @@ bool quaternion_near(const quaternion& q0, const quaternion& q1, const float eps
 
 void quaternion_serialize(const quaternion& q, bit_writer& writer)
 {
+  using namespace eely::internal;
+
   writer.write({.value = bit_cast<uint32_t>(q.x), .size_bits = 32});
   writer.write({.value = bit_cast<uint32_t>(q.y), .size_bits = 32});
   writer.write({.value = bit_cast<uint32_t>(q.z), .size_bits = 32});
@@ -145,6 +147,8 @@ void quaternion_serialize(const quaternion& q, bit_writer& writer)
 
 quaternion quaternion_deserialize(bit_reader& reader)
 {
+  using namespace eely::internal;
+
   return quaternion{.x = bit_cast<float>(reader.read(32)),
                     .y = bit_cast<float>(reader.read(32)),
                     .z = bit_cast<float>(reader.read(32)),

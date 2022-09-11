@@ -7,7 +7,7 @@
 
 TEST(graph, graph)
 {
-  using namespace eely;
+  using namespace eely::internal;
 
   graph<int> graph;
 

@@ -9,7 +9,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace eely {
+namespace eely::internal {
 // Currently in places where floats are written into memory buffers,
 // constant equal to 32 bits is used. This is temporary until `bit_writer` interface is improved
 static_assert(sizeof(float) == 4);
@@ -63,4 +63,4 @@ TDst polymorphic_downcast(TSrc src)
   EXPECTS(dynamic_cast<TDst>(src) == src);
   return static_cast<TDst>(src);
 }
-}  // namespace eely
+}  // namespace eely::internal

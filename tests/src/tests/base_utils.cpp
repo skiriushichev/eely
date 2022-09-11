@@ -6,7 +6,7 @@
 
 TEST(base_utils, base_utils)
 {
-  using namespace eely;
+  using namespace eely::internal;
 
   // bit_cast
   {

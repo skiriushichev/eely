@@ -21,6 +21,8 @@
 namespace eely::internal {
 fsm_player_node_uptr fsm_player_node_create(const project& project, anim_graph_node_base& node)
 {
+  using namespace eely::internal;
+
   // TODO: use enum + polymorphic_downcast
 
   fsm_player_node_uptr result;

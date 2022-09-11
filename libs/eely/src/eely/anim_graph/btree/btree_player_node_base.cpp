@@ -21,6 +21,8 @@ btree_player_node_uptr btree_player_node_create(
     const anim_graph_node_base& node,
     const std::vector<btree_player_node_uptr>& player_nodes)
 {
+  using namespace eely::internal;
+
   // TODO: use enum + polymorphic_downcast
 
   if (const auto* node_add{dynamic_cast<const btree_node_add*>(&node)}) {

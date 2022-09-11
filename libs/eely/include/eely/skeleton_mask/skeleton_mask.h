@@ -12,14 +12,19 @@
 #include <vector>
 
 namespace eely {
+// Cooked version of a skeleton mask resource,
+// which defines how different parts of a skeleton participate in certain operations.
 class skeleton_mask final : public resource {
 public:
+  // Construct skeleton mask from a buffer.
   explicit skeleton_mask(const project& project, bit_reader& reader);
 
+  // Construct skeleton mask from an uncooked counterpart.
   explicit skeleton_mask(const project& project, const skeleton_mask_uncooked& uncooked);
 
   void serialize(bit_writer& writer) const override;
 
+  // Return weight of a joint.
   [[nodiscard]] float get_weight(gsl::index joint_index) const;
 
 private:
