@@ -7,6 +7,7 @@
 #include "eely/clip/clip_player_acl.h"
 #include "eely/clip/clip_uncooked.h"
 #include "eely/clip/clip_utils.h"
+#include "eely/skeleton/skeleton_utils.h"
 
 #include <acl/compression/compress.h>
 #include <acl/core/ansi_allocator.h>
@@ -150,7 +151,7 @@ std::unique_ptr<uint8_t, decltype(&std::free)> acl_compress(
   output_stats stats;
 
   compressed_tracks* acl_compressed_tracks{nullptr};
-  error_result error_result =
+  [[maybe_unused]] error_result error_result =
       compress_track_list(acl_allocator, raw_track_list, settings, acl_compressed_tracks, stats);
   EXPECTS(error_result.empty());
 
@@ -166,16 +167,16 @@ clip_impl_acl::clip_impl_acl(bit_reader& reader)
 {
   // Metadata
 
-  _metadata.duration_s = bit_cast<float>(reader.read(32));
+  _metadata.duration_s = bit_reader_read<float>(reader);
   EXPECTS(_metadata.duration_s >= 0.0F);
 
-  _metadata.is_additive = reader.read(1) == 1U;
+  _metadata.is_additive = bit_reader_read<bool>(reader);
 
-  _metadata.shallow_joint_index = reader.read(bits_joints_count);
+  _metadata.shallow_joint_index = bit_reader_read<gsl::index>(reader, bits_joints_count);
 
   // Data
 
-  const gsl::index data_size{reader.read(32)};
+  const gsl::index data_size{bit_reader_read<gsl::index>(reader, 32)};
   EXPECTS(data_size > 0);
 
   _acl_compressed_tracks_storage = acl_allocate_compressed_tracks_storage(data_size);
@@ -183,7 +184,7 @@ clip_impl_acl::clip_impl_acl(bit_reader& reader)
   std::span<uint8_t> data_span{_acl_compressed_tracks_storage.get(),
                                gsl::narrow<size_t>(data_size)};
   for (gsl::index i{0}; i < data_size; ++i) {
-    data_span[i] = reader.read(8);
+    data_span[i] = bit_reader_read<uint8_t>(reader);
   }
 
   acl::error_result error_result;
@@ -223,21 +224,19 @@ void clip_impl_acl::serialize(bit_writer& writer) const
 {
   // Metadata
 
-  writer.write({.value = bit_cast<uint32_t>(_metadata.duration_s), .size_bits = 32});
-  writer.write({.value = _metadata.is_additive ? 1U : 0U, .size_bits = 1});
+  bit_writer_write(writer, _metadata.duration_s);
+  bit_writer_write(writer, _metadata.is_additive);
 
-  writer.write({.value = gsl::narrow<uint32_t>(_metadata.shallow_joint_index),
-                .size_bits = bits_joints_count});
+  bit_writer_write(writer, _metadata.shallow_joint_index, bits_joints_count);
 
   // Data
 
-  writer.write(
-      {.value = gsl::narrow<uint32_t>(_acl_compressed_tracks->get_size()), .size_bits = 32});
+  bit_writer_write(writer, _acl_compressed_tracks->get_size());
 
   std::span<uint8_t> data_span{_acl_compressed_tracks_storage.get(),
                                _acl_compressed_tracks->get_size()};
   for (gsl::index i{0}; i < _acl_compressed_tracks->get_size(); ++i) {
-    writer.write({.value = data_span[i], .size_bits = 8});
+    bit_writer_write(writer, data_span[i]);
   }
 }
 

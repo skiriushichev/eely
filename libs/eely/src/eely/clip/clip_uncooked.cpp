@@ -10,6 +10,7 @@
 #include "eely/math/quaternion.h"
 #include "eely/project/resource_uncooked.h"
 #include "eely/skeleton/skeleton_uncooked.h"
+#include "eely/skeleton/skeleton_utils.h"
 
 #include <gsl/narrow>
 #include <gsl/util>
@@ -25,41 +26,32 @@ namespace internal {
 static constexpr gsl::index bits_keys_count{16};
 }
 
-clip_uncooked::clip_uncooked(bit_reader& reader) : resource_uncooked(reader)
+clip_uncooked::clip_uncooked(internal::bit_reader& reader) : resource_uncooked(reader)
 {
   using namespace eely::internal;
 
-  _target_skeleton_id = string_id_deserialize(reader);
+  _target_skeleton_id = bit_reader_read<string_id>(reader);
+
+  _skeleton_mask_id = bit_reader_read<string_id>(reader);
 
   _compression_scheme =
-      static_cast<clip_compression_scheme>(reader.read(bits_clip_compression_scheme));
+      bit_reader_read<clip_compression_scheme>(reader, bits_clip_compression_scheme);
 
-  const gsl::index tracks_count{reader.read(bits_joints_count)};
+  const auto tracks_count{bit_reader_read<gsl::index>(reader, bits_joints_count)};
   for (gsl::index track_index{0}; track_index < tracks_count; ++track_index) {
     clip_uncooked_track t;
 
-    t.joint_id = string_id_deserialize(reader);
+    t.joint_id = bit_reader_read<string_id>(reader);
 
-    const gsl::index keys_count{reader.read(bits_keys_count)};
+    const auto keys_count{bit_reader_read<gsl::index>(reader, bits_keys_count)};
     for (gsl::index key_index{0}; key_index < keys_count; ++key_index) {
-      const float time_s{bit_cast<float>(reader.read(32))};
+      const auto time_s{bit_reader_read<float>(reader)};
 
       clip_uncooked_key k;
 
-      const uint32_t has_translation{reader.read(1)};
-      if (has_translation == 1) {
-        k.translation = float3_deserialize(reader);
-      }
-
-      const uint32_t has_rotation{reader.read(1)};
-      if (has_rotation == 1) {
-        k.rotation = quaternion_deserialize(reader);
-      }
-
-      const uint32_t has_scale{reader.read(1)};
-      if (has_scale == 1) {
-        k.scale = float3_deserialize(reader);
-      }
+      k.translation = bit_reader_read<std::optional<float3>>(reader);
+      k.rotation = bit_reader_read<std::optional<quaternion>>(reader);
+      k.scale = bit_reader_read<std::optional<float3>>(reader);
 
       t.keys[time_s] = k;
     }
@@ -73,55 +65,36 @@ clip_uncooked::clip_uncooked(const string_id& id)
 {
 }
 
-void clip_uncooked::serialize(bit_writer& writer) const
+void clip_uncooked::serialize(internal::bit_writer& writer) const
 {
   using namespace eely::internal;
 
   resource_uncooked::serialize(writer);
 
-  string_id_serialize(_target_skeleton_id, writer);
+  bit_writer_write(writer, _target_skeleton_id);
 
-  writer.write({.value = static_cast<uint32_t>(_compression_scheme),
-                .size_bits = bits_clip_compression_scheme});
+  bit_writer_write(writer, _skeleton_mask_id);
+
+  bit_writer_write(writer, _compression_scheme, bits_clip_compression_scheme);
 
   const gsl::index tracks_count{std::ssize(_tracks)};
   EXPECTS(tracks_count <= joints_max_count);
-  writer.write({.value = gsl::narrow<uint32_t>(tracks_count), .size_bits = bits_joints_count});
+  bit_writer_write(writer, tracks_count, bits_joints_count);
 
   for (gsl::index track_index{0}; track_index < tracks_count; ++track_index) {
     const clip_uncooked_track& t{_tracks[track_index]};
 
-    string_id_serialize(t.joint_id, writer);
+    bit_writer_write(writer, t.joint_id);
 
     const gsl::index keys_count{std::ssize(t.keys)};
-    writer.write({.value = gsl::narrow<uint32_t>(keys_count), .size_bits = bits_keys_count});
+    bit_writer_write(writer, keys_count, bits_keys_count);
 
     for (const auto& [time, key] : t.keys) {
-      writer.write({.value = bit_cast<uint32_t>(time), .size_bits = 32});
+      bit_writer_write(writer, time);
 
-      if (key.translation.has_value()) {
-        writer.write({.value = 1, .size_bits = 1});
-        float3_serialize(key.translation.value(), writer);
-      }
-      else {
-        writer.write({.value = 0, .size_bits = 1});
-      }
-
-      if (key.rotation.has_value()) {
-        writer.write({.value = 1, .size_bits = 1});
-        quaternion_serialize(key.rotation.value(), writer);
-      }
-      else {
-        writer.write({.value = 0, .size_bits = 1});
-      }
-
-      if (key.scale.has_value()) {
-        writer.write({.value = 1, .size_bits = 1});
-        float3_serialize(key.scale.value(), writer);
-      }
-      else {
-        writer.write({.value = 0, .size_bits = 1});
-      }
+      bit_writer_write(writer, key.translation);
+      bit_writer_write(writer, key.rotation);
+      bit_writer_write(writer, key.scale);
     }
   }
 }
@@ -139,6 +112,16 @@ const string_id& clip_uncooked::get_target_skeleton_id() const
 void clip_uncooked::set_target_skeleton_id(string_id skeleton_id)
 {
   _target_skeleton_id = std::move(skeleton_id);
+}
+
+void clip_uncooked::set_skeleton_mask_id(string_id skeleton_mask_id)
+{
+  _skeleton_mask_id = std::move(skeleton_mask_id);
+}
+
+string_id clip_uncooked::get_skeleton_mask_id() const
+{
+  return _skeleton_mask_id;
 }
 
 const std::vector<clip_uncooked_track>& clip_uncooked::get_tracks() const
@@ -176,30 +159,31 @@ float clip_uncooked::get_duration_s() const
   return duration_s;
 }
 
-clip_additive_uncooked::clip_additive_uncooked(bit_reader& reader) : resource_uncooked(reader)
+clip_additive_uncooked::clip_additive_uncooked(internal::bit_reader& reader)
+    : resource_uncooked(reader)
 {
   using namespace eely::internal;
 
-  _target_skeleton_id = string_id_deserialize(reader);
-  _skeleton_mask_id = string_id_deserialize(reader);
+  _target_skeleton_id = bit_reader_read<string_id>(reader);
+  _skeleton_mask_id = bit_reader_read<string_id>(reader);
 
-  _base_clip_id = string_id_deserialize(reader);
-  _source_clip_id = string_id_deserialize(reader);
+  _base_clip_id = bit_reader_read<string_id>(reader);
+  _source_clip_id = bit_reader_read<string_id>(reader);
 
-  const bool has_base_clip_range{static_cast<bool>(reader.read(1))};
+  const auto has_base_clip_range{bit_reader_read<bool>(reader)};
   if (has_base_clip_range) {
     _base_clip_range =
-        range{.from_s = bit_cast<float>(reader.read(32)), .to_s = bit_cast<float>(reader.read(32))};
+        range{.from_s = bit_reader_read<float>(reader), .to_s = bit_reader_read<float>(reader)};
   }
 
-  const bool has_source_clip_range{static_cast<bool>(reader.read(1))};
+  const auto has_source_clip_range{bit_reader_read<bool>(reader)};
   if (has_source_clip_range) {
     _source_clip_range =
-        range{.from_s = bit_cast<float>(reader.read(32)), .to_s = bit_cast<float>(reader.read(32))};
+        range{.from_s = bit_reader_read<float>(reader), .to_s = bit_reader_read<float>(reader)};
   }
 
   _compression_scheme =
-      static_cast<clip_compression_scheme>(reader.read(bits_clip_compression_scheme));
+      bit_reader_read<clip_compression_scheme>(reader, bits_clip_compression_scheme);
 }
 
 clip_additive_uncooked::clip_additive_uncooked(const string_id& id)
@@ -207,36 +191,35 @@ clip_additive_uncooked::clip_additive_uncooked(const string_id& id)
 {
 }
 
-void clip_additive_uncooked::serialize(bit_writer& writer) const
+void clip_additive_uncooked::serialize(internal::bit_writer& writer) const
 {
   using namespace eely::internal;
 
-  string_id_serialize(_target_skeleton_id, writer);
-  string_id_serialize(_skeleton_mask_id, writer);
+  bit_writer_write(writer, _target_skeleton_id);
+  bit_writer_write(writer, _skeleton_mask_id);
 
-  string_id_serialize(_base_clip_id, writer);
-  string_id_serialize(_source_clip_id, writer);
+  bit_writer_write(writer, _base_clip_id);
+  bit_writer_write(writer, _source_clip_id);
 
   if (_base_clip_range.has_value()) {
-    writer.write({.value = 1, .size_bits = 1});
-    writer.write({.value = bit_cast<uint32_t>(_base_clip_range->from_s), .size_bits = 32});
-    writer.write({.value = bit_cast<uint32_t>(_base_clip_range->to_s), .size_bits = 32});
+    bit_writer_write(writer, true);
+    bit_writer_write(writer, _base_clip_range->from_s);
+    bit_writer_write(writer, _base_clip_range->to_s);
   }
   else {
-    writer.write({.value = 0, .size_bits = 1});
+    bit_writer_write(writer, false);
   }
 
   if (_source_clip_range.has_value()) {
-    writer.write({.value = 1, .size_bits = 1});
-    writer.write({.value = bit_cast<uint32_t>(_source_clip_range->from_s), .size_bits = 32});
-    writer.write({.value = bit_cast<uint32_t>(_source_clip_range->to_s), .size_bits = 32});
+    bit_writer_write(writer, true);
+    bit_writer_write(writer, _source_clip_range->from_s);
+    bit_writer_write(writer, _source_clip_range->to_s);
   }
   else {
-    writer.write({.value = 0, .size_bits = 1});
+    bit_writer_write(writer, false);
   }
 
-  writer.write({.value = static_cast<uint32_t>(_compression_scheme),
-                .size_bits = bits_clip_compression_scheme});
+  bit_writer_write(writer, _compression_scheme, bits_clip_compression_scheme);
 }
 
 void clip_additive_uncooked::collect_dependencies(

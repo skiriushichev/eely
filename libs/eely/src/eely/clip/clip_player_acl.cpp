@@ -50,7 +50,7 @@ clip_player_acl::clip_player_acl(const clip_metadata_acl& metadata,
                                  const acl::compressed_tracks& acl_compressed_tracks)
     : _metadata{metadata}
 {
-  const bool init_result{_decompression_context.initialize(acl_compressed_tracks)};
+  [[maybe_unused]] const bool init_result{_decompression_context.initialize(acl_compressed_tracks)};
   EXPECTS(init_result);
 }
 

@@ -1,9 +1,7 @@
 #include "eely/project/project.h"
 
-#include "eely/anim_graph/btree/btree.h"
-#include "eely/anim_graph/btree/btree_uncooked.h"
-#include "eely/anim_graph/fsm/fsm.h"
-#include "eely/anim_graph/fsm/fsm_uncooked.h"
+#include "eely/anim_graph/anim_graph.h"
+#include "eely/anim_graph/anim_graph_uncooked.h"
 #include "eely/base/assert.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
@@ -19,14 +17,19 @@
 
 #include <bit>
 #include <memory>
+#include <span>
 #include <vector>
 
 namespace eely {
 static constexpr gsl::index bits_resources_count{16};
 
-project::project(bit_reader& reader)
+project::project(const std::span<std::byte>& buffer)
 {
-  const gsl::index resources_count{reader.read(bits_resources_count)};
+  using namespace eely::internal;
+
+  bit_reader reader{buffer};
+
+  const auto resources_count{bit_reader_read<gsl::index>(reader, bits_resources_count)};
 
   for (gsl::index i{0}; i < resources_count; ++i) {
     std::unique_ptr<resource> r{resource_deserialize(*this, reader)};
@@ -34,8 +37,12 @@ project::project(bit_reader& reader)
   }
 }
 
-void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
+void project::cook(const project_uncooked& project_uncooked, const std::span<std::byte>& out_buffer)
 {
+  using namespace eely::internal;
+
+  bit_writer writer{out_buffer};
+
   // Cook and write resources in topological order,
   // so that when a resource is being deserialized or cooked,
   // all of its dependencies are ready
@@ -52,7 +59,7 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
       resource_cooked = std::make_unique<skeleton>(tmp_project, *ru);
     }
     else if (const auto* ru{dynamic_cast<const clip_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<clip>(tmp_project, *ru);
+      resource_cooked = std::make_unique<clip>(tmp_project, project_uncooked, *ru);
     }
     else if (const auto* ru{dynamic_cast<const clip_additive_uncooked*>(resource_uncooked)}) {
       resource_cooked = std::make_unique<clip>(tmp_project, project_uncooked, *ru);
@@ -60,11 +67,8 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
     else if (const auto* ru{dynamic_cast<const skeleton_mask_uncooked*>(resource_uncooked)}) {
       resource_cooked = std::make_unique<skeleton_mask>(tmp_project, *ru);
     }
-    else if (const auto* ru{dynamic_cast<const btree_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<btree>(tmp_project, *ru);
-    }
-    else if (const auto* ru{dynamic_cast<const fsm_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<fsm>(tmp_project, *ru);
+    else if (const auto* ru{dynamic_cast<const anim_graph_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<anim_graph>(tmp_project, *ru);
     }
     else {
       EXPECTS(false);
@@ -78,8 +82,7 @@ void project::cook(const project_uncooked& project_uncooked, bit_writer& writer)
 
   project_uncooked.for_each_resource_topological(cook_resource);
 
-  writer.write({.value = static_cast<uint32_t>(resources_ordered.size()),
-                .size_bits = bits_resources_count});
+  bit_writer_write(writer, resources_ordered.size(), bits_resources_count);
 
   for (const resource* r : resources_ordered) {
     resource_serialize(*r, writer);

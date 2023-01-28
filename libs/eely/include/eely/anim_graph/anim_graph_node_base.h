@@ -4,57 +4,84 @@
 #include "eely/base/bit_writer.h"
 #include "eely/base/string_id.h"
 
-#include <gsl/util>
-
+#include <bit>
 #include <memory>
 #include <unordered_set>
-#include <vector>
 
 namespace eely {
-// Common class for all animation graph nodes: both blendtrees and state machine ones.
-// These are the definitions from which runtime nodes are created by `btree_player` or `fsm_player`.
+// Enum for all types of animation nodes.
+// Can be queried using `anim_graph_node_base::get_type()`,
+// and used instead of dynamics casts when checking node type is needed
+// (e.g. in serialization etc.).
+enum class anim_graph_node_type {
+  and_logic,  // `and` is a keyword :(
+  blend,
+  clip,
+  param_comparison,
+  param,
+  random,
+  speed,
+  state_condition,
+  state_machine,
+  state_transition,
+  state,
+  sum
+};
+
+// Common class for all animation graph nodes.
+// These are definitions from which runtime nodes are created by `anim_graph_player`.
 class anim_graph_node_base {
 public:
-  // Construct empty node.
-  explicit anim_graph_node_base() = default;
+  // Construct a node with specified unique ID within a graph.
+  explicit anim_graph_node_base(anim_graph_node_type type, int id);
 
-  // Construct node from a memory buffer.
-  explicit anim_graph_node_base(bit_reader& reader);
+  // Construct a node from a memory buffer.
+  explicit anim_graph_node_base(anim_graph_node_type type, internal::bit_reader& reader);
 
   virtual ~anim_graph_node_base() = default;
 
-  // Serialize node into a memory buffer.
-  virtual void serialize(bit_writer& writer) const;
-
-  // Construct a copy of this node.
-  [[nodiscard]] virtual std::unique_ptr<anim_graph_node_base> clone() const = 0;
+  // Serialize a node into a memory buffer.
+  virtual void serialize(internal::bit_writer& writer) const;
 
   // Collect resource dependencies for this node.
+  // This should only collect direct dependencies of this node, not recursively across all children.
   virtual void collect_dependencies(std::unordered_set<string_id>& /*out_dependencies*/) {}
 
-  // Return read-only vector of children indices.
-  [[nodiscard]] const std::vector<gsl::index>& get_children_indices() const;
+  // Clone this node.
+  [[nodiscard]] virtual std::unique_ptr<anim_graph_node_base> clone() const = 0;
 
-  // Return vector of children indices.
-  [[nodiscard]] std::vector<gsl::index>& get_children_indices();
+  // Return this node's type.
+  [[nodiscard]] anim_graph_node_type get_type() const;
+
+  // Return this node's id unique within a graph.
+  [[nodiscard]] int get_id() const;
 
 private:
-  std::vector<gsl::index> _children_indices;
+  anim_graph_node_type _type;
+  int _id;
 };
 
-// Shorter name for a unique pointer to an animation graph node.
+// Shorter name for unique pointer to a node.
 using anim_graph_node_uptr = std::unique_ptr<anim_graph_node_base>;
 
 namespace internal {
-static constexpr gsl::index anim_graph_nodes_max_size{255};
-static constexpr gsl::index bits_anim_graph_node_index{8};
+static constexpr gsl::index anim_graph_nodes_max_size{1023};
+static constexpr gsl::index bits_anim_graph_nodes_size{
+    std::bit_width(static_cast<size_t>(anim_graph_nodes_max_size - 1))};
 
-// Serialize animation graph node into a memory buffer.
+static constexpr gsl::index anim_graph_max_node_id{1023};
+static constexpr gsl::index bits_anim_graph_node_id{
+    std::bit_width(static_cast<size_t>(anim_graph_max_node_id))};
+
+static constexpr gsl::index bits_anim_graph_node_type{8};
+
+// Return animation graph node read from a memory buffer.
+template <>
+anim_graph_node_uptr bit_reader_read(bit_reader& reader);
+
+// Write animation graph node into a memory buffer.
 // This method serializes node's type as well as its data, thus it can be recreated
-// with correct type from this buffer (using `anim_graph_node_deserialize`).
-void anim_graph_node_serialize(const anim_graph_node_base& node, bit_writer& writer);
-
-// Deserialize node previously saved via `anim_graph_node_serialize`.
-anim_graph_node_uptr anim_graph_node_deserialize(bit_reader& reader);
+// with correct type from this buffer (using `bit_reader_read`).
+void bit_writer_write(bit_writer& writer, const anim_graph_node_base& node);
 }  // namespace internal
 }  // namespace eely

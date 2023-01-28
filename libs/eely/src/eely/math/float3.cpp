@@ -72,24 +72,6 @@ bool float3_near(const float3& a, const float3& b, const float epsilon)
          float_near(a.z, b.z, epsilon);
 }
 
-void float3_serialize(const float3& a, bit_writer& writer)
-{
-  using namespace eely::internal;
-
-  writer.write({.value = bit_cast<uint32_t>(a.x), .size_bits = 32});
-  writer.write({.value = bit_cast<uint32_t>(a.y), .size_bits = 32});
-  writer.write({.value = bit_cast<uint32_t>(a.z), .size_bits = 32});
-}
-
-float3 float3_deserialize(bit_reader& reader)
-{
-  using namespace eely::internal;
-
-  return float3{.x = bit_cast<float>(reader.read(32)),
-                .y = bit_cast<float>(reader.read(32)),
-                .z = bit_cast<float>(reader.read(32))};
-}
-
 float3 vector_normalized(const float3& a)
 {
   const float length{std::sqrt(a.x * a.x + a.y * a.y + a.z * a.z)};
@@ -105,4 +87,13 @@ float3 vector_cross(const float3& a, const float3& b)
 {
   return float3{a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
+
+namespace internal {
+void bit_writer_write(bit_writer& writer, const float3& value)
+{
+  writer.write({.value = bit_cast<uint32_t>(value.x), .size_bits = 32});
+  writer.write({.value = bit_cast<uint32_t>(value.y), .size_bits = 32});
+  writer.write({.value = bit_cast<uint32_t>(value.z), .size_bits = 32});
+}
+}  // namespace internal
 }  // namespace eely

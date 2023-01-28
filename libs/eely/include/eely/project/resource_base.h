@@ -11,7 +11,7 @@ namespace eely {
 class resource_base {
 public:
   // Construct resource from a memory buffer.
-  explicit resource_base(bit_reader& reader);
+  explicit resource_base(internal::bit_reader& reader);
 
   // Construct empty resource with specified id.
   explicit resource_base(string_id id);
@@ -25,12 +25,12 @@ public:
   resource_base& operator=(resource_base&&) = delete;
 
   // Serialize resource into a memory buffer;
-  virtual void serialize(bit_writer& writer) const;
+  virtual void serialize(internal::bit_writer& writer) const;
 
   // Get resource id.
   [[nodiscard]] const string_id& get_id() const;
 
 private:
-  const string_id _id;
+  string_id _id;
 };
 }  // namespace eely

@@ -5,14 +5,23 @@
 #include <gsl/pointers>
 
 #include <bit>
+#include <concepts>
 #include <cstring>
 #include <memory>
+#include <optional>
 #include <type_traits>
 
 namespace eely::internal {
-// Currently in places where floats are written into memory buffers,
-// constant equal to 32 bits is used. This is temporary until `bit_writer` interface is improved
-static_assert(sizeof(float) == 4);
+// Helper concepts, mainly for for `bit_reader`/`bit_writer`.
+
+template <typename T>
+concept non_bool_integral = !std::same_as<T, bool> && std::integral<T>;
+
+template <typename T>
+concept scoped_enum = std::is_scoped_enum_v<T>;
+
+template <typename T>
+concept optional = std::same_as<T, std::optional<typename T::value_type>>;
 
 // No effort is made currently to handle loading projects on machines with different endianess.
 // When it becomes supported, this assert can be removed.

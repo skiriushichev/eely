@@ -1,37 +1,37 @@
 project(eely)
 
 set(SOURCE_FILES
-    include/eely/anim_graph/btree/btree_node_add.h
-    include/eely/anim_graph/btree/btree_node_base.h
-    include/eely/anim_graph/btree/btree_node_blend.h
-    include/eely/anim_graph/btree/btree_node_btree.h
-    include/eely/anim_graph/btree/btree_node_clip.h
-    include/eely/anim_graph/btree/btree_node_fsm.h
-    include/eely/anim_graph/btree/btree_player_node_add.h
-    include/eely/anim_graph/btree/btree_player_node_base.h
-    include/eely/anim_graph/btree/btree_player_node_blend.h
-    include/eely/anim_graph/btree/btree_player_node_btree.h
-    include/eely/anim_graph/btree/btree_player_node_clip.h
-    include/eely/anim_graph/btree/btree_player_node_fsm.h
-    include/eely/anim_graph/btree/btree_player.h
-    include/eely/anim_graph/btree/btree_uncooked.h
-    include/eely/anim_graph/btree/btree.h
-    include/eely/anim_graph/fsm/fsm_node_base.h
-    include/eely/anim_graph/fsm/fsm_node_btree.h
-    include/eely/anim_graph/fsm/fsm_node_fsm.h
-    include/eely/anim_graph/fsm/fsm_node_transition.h
-    include/eely/anim_graph/fsm/fsm_player_node_base.h
-    include/eely/anim_graph/fsm/fsm_player_node_btree.h
-    include/eely/anim_graph/fsm/fsm_player_node_fsm.h
-    include/eely/anim_graph/fsm/fsm_player_node_transition.h
-    include/eely/anim_graph/fsm/fsm_player.h
-    include/eely/anim_graph/fsm/fsm_uncooked.h
-    include/eely/anim_graph/fsm/fsm.h
-    include/eely/anim_graph/anim_graph_base_uncooked.h
-    include/eely/anim_graph/anim_graph_base.h
     include/eely/anim_graph/anim_graph_node_base.h
+    include/eely/anim_graph/anim_graph_node_and.h
+    include/eely/anim_graph/anim_graph_node_blend.h
+    include/eely/anim_graph/anim_graph_node_clip.h
+    include/eely/anim_graph/anim_graph_node_param_comparison.h
+    include/eely/anim_graph/anim_graph_node_param.h
+    include/eely/anim_graph/anim_graph_node_random.h
+    include/eely/anim_graph/anim_graph_node_speed.h
+    include/eely/anim_graph/anim_graph_node_state_condition.h
+    include/eely/anim_graph/anim_graph_node_state_machine.h
+    include/eely/anim_graph/anim_graph_node_state_transition.h
+    include/eely/anim_graph/anim_graph_node_state.h
+    include/eely/anim_graph/anim_graph_node_sum.h
+    include/eely/anim_graph/anim_graph_player_context.h
+    include/eely/anim_graph/anim_graph_player_node_and.h
     include/eely/anim_graph/anim_graph_player_node_base.h
+    include/eely/anim_graph/anim_graph_player_node_blend.h
+    include/eely/anim_graph/anim_graph_player_node_clip.h
+    include/eely/anim_graph/anim_graph_player_node_param_comparison.h
+    include/eely/anim_graph/anim_graph_player_node_param.h
+    include/eely/anim_graph/anim_graph_player_node_random.h
+    include/eely/anim_graph/anim_graph_player_node_speed.h
+    include/eely/anim_graph/anim_graph_player_node_pose_base.h
+    include/eely/anim_graph/anim_graph_player_node_state_condition.h
+    include/eely/anim_graph/anim_graph_player_node_state_machine.h
+    include/eely/anim_graph/anim_graph_player_node_state_transition.h
+    include/eely/anim_graph/anim_graph_player_node_state.h
+    include/eely/anim_graph/anim_graph_player_node_sum.h
     include/eely/anim_graph/anim_graph_player.h
+    include/eely/anim_graph/anim_graph_uncooked.h
+    include/eely/anim_graph/anim_graph.h
     include/eely/base/assert.h
     include/eely/base/base_utils.h   
     include/eely/base/bit_reader.h
@@ -56,8 +56,8 @@ set(SOURCE_FILES
     include/eely/job/job_add.h
     include/eely/job/job_base.h
     include/eely/job/job_blend.h
+    include/eely/job/job_clip.h
     include/eely/job/job_queue.h
-    include/eely/job/job_play.h
     include/eely/job/job_restore.h
     include/eely/job/job_save.h
     include/eely/math/float3.h
@@ -80,32 +80,36 @@ set(SOURCE_FILES
     include/eely/skeleton/skeleton.h
     include/eely/skeleton_mask/skeleton_mask_uncooked.h
     include/eely/skeleton_mask/skeleton_mask.h
-    src/eely/anim_graph/btree/btree_node_add.cpp
-    src/eely/anim_graph/btree/btree_node_blend.cpp
-    src/eely/anim_graph/btree/btree_node_btree.cpp
-    src/eely/anim_graph/btree/btree_node_clip.cpp
-    src/eely/anim_graph/btree/btree_node_fsm.cpp
-    src/eely/anim_graph/btree/btree_player_node_add.cpp
-    src/eely/anim_graph/btree/btree_player_node_base.cpp
-    src/eely/anim_graph/btree/btree_player_node_blend.cpp
-    src/eely/anim_graph/btree/btree_player_node_btree.cpp
-    src/eely/anim_graph/btree/btree_player_node_clip.cpp
-    src/eely/anim_graph/btree/btree_player_node_fsm.cpp
-    src/eely/anim_graph/btree/btree_player.cpp
-    src/eely/anim_graph/btree/btree.cpp
-    src/eely/anim_graph/fsm/fsm_node_btree.cpp
-    src/eely/anim_graph/fsm/fsm_node_fsm.cpp
-    src/eely/anim_graph/fsm/fsm_node_transition.cpp
-    src/eely/anim_graph/fsm/fsm_player_node_base.cpp
-    src/eely/anim_graph/fsm/fsm_player_node_btree.cpp
-    src/eely/anim_graph/fsm/fsm_player_node_fsm.cpp
-    src/eely/anim_graph/fsm/fsm_player_node_transition.cpp
-    src/eely/anim_graph/fsm/fsm_player.cpp
-    src/eely/anim_graph/anim_graph_base_uncooked.cpp
-    src/eely/anim_graph/anim_graph_base.cpp
+    src/eely/anim_graph/anim_graph_node_and.cpp
     src/eely/anim_graph/anim_graph_node_base.cpp
+    src/eely/anim_graph/anim_graph_node_blend.cpp
+    src/eely/anim_graph/anim_graph_node_clip.cpp
+    src/eely/anim_graph/anim_graph_node_param_comparison.cpp
+    src/eely/anim_graph/anim_graph_node_param.cpp
+    src/eely/anim_graph/anim_graph_node_random.cpp
+    src/eely/anim_graph/anim_graph_node_speed.cpp
+    src/eely/anim_graph/anim_graph_node_state_condition.cpp
+    src/eely/anim_graph/anim_graph_node_state_machine.cpp
+    src/eely/anim_graph/anim_graph_node_state_transition.cpp
+    src/eely/anim_graph/anim_graph_node_state.cpp
+    src/eely/anim_graph/anim_graph_node_sum.cpp
+    src/eely/anim_graph/anim_graph_player_node_and.cpp
     src/eely/anim_graph/anim_graph_player_node_base.cpp
+    src/eely/anim_graph/anim_graph_player_node_blend.cpp
+    src/eely/anim_graph/anim_graph_player_node_clip.cpp
+    src/eely/anim_graph/anim_graph_player_node_param_comparison.cpp
+    src/eely/anim_graph/anim_graph_player_node_param.cpp
+    src/eely/anim_graph/anim_graph_player_node_random.cpp
+    src/eely/anim_graph/anim_graph_player_node_speed.cpp
+    src/eely/anim_graph/anim_graph_player_node_pose_base.cpp
+    src/eely/anim_graph/anim_graph_player_node_state_condition.cpp
+    src/eely/anim_graph/anim_graph_player_node_state_machine.cpp
+    src/eely/anim_graph/anim_graph_player_node_state_transition.cpp
+    src/eely/anim_graph/anim_graph_player_node_state.cpp
+    src/eely/anim_graph/anim_graph_player_node_sum.cpp
     src/eely/anim_graph/anim_graph_player.cpp
+    src/eely/anim_graph/anim_graph_uncooked.cpp
+    src/eely/anim_graph/anim_graph.cpp
     src/eely/base/bit_reader.cpp
     src/eely/base/bit_writer.cpp
     src/eely/base/string_id.cpp
@@ -147,4 +151,3 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:DEBUG>:EELY_DEBUG>)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
-message(STATUS "foo include dir: ${CMAKE_CXX_COMPILER_ID}")

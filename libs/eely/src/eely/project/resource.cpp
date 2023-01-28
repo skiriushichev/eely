@@ -1,7 +1,6 @@
 #include "eely/project/resource.h"
 
-#include "eely/anim_graph/btree/btree.h"
-#include "eely/anim_graph/fsm/fsm.h"
+#include "eely/anim_graph/anim_graph.h"
 #include "eely/base/assert.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
@@ -14,11 +13,7 @@
 #include <stdexcept>
 
 namespace eely {
-static constexpr gsl::index bits_resource_type{4};
-
-enum class resource_type { skeleton, clip, skeleton_mask, btree, fsm };
-
-resource::resource(const project& project, bit_reader& reader)
+resource::resource(const project& project, internal::bit_reader& reader)
     : resource_base(reader), _project{project}
 {
 }
@@ -33,6 +28,12 @@ const project& resource::get_project() const
   return _project;
 }
 
+namespace internal {
+
+static constexpr gsl::index bits_resource_type{4};
+
+enum class resource_type { skeleton, clip, skeleton_mask, anim_graph };
+
 void resource_serialize(const resource& resource, bit_writer& writer)
 {
   resource_type type;
@@ -45,24 +46,21 @@ void resource_serialize(const resource& resource, bit_writer& writer)
   else if (dynamic_cast<const skeleton_mask*>(&resource) != nullptr) {
     type = resource_type::skeleton_mask;
   }
-  else if (dynamic_cast<const btree*>(&resource) != nullptr) {
-    type = resource_type::btree;
-  }
-  else if (dynamic_cast<const fsm*>(&resource) != nullptr) {
-    type = resource_type::fsm;
+  else if (dynamic_cast<const anim_graph*>(&resource) != nullptr) {
+    type = resource_type::anim_graph;
   }
   else {
     throw std::runtime_error("Unknown resource type for serialization");
   }
 
-  writer.write({.value = static_cast<uint32_t>(type), .size_bits = bits_resource_type});
+  bit_writer_write(writer, type, bits_resource_type);
 
   resource.serialize(writer);
 }
 
 std::unique_ptr<resource> resource_deserialize(const project& project, bit_reader& reader)
 {
-  const auto type{static_cast<resource_type>(reader.read(bits_resource_type))};
+  const auto type{bit_reader_read<resource_type>(reader, bits_resource_type)};
 
   switch (type) {
     case resource_type::skeleton: {
@@ -77,12 +75,8 @@ std::unique_ptr<resource> resource_deserialize(const project& project, bit_reade
       return std::make_unique<skeleton_mask>(project, reader);
     } break;
 
-    case resource_type::btree: {
-      return std::make_unique<btree>(project, reader);
-    } break;
-
-    case resource_type::fsm: {
-      return std::make_unique<fsm>(project, reader);
+    case resource_type::anim_graph: {
+      return std::make_unique<anim_graph>(project, reader);
     } break;
 
     default: {
@@ -90,4 +84,5 @@ std::unique_ptr<resource> resource_deserialize(const project& project, bit_reade
     } break;
   }
 }
+}  // namespace internal
 }  // namespace eely

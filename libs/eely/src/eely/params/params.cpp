@@ -1,40 +1,37 @@
 #include "eely/params/params.h"
 
-#include "eely/base/base_utils.h"
-#include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
 
-#include <gsl/narrow>
-
-#include <stdexcept>
+#include <variant>
 
 namespace eely::internal {
-constexpr gsl::index bits_param_type = 2;
-
-void params_value_serialize(const params::type_variant& value, bit_writer& writer)
+void bit_writer_write(bit_writer& writer, const param_value& value)
 {
-  writer.write({.value = gsl::narrow<uint32_t>(value.index()), .size_bits = bits_param_type});
+  bit_writer_write(writer, value.index(), bits_param_value_type_index);
 
-  if (const auto* value_raw{std::get_if<float>(&value)}) {
-    writer.write({.value = bit_cast<uint32_t>(*value_raw), .size_bits = 32});
-  }
-  else if (const auto* value_raw{std::get_if<bool>(&value)}) {
-    writer.write({.value = (*value_raw) ? 1U : 0U, .size_bits = 1});
-  }
-}
+  switch (value.index()) {
+    case 0: {
+      static_assert(std::is_same_v<std::variant_alternative_t<0, param_value>, std::monostate>);
+    } break;
 
-// Deserialize parameter value previously written via `params_value_serialize`.
-params::type_variant params_value_deserialize(bit_reader& reader)
-{
-  gsl::index index{reader.read(bits_param_type)};
-  if (index == 0) {
-    return params::type_variant{bit_cast<float>(reader.read(32))};
-  }
+    case 1: {
+      static_assert(std::is_same_v<std::variant_alternative_t<1, param_value>, int>);
+      bit_writer_write(writer, std::get<int>(value), bits_param_value_int);
+    } break;
 
-  if (index == 1) {
-    return params::type_variant{static_cast<bool>(reader.read(1))};
-  }
+    case 2: {
+      static_assert(std::is_same_v<std::variant_alternative_t<2, param_value>, float>);
+      bit_writer_write(writer, std::get<float>(value));
+    } break;
 
-  throw std::runtime_error{"Invalid variant index type for params value."};
+    case 3: {
+      static_assert(std::is_same_v<std::variant_alternative_t<3, param_value>, bool>);
+      bit_writer_write(writer, std::get<bool>(value));
+    } break;
+
+    default: {
+      throw std::runtime_error("Unknown param value type for writing");
+    } break;
+  }
 }
 }  // namespace eely::internal

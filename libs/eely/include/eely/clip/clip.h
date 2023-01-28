@@ -5,6 +5,7 @@
 #include "eely/clip/clip_impl_base.h"
 #include "eely/clip/clip_uncooked.h"
 #include "eely/project/project.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/project/resource.h"
 
 #include <memory>
@@ -14,10 +15,12 @@ namespace eely {
 class clip final : public resource {
 public:
   // Construct clip from a memory buffer.
-  explicit clip(const project& project, bit_reader& reader);
+  explicit clip(const project& project, internal::bit_reader& reader);
 
   // Construct clip from an uncooked counterpart.
-  explicit clip(const project& project, const clip_uncooked& uncooked);
+  explicit clip(const project& project,
+                const project_uncooked& project_uncooked,
+                const clip_uncooked& uncooked);
 
   // Construct clip from an uncooked additive counterpart.
   // Uncooked project is required as well,
@@ -27,7 +30,7 @@ public:
                 const clip_additive_uncooked& clip_uncooked);
 
   // Serialize clip into a memory buffer.
-  void serialize(bit_writer& writer) const override;
+  void serialize(internal::bit_writer& writer) const override;
 
   // Get clip's duration in seconds.
   [[nodiscard]] float get_duration_s() const;

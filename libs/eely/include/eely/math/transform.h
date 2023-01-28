@@ -52,12 +52,6 @@ transform transform_diff(const transform& t0, const transform& t1);
 // are within specified epsilon.
 bool transform_near(const transform& t0, const transform& t1, float epsilon = epsilon_default);
 
-// Serialize `transform` into specified memory buffer.
-void transform_serialize(const transform& t, bit_writer& writer);
-
-// Deserialize `transform` from specified memory buffer.
-transform transform_deserialize(bit_reader& reader);
-
 namespace internal {
 // Number of bits in which it is safe to pack `transform_components` value.
 static constexpr gsl::index bits_transform_components{3};
@@ -84,5 +78,25 @@ struct transform_component_t<transform_components::scale> final {
   using type = float3;
   using optional_type = std::optional<float3>;
 };
+
+// Read `transform` from a memory buffer.
+template <>
+transform bit_reader_read<transform>(bit_reader& reader);
+
+// Write `transform` into a memory buffer.
+void bit_writer_write(bit_writer& writer, const transform& value);
+}  // namespace internal
+
+// Implementation
+
+namespace internal {
+template <>
+inline transform bit_reader_read<transform>(bit_reader& reader)
+{
+  return transform{.translation = bit_reader_read<float3>(reader),
+                   .rotation = bit_reader_read<quaternion>(reader),
+                   .scale = bit_reader_read<float3>(reader)};
+}
+
 }  // namespace internal
 }  // namespace eely

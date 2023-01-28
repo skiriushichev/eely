@@ -62,17 +62,12 @@ bool transform_near(const transform& t0, const transform& t1, float epsilon)
          float3_near(t0.scale, t1.scale, epsilon);
 }
 
-void transform_serialize(const transform& t, bit_writer& writer)
+namespace internal {
+void bit_writer_write(bit_writer& writer, const transform& value)
 {
-  float3_serialize(t.translation, writer);
-  quaternion_serialize(t.rotation, writer);
-  float3_serialize(t.scale, writer);
+  bit_writer_write(writer, value.translation);
+  bit_writer_write(writer, value.rotation);
+  bit_writer_write(writer, value.scale);
 }
-
-transform transform_deserialize(bit_reader& reader)
-{
-  return transform{.translation = float3_deserialize(reader),
-                   .rotation = quaternion_deserialize(reader),
-                   .scale = float3_deserialize(reader)};
-}
+}  // namespace internal
 }  // namespace eely

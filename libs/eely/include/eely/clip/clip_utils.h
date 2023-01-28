@@ -58,6 +58,11 @@ void clip_sample_track(const clip_uncooked_track& track,
                        const clip_sampling_info& sampling_info,
                        std::vector<transform>& out_samples);
 
+// Calculate tracks for a clip.
+void clip_calculate_tracks(const project_uncooked& project,
+                           const clip_uncooked& uncooked,
+                           std::vector<clip_uncooked_track>& out_tracks);
+
 // Calculate tracks for an additive clip.
 void clip_calculate_additive_tracks(const project_uncooked& project,
                                     const clip_additive_uncooked& uncooked,
@@ -99,7 +104,7 @@ auto& get_by_joint_index(TVector& data, gsl::index& data_index, gsl::index joint
 {
   const gsl::index data_size{std::ssize(data)};
 
-  const gsl::index initial_index{data_index};
+  [[maybe_unused]] const gsl::index initial_index{data_index};
 
   while (true) {
     auto& element{data[data_index]};

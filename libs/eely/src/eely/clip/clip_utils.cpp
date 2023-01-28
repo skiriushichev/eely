@@ -39,6 +39,64 @@ void clip_sample_track(const clip_uncooked_track& track,
   }
 }
 
+void clip_calculate_tracks(const project_uncooked& project,
+                           const clip_uncooked& uncooked,
+                           std::vector<clip_uncooked_track>& out_tracks)
+{
+  const std::vector<clip_uncooked_track>& original_tracks{uncooked.get_tracks()};
+
+  const skeleton_mask_uncooked* skeleton_mask{
+      project.get_resource<skeleton_mask_uncooked>(uncooked.get_skeleton_mask_id())};
+  if (skeleton_mask == nullptr) {
+    // If there is no skeleton mask,
+    // there is no alteration to the original tracks.
+    out_tracks = original_tracks;
+    return;
+  }
+
+  // Apply mask weights
+
+  const std::unordered_map<string_id, joint_weight>& weights{skeleton_mask->get_weights()};
+
+  for (const clip_uncooked_track& original_track : original_tracks) {
+    clip_uncooked_track result_track{.joint_id = original_track.joint_id};
+
+    for (const auto& [original_time, original_key] : original_track.keys) {
+      clip_uncooked_key result_key;
+
+      joint_weight weight{1.0F, 1.0F, 1.0F};
+
+      auto weight_iter{weights.find(original_track.joint_id)};
+      if (weight_iter != weights.end()) {
+        weight = weight_iter->second;
+      }
+
+      if (!float_near(weight.translation, 0.0F) && original_key.translation.has_value()) {
+        result_key.translation =
+            float3_lerp(float3::zeroes, original_key.translation.value(), weight.translation);
+      }
+
+      if (!float_near(weight.rotation, 0.0F) && original_key.rotation.has_value()) {
+        result_key.rotation =
+            quaternion_slerp(quaternion::identity, original_key.rotation.value(), weight.rotation);
+      }
+
+      if (!float_near(weight.scale, 0.0F) && original_key.scale.has_value()) {
+        result_key.scale = float3_lerp(float3::zeroes, original_key.scale.value(), weight.scale);
+      }
+
+      if (result_key.translation.has_value() || result_key.rotation.has_value() ||
+          result_key.scale.has_value()) {
+        result_track.keys[original_time] = result_key;
+      }
+    }
+
+    if (!result_track.keys.empty()) {
+      out_tracks.push_back(std::move(result_track));
+    }
+  }
+}
+
 void clip_calculate_additive_tracks(const project_uncooked& project,
                                     const clip_additive_uncooked& uncooked,
                                     float& out_duration,
@@ -80,7 +138,7 @@ void clip_calculate_additive_tracks(const project_uncooked& project,
   const skeleton_uncooked& skeleton{
       *project.get_resource<skeleton_uncooked>(clip_source.get_target_skeleton_id())};
 
-  const std::unordered_map<string_id, float>* joint_weights{nullptr};
+  const std::unordered_map<string_id, joint_weight>* joint_weights{nullptr};
   const skeleton_mask_uncooked* skeleton_mask{
       project.get_resource<skeleton_mask_uncooked>(uncooked.get_skeleton_mask_id())};
   if (skeleton_mask != nullptr) {
@@ -88,15 +146,15 @@ void clip_calculate_additive_tracks(const project_uncooked& project,
   }
 
   const auto get_joint_weight = [joint_weights](const string_id& joint_id) {
-    float weight{1.0F};
+    joint_weight weights{1.0F};
     if (joint_weights != nullptr) {
       auto iter{joint_weights->find(joint_id)};
       if (iter != joint_weights->end()) {
-        weight = iter->second;
+        weights = iter->second;
       }
     }
 
-    return weight;
+    return weights;
   };
 
   // Prepare sampling parameters
@@ -125,8 +183,9 @@ void clip_calculate_additive_tracks(const project_uncooked& project,
       continue;
     }
 
-    const float weight{get_joint_weight(joint->id)};
-    if (float_near(weight, 0.0F)) {
+    const joint_weight weight{get_joint_weight(joint->id)};
+    if (float_near(weight.translation, 0.0F) && float_near(weight.rotation, 0.0F) &&
+        float_near(weight.scale, 0.0F)) {
       continue;
     }
 
@@ -141,7 +200,7 @@ void clip_calculate_additive_tracks(const project_uncooked& project,
   for (const auto& kvp : source_sampled_tracks) {
     const string_id& joint_id{kvp.first};
 
-    const float weight{get_joint_weight(joint_id)};
+    const joint_weight weight{get_joint_weight(joint_id)};
 
     clip_uncooked_track diff_track;
     diff_track.joint_id = joint_id;
@@ -169,14 +228,22 @@ void clip_calculate_additive_tracks(const project_uncooked& project,
                          source_sample_timestep * static_cast<float>(i)};
 
       // Use `std::min` when accesing base track to account for either 1 sample or N samples
-      transform delta{transform_diff(
+      const transform delta{transform_diff(
           kvp.second[i], base_track_samples[std::min(i, base_track_samples.size() - 1)])};
-      delta = transform{float3_lerp(float3::zeroes, delta.translation, weight),
-                        quaternion_slerp(quaternion::identity, delta.rotation, weight),
-                        float3_lerp(float3::ones, delta.scale, weight)};
-      diff_track.keys[time_s].translation = delta.translation;
-      diff_track.keys[time_s].rotation = delta.rotation;
-      diff_track.keys[time_s].scale = delta.scale;
+
+      if (!float_near(weight.translation, 0.0F)) {
+        diff_track.keys[time_s].translation =
+            float3_lerp(float3::zeroes, delta.translation, weight.translation);
+      }
+
+      if (!float_near(weight.rotation, 0.0F)) {
+        diff_track.keys[time_s].rotation =
+            quaternion_slerp(quaternion::identity, delta.rotation, weight.rotation);
+      }
+
+      if (!float_near(weight.scale, 0.0F)) {
+        diff_track.keys[time_s].scale = float3_lerp(float3::ones, delta.scale, weight.scale);
+      }
     }
 
     out_tracks.push_back(diff_track);

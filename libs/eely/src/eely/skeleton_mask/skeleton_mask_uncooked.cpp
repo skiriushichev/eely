@@ -14,32 +14,40 @@
 #include <unordered_set>
 
 namespace eely {
-skeleton_mask_uncooked::skeleton_mask_uncooked(bit_reader& reader) : resource_uncooked(reader)
+skeleton_mask_uncooked::skeleton_mask_uncooked(internal::bit_reader& reader)
+    : resource_uncooked(reader)
 {
   using namespace eely::internal;
 
-  _skeleton_id = string_id_deserialize(reader);
+  _skeleton_id = bit_reader_read<string_id>(reader);
 
-  gsl::index weights_count{reader.read(bits_joints_count)};
+  const auto weights_count{bit_reader_read<gsl::index>(reader, bits_joints_count)};
   for (gsl::index i{0}; i < weights_count; ++i) {
-    string_id id{string_id_deserialize(reader)};
-    float weight{bit_cast<float>(reader.read(32))};
-    _weights.insert({std::move(id), weight});
+    auto id{bit_reader_read<string_id>(reader)};
+    const auto weight_translation{bit_reader_read<float>(reader)};
+    const auto weight_rotation{bit_reader_read<float>(reader)};
+    const auto weight_scale{bit_reader_read<float>(reader)};
+
+    _weights.insert({id, {weight_translation, weight_rotation, weight_scale}});
   }
 }
 
 skeleton_mask_uncooked::skeleton_mask_uncooked(const string_id& id) : resource_uncooked(id) {}
 
-void skeleton_mask_uncooked::serialize(bit_writer& writer) const
+void skeleton_mask_uncooked::serialize(internal::bit_writer& writer) const
 {
   using namespace eely::internal;
 
-  string_id_serialize(_skeleton_id, writer);
+  resource_uncooked::serialize(writer);
 
-  writer.write({.value = gsl::narrow<uint32_t>(_weights.size()), .size_bits = bits_joints_count});
+  bit_writer_write(writer, _skeleton_id);
+
+  bit_writer_write(writer, _weights.size(), bits_joints_count);
   for (const auto& [joint_id, weight] : _weights) {
-    string_id_serialize(joint_id, writer);
-    writer.write({.value = bit_cast<uint32_t>(weight), .size_bits = 32});
+    bit_writer_write(writer, joint_id);
+    bit_writer_write(writer, weight.translation);
+    bit_writer_write(writer, weight.rotation);
+    bit_writer_write(writer, weight.scale);
   }
 }
 
@@ -59,12 +67,12 @@ void skeleton_mask_uncooked::set_target_skeleton_id(string_id skeleton_id)
   _skeleton_id = std::move(skeleton_id);
 }
 
-const std::unordered_map<string_id, float>& skeleton_mask_uncooked::get_weights() const
+const std::unordered_map<string_id, joint_weight>& skeleton_mask_uncooked::get_weights() const
 {
   return _weights;
 }
 
-std::unordered_map<string_id, float>& skeleton_mask_uncooked::get_weights()
+std::unordered_map<string_id, joint_weight>& skeleton_mask_uncooked::get_weights()
 {
   return _weights;
 }

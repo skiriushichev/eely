@@ -8,6 +8,7 @@
 #include "eely/math/transform.h"
 #include "eely/project/resource.h"
 #include "eely/skeleton/skeleton_uncooked.h"
+#include "eely/skeleton/skeleton_utils.h"
 
 #include <gsl/narrow>
 #include <gsl/util>
@@ -44,50 +45,48 @@ skeleton::skeleton(const project& project, const skeleton_uncooked& uncooked)
   }
 }
 
-skeleton::skeleton(const project& project, bit_reader& reader) : resource(project, reader)
+skeleton::skeleton(const project& project, internal::bit_reader& reader) : resource(project, reader)
 {
   using namespace eely::internal;
 
-  const gsl::index joints_count{reader.read(bits_joints_count)};
+  const auto joints_count{bit_reader_read<gsl::index>(reader, bits_joints_count)};
 
   _joint_ids.resize(joints_count);
   _joint_parents.resize(joints_count);
   _rest_pose.resize(joints_count);
 
   for (gsl::index i{0}; i < joints_count; ++i) {
-    _joint_ids[i] = string_id_deserialize(reader);
+    _joint_ids[i] = bit_reader_read<string_id>(reader);
   }
 
   for (gsl::index i{0}; i < joints_count; ++i) {
-    _joint_parents[i] = reader.read(bits_joints_count);
+    _joint_parents[i] = bit_reader_read<gsl::index>(reader, bits_joints_count);
   }
 
   for (gsl::index i{0}; i < joints_count; ++i) {
-    _rest_pose[i] = transform_deserialize(reader);
+    _rest_pose[i] = bit_reader_read<transform>(reader);
   }
 }
 
-void skeleton::serialize(bit_writer& writer) const
+void skeleton::serialize(internal::bit_writer& writer) const
 {
   using namespace eely::internal;
 
-  resource_base::serialize(writer);
+  resource::serialize(writer);
 
   const gsl::index joints_count{std::ssize(_joint_ids)};
-
-  writer.write({.value = gsl::narrow<uint32_t>(joints_count), .size_bits = bits_joints_count});
+  bit_writer_write(writer, joints_count, bits_joints_count);
 
   for (gsl::index i{0}; i < joints_count; ++i) {
-    string_id_serialize(_joint_ids[i], writer);
+    bit_writer_write(writer, _joint_ids[i]);
   };
 
   for (gsl::index i{0}; i < joints_count; ++i) {
-    writer.write(
-        {.value = gsl::narrow<uint32_t>(_joint_parents[i]), .size_bits = bits_joints_count});
+    bit_writer_write(writer, _joint_parents[i], bits_joints_count);
   };
 
   for (gsl::index i{0}; i < joints_count; ++i) {
-    transform_serialize(_rest_pose[i], writer);
+    bit_writer_write(writer, _rest_pose[i]);
   }
 }
 

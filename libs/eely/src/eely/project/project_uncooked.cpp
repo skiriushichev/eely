@@ -1,6 +1,7 @@
 #include "eely/project/project_uncooked.h"
 
 #include "eely/base/assert.h"
+#include "eely/base/bit_writer.h"
 #include "eely/project/axis_system.h"
 #include "eely/project/measurement_unit.h"
 #include "eely/project/resource_uncooked.h"
@@ -10,12 +11,12 @@
 namespace eely {
 static constexpr gsl::index bits_resources_count{16};
 
-project_uncooked::project_uncooked(bit_reader& reader)
+project_uncooked::project_uncooked(internal::bit_reader& reader)
 {
-  _measurement_unit = static_cast<measurement_unit>(reader.read(bits_measurement_units));
-  _axis_system = static_cast<axis_system>(reader.read(bits_axis_system));
+  _measurement_unit = bit_reader_read<measurement_unit>(reader, bits_measurement_units);
+  _axis_system = bit_reader_read<axis_system>(reader, bits_axis_system);
 
-  const gsl::index resources_count{reader.read(bits_resources_count)};
+  const auto resources_count{bit_reader_read<gsl::index>(reader, bits_resources_count)};
 
   for (gsl::index i{0}; i < resources_count; ++i) {
     std::unique_ptr<resource_uncooked> r{resource_uncooked_deserialize(reader)};
@@ -28,15 +29,14 @@ project_uncooked::project_uncooked(measurement_unit measurement_unit, axis_syste
 {
 }
 
-void project_uncooked::serialize(bit_writer& writer)
+void project_uncooked::serialize(internal::bit_writer& writer)
 {
-  writer.write(
-      {.value = static_cast<uint32_t>(_measurement_unit), .size_bits = bits_measurement_units});
+  using namespace eely::internal;
 
-  writer.write({.value = static_cast<uint32_t>(_axis_system), .size_bits = bits_axis_system});
+  bit_writer_write(writer, _measurement_unit, bits_measurement_units);
+  bit_writer_write(writer, _axis_system, bits_axis_system);
 
-  writer.write(
-      {.value = static_cast<uint32_t>(_resources.size()), .size_bits = bits_resources_count});
+  bit_writer_write(writer, _resources.size(), bits_resources_count);
 
   // Write resources in topological order,
   // so that when a resource is being deserialized,

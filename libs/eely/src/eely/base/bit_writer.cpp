@@ -1,6 +1,7 @@
 #include "eely/base/bit_writer.h"
 
 #include "eely/base/assert.h"
+#include "eely/base/base_utils.h"
 
 #include <gsl/narrow>
 #include <gsl/util>
@@ -10,7 +11,7 @@
 #include <cstdint>
 #include <stdexcept>
 
-namespace eely {
+namespace eely::internal {
 bit_writer::bit_writer(const std::span<std::byte>& data)
     : _data{data.data()}, _data_size_bits{std::ssize(data) * 8}
 {
@@ -124,4 +125,15 @@ gsl::index bit_writer_get_bytes_written(const bit_writer& writer)
 {
   return (writer.get_bit_position() + 7) / 8;
 }
-}  // namespace eely
+
+void bit_writer_write(bit_writer& writer, const float value)
+{
+  static_assert(sizeof(float) == 4);
+  writer.write({.value = bit_cast<uint32_t>(value), .size_bits = 32});
+}
+
+void bit_writer_write(bit_writer& writer, const bool value)
+{
+  writer.write({.value = value ? 1U : 0U, .size_bits = 1});
+}
+}  // namespace eely::internal

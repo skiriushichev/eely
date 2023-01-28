@@ -19,13 +19,13 @@ namespace eely {
 class skeleton final : public resource {
 public:
   // Construct a skeleton from a memory buffer.
-  explicit skeleton(const project& project, bit_reader& reader);
+  explicit skeleton(const project& project, internal::bit_reader& reader);
 
   // Construct a skeleton from an uncooked counterpart.
   explicit skeleton(const project& project, const skeleton_uncooked& uncooked);
 
   // Serialize skeleton into memory buffer.
-  void serialize(bit_writer& writer) const override;
+  void serialize(internal::bit_writer& writer) const override;
 
   // Return number of joints in a skeleton.
   [[nodiscard]] gsl::index get_joints_count() const;

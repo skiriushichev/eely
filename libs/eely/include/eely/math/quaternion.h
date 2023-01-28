@@ -68,14 +68,17 @@ float quaternion_get_at(const quaternion& q, gsl::index index);
 // are within specified epsilon.
 bool quaternion_near(const quaternion& q0, const quaternion& q1, float epsilon = epsilon_default);
 
-// Serialize `quaternion` into specified memory buffer.
-void quaternion_serialize(const quaternion& q, bit_writer& writer);
-
-// Deserialize `quaternion` from specified memory buffer.
-quaternion quaternion_deserialize(bit_reader& reader);
-
 // Return vector rotated by a quaternion.
 float3 vector_rotate(const float3& v, const quaternion& q);
+
+namespace internal {
+// Read `quaternion` from a memory buffer.
+template <>
+quaternion bit_reader_read<quaternion>(bit_reader& reader);
+
+// Write `quaternion` into a memory buffer.
+void bit_writer_write(bit_writer& writer, const quaternion& value);
+}  // namespace internal
 
 // Implementation
 
@@ -120,4 +123,15 @@ inline float quaternion_get_at(const quaternion& q, const gsl::index index)
       return q.x;
   }
 }
+
+namespace internal {
+template <>
+inline quaternion bit_reader_read<quaternion>(bit_reader& reader)
+{
+  return quaternion{.x = bit_reader_read<float>(reader),
+                    .y = bit_reader_read<float>(reader),
+                    .z = bit_reader_read<float>(reader),
+                    .w = bit_reader_read<float>(reader)};
+}
+}  // namespace internal
 }  // namespace eely

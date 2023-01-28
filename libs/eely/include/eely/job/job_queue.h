@@ -30,11 +30,14 @@ public:
   // Get pose pool to be used during execution.
   [[nodiscard]] skeleton_pose_pool& get_pose_pool();
 
-  [[nodiscard]] gsl::index acquire_saved_pose_index();
+  // Acquire slot to save pose to for further use.
+  [[nodiscard]] gsl::index acquire_saved_pose_slot();
 
-  void save_pose(const job_base& job, gsl::index pose_index);
+  // Save job's pose in a specified slot.
+  void save_pose(const job_base& job, gsl::index pose_slot);
 
-  const skeleton_pose_pool::ptr& restore_pose(gsl::index pose_index);
+  // Restore pose from a speicifed slot.
+  const skeleton_pose_pool::ptr& restore_pose(gsl::index pose_slot);
 
 private:
   std::vector<job_base*> _jobs;

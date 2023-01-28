@@ -7,7 +7,7 @@
 namespace eely::internal {
 uint16_t float_quantize(const float_quantize_params& params)
 {
-  static constexpr float epsilon_asserts{1e-3F};
+  [[maybe_unused]] static constexpr float epsilon_asserts{1e-3F};
 
   EXPECTS(params.value >= params.range_from &&
           params.value <= params.range_from + params.range_length + epsilon_asserts);

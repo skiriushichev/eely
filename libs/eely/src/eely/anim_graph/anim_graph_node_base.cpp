@@ -1,157 +1,123 @@
 #include "eely/anim_graph/anim_graph_node_base.h"
 
-#include "eely/anim_graph/btree/btree_node_add.h"
-#include "eely/anim_graph/btree/btree_node_blend.h"
-#include "eely/anim_graph/btree/btree_node_btree.h"
-#include "eely/anim_graph/btree/btree_node_clip.h"
-#include "eely/anim_graph/btree/btree_node_fsm.h"
-#include "eely/anim_graph/fsm/fsm_node_btree.h"
-#include "eely/anim_graph/fsm/fsm_node_fsm.h"
-#include "eely/anim_graph/fsm/fsm_node_transition.h"
-#include "eely/base/assert.h"
+#include "eely/anim_graph/anim_graph_node_and.h"
+#include "eely/anim_graph/anim_graph_node_blend.h"
+#include "eely/anim_graph/anim_graph_node_clip.h"
+#include "eely/anim_graph/anim_graph_node_param.h"
+#include "eely/anim_graph/anim_graph_node_param_comparison.h"
+#include "eely/anim_graph/anim_graph_node_random.h"
+#include "eely/anim_graph/anim_graph_node_speed.h"
+#include "eely/anim_graph/anim_graph_node_state.h"
+#include "eely/anim_graph/anim_graph_node_state_condition.h"
+#include "eely/anim_graph/anim_graph_node_state_machine.h"
+#include "eely/anim_graph/anim_graph_node_state_transition.h"
+#include "eely/anim_graph/anim_graph_node_sum.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
-#include "eely/base/string_id.h"
-
-#include <gsl/narrow>
-#include <gsl/util>
 
 #include <memory>
 #include <unordered_set>
-#include <vector>
 
 namespace eely {
-anim_graph_node_base::anim_graph_node_base(bit_reader& reader)
+anim_graph_node_base::anim_graph_node_base(const anim_graph_node_type type, const int id)
+    : _type{type}, _id{id}
+{
+}
+
+anim_graph_node_base::anim_graph_node_base(const anim_graph_node_type type,
+                                           internal::bit_reader& reader)
+    : _type{type}, _id{internal::bit_reader_read<int>(reader, internal::bits_anim_graph_node_id)}
+{
+}
+
+void anim_graph_node_base::serialize(internal::bit_writer& writer) const
 {
   using namespace eely::internal;
 
-  const gsl::index children_size{reader.read(bits_anim_graph_node_index)};
-  EXPECTS(children_size <= anim_graph_nodes_max_size);
-  _children_indices.resize(children_size);
+  // Type is serialized and read outside,
+  // because we need to know type of a node to call appropriate constructor
+  // (it's read in `bit_reader_read` and written in `bit_writer_writer`)
 
-  for (gsl::index i{0}; i < children_size; ++i) {
-    _children_indices[i] = reader.read(bits_anim_graph_node_index);
-  }
+  bit_writer_write(writer, _id, bits_anim_graph_node_id);
 }
 
-void anim_graph_node_base::serialize(bit_writer& writer) const
+anim_graph_node_type anim_graph_node_base::get_type() const
 {
-  using namespace eely::internal;
-
-  const gsl::index children_size{std::ssize(_children_indices)};
-  EXPECTS(children_size <= anim_graph_nodes_max_size);
-
-  writer.write(
-      {.value = gsl::narrow<uint32_t>(children_size), .size_bits = bits_anim_graph_node_index});
-
-  for (gsl::index i{0}; i < children_size; ++i) {
-    writer.write({.value = gsl::narrow<uint32_t>(_children_indices[i]),
-                  .size_bits = bits_anim_graph_node_index});
-  };
+  return _type;
 }
 
-const std::vector<gsl::index>& anim_graph_node_base::get_children_indices() const
+int anim_graph_node_base::get_id() const
 {
-  return _children_indices;
-}
-
-std::vector<gsl::index>& anim_graph_node_base::get_children_indices()
-{
-  return _children_indices;
+  return _id;
 }
 
 namespace internal {
-enum class anim_graph_node_type {
-  btree_add,
-  btree_blend,
-  btree_btree,
-  btree_clip,
-  btree_fsm,
-  fsm_btree,
-  fsm_fsm,
-  fsm_transition
-};
-
-static constexpr gsl::index bits_anim_graph_node_type{4};
-
-void anim_graph_node_serialize(const anim_graph_node_base& node, bit_writer& writer)
+template <>
+anim_graph_node_uptr bit_reader_read(bit_reader& reader)
 {
-  // TODO: use enum + polymorphic_downcast
+  const auto type{bit_reader_read<anim_graph_node_type>(reader, bits_anim_graph_node_type)};
 
-  anim_graph_node_type type;
-  if (dynamic_cast<const btree_node_add*>(&node) != nullptr) {
-    type = anim_graph_node_type::btree_add;
-  }
-  else if (dynamic_cast<const btree_node_blend*>(&node) != nullptr) {
-    type = anim_graph_node_type::btree_blend;
-  }
-  else if (dynamic_cast<const btree_node_btree*>(&node) != nullptr) {
-    type = anim_graph_node_type::btree_btree;
-  }
-  else if (dynamic_cast<const btree_node_clip*>(&node) != nullptr) {
-    type = anim_graph_node_type::btree_clip;
-  }
-  else if (dynamic_cast<const btree_node_fsm*>(&node) != nullptr) {
-    type = anim_graph_node_type::btree_fsm;
-  }
-  else if (dynamic_cast<const fsm_node_btree*>(&node) != nullptr) {
-    type = anim_graph_node_type::fsm_btree;
-  }
-  else if (dynamic_cast<const fsm_node_fsm*>(&node) != nullptr) {
-    type = anim_graph_node_type::fsm_fsm;
-  }
-  else if (dynamic_cast<const fsm_node_transition*>(&node) != nullptr) {
-    type = anim_graph_node_type::fsm_transition;
-  }
-  else {
-    throw std::runtime_error("Unknown animation graph node type for serialization");
-  }
-
-  writer.write({.value = static_cast<uint32_t>(type), .size_bits = bits_anim_graph_node_type});
-
-  node.serialize(writer);
-}
-
-anim_graph_node_uptr anim_graph_node_deserialize(bit_reader& reader)
-{
-  const auto type{static_cast<anim_graph_node_type>(reader.read(bits_anim_graph_node_type))};
   switch (type) {
-    case anim_graph_node_type::btree_add: {
-      return std::make_unique<btree_node_add>(reader);
+    case anim_graph_node_type::and_logic: {
+      return std::make_unique<anim_graph_node_and>(reader);
     } break;
 
-    case anim_graph_node_type::btree_blend: {
-      return std::make_unique<btree_node_blend>(reader);
+    case anim_graph_node_type::blend: {
+      return std::make_unique<anim_graph_node_blend>(reader);
     } break;
 
-    case anim_graph_node_type::btree_btree: {
-      return std::make_unique<btree_node_btree>(reader);
+    case anim_graph_node_type::clip: {
+      return std::make_unique<anim_graph_node_clip>(reader);
     } break;
 
-    case anim_graph_node_type::btree_clip: {
-      return std::make_unique<btree_node_clip>(reader);
+    case anim_graph_node_type::random: {
+      return std::make_unique<anim_graph_node_random>(reader);
     } break;
 
-    case anim_graph_node_type::btree_fsm: {
-      return std::make_unique<btree_node_fsm>(reader);
+    case anim_graph_node_type::speed: {
+      return std::make_unique<anim_graph_node_speed>(reader);
     } break;
 
-    case anim_graph_node_type::fsm_btree: {
-      return std::make_unique<fsm_node_btree>(reader);
+    case anim_graph_node_type::param: {
+      return std::make_unique<anim_graph_node_param>(reader);
     } break;
 
-    case anim_graph_node_type::fsm_fsm: {
-      return std::make_unique<fsm_node_fsm>(reader);
+    case anim_graph_node_type::param_comparison: {
+      return std::make_unique<anim_graph_node_param_comparison>(reader);
     } break;
 
-    case anim_graph_node_type::fsm_transition: {
-      return std::make_unique<fsm_node_transition>(reader);
+    case anim_graph_node_type::sum: {
+      return std::make_unique<anim_graph_node_sum>(reader);
+    } break;
+
+    case anim_graph_node_type::state_condition: {
+      return std::make_unique<anim_graph_node_state_condition>(reader);
+    } break;
+
+    case anim_graph_node_type::state_machine: {
+      return std::make_unique<anim_graph_node_state_machine>(reader);
+    } break;
+
+    case anim_graph_node_type::state_transition: {
+      return std::make_unique<anim_graph_node_state_transition>(reader);
+    } break;
+
+    case anim_graph_node_type::state: {
+      return std::make_unique<anim_graph_node_state>(reader);
     } break;
 
     default: {
-      throw std::runtime_error("Unknown animation graph node type for deserialization");
+      throw std::runtime_error("Unknown anim graph node type for deserialization");
     } break;
   }
+}
+
+void bit_writer_write(bit_writer& writer, const anim_graph_node_base& node)
+{
+  anim_graph_node_type type{node.get_type()};
+
+  bit_writer_write(writer, type, bits_anim_graph_node_type);
+  node.serialize(writer);
 }
 }  // namespace internal
 }  // namespace eely

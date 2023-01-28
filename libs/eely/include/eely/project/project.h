@@ -1,13 +1,12 @@
 #pragma once
 
 #include "eely/base/base_utils.h"
-#include "eely/base/bit_reader.h"
-#include "eely/base/bit_writer.h"
 #include "eely/base/string_id.h"
 #include "eely/project/project_uncooked.h"
 #include "eely/project/resource.h"
 
 #include <memory>
+#include <span>
 #include <unordered_map>
 
 namespace eely {
@@ -15,7 +14,7 @@ namespace eely {
 class project final {
 public:
   // Create project from a memory buffer.
-  explicit project(bit_reader& reader);
+  explicit project(const std::span<std::byte>& buffer);
 
   ~project() = default;
 
@@ -33,7 +32,8 @@ public:
 
   // Cook project from uncooked version
   // and write results into a memory buffer.
-  static void cook(const project_uncooked& project_uncooked, bit_writer& writer);
+  static void cook(const project_uncooked& project_uncooked,
+                   const std::span<std::byte>& out_buffer);
 
 private:
   // Used only during cooking

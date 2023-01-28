@@ -16,12 +16,12 @@
 #include <memory>
 
 namespace eely {
-clip::clip(const project& project, bit_reader& reader) : resource(project, reader)
+clip::clip(const project& project, internal::bit_reader& reader) : resource(project, reader)
 {
   using namespace eely::internal;
 
   const auto compression_scheme =
-      static_cast<clip_compression_scheme>(reader.read(bits_clip_compression_scheme));
+      bit_reader_read<clip_compression_scheme>(reader, bits_clip_compression_scheme);
 
   switch (compression_scheme) {
     case clip_compression_scheme::none: {
@@ -42,7 +42,9 @@ clip::clip(const project& project, bit_reader& reader) : resource(project, reade
   }
 }
 
-clip::clip(const project& project, const clip_uncooked& uncooked)
+clip::clip(const project& project,
+           const project_uncooked& project_uncooked,
+           const clip_uncooked& uncooked)
     : resource(project, uncooked.get_id())
 {
   using namespace eely::internal;
@@ -51,7 +53,9 @@ clip::clip(const project& project, const clip_uncooked& uncooked)
       *project.get_resource<eely::skeleton>(uncooked.get_target_skeleton_id())};
 
   const float duration_s{uncooked.get_duration_s()};
-  const std::vector<clip_uncooked_track>& tracks{uncooked.get_tracks()};
+
+  std::vector<clip_uncooked_track> tracks;
+  clip_calculate_tracks(project_uncooked, uncooked, tracks);
 
   switch (uncooked.get_compression_scheme()) {
     case clip_compression_scheme::none: {
@@ -105,7 +109,7 @@ clip::clip(const project& project,
   }
 }
 
-void clip::serialize(bit_writer& writer) const
+void clip::serialize(internal::bit_writer& writer) const
 {
   using namespace eely::internal;
 
@@ -122,8 +126,7 @@ void clip::serialize(bit_writer& writer) const
     compression_scheme = clip_compression_scheme::acl;
   }
 
-  writer.write({.value = static_cast<uint32_t>(compression_scheme),
-                .size_bits = bits_clip_compression_scheme});
+  bit_writer_write(writer, compression_scheme, bits_clip_compression_scheme);
 
   _impl->serialize(writer);
 }

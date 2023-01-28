@@ -6,6 +6,7 @@
 #include "eely/base/string_id.h"
 #include "eely/math/transform.h"
 #include "eely/project/resource_uncooked.h"
+#include "eely/skeleton/skeleton_utils.h"
 
 #include <gsl/narrow>
 #include <gsl/util>
@@ -18,50 +19,36 @@
 namespace eely {
 skeleton_uncooked::skeleton_uncooked(const string_id& id) : resource_uncooked(id) {}
 
-skeleton_uncooked::skeleton_uncooked(bit_reader& reader) : resource_uncooked(reader)
+skeleton_uncooked::skeleton_uncooked(internal::bit_reader& reader) : resource_uncooked(reader)
 {
   using namespace eely::internal;
 
-  const gsl::index joints_count{reader.read(bits_joints_count)};
+  const auto joints_count{bit_reader_read<gsl::index>(reader, bits_joints_count)};
 
   _joints.resize(joints_count);
   for (gsl::index i{0}; i < joints_count; ++i) {
     joint& joint{_joints[i]};
 
-    joint.id = string_id_deserialize(reader);
+    joint.id = bit_reader_read<string_id>(reader);
+    joint.parent_index = bit_reader_read<std::optional<gsl::index>>(reader, bits_joints_count);
 
-    const uint32_t has_parent{reader.read(1)};
-    if (has_parent == 1) {
-      joint.parent_index = reader.read(bits_joints_count);
-    }
-
-    joint.rest_pose_transform = transform_deserialize(reader);
+    joint.rest_pose_transform = bit_reader_read<transform>(reader);
   }
 }
 
-void skeleton_uncooked::serialize(bit_writer& writer) const
+void skeleton_uncooked::serialize(internal::bit_writer& writer) const
 {
   using namespace eely::internal;
 
   resource_uncooked::serialize(writer);
 
   const gsl::index joints_count{std::ssize(_joints)};
-
-  writer.write({.value = gsl::narrow<uint32_t>(joints_count), .size_bits = bits_joints_count});
+  bit_writer_write(writer, joints_count, bits_joints_count);
 
   for (const joint& joint : _joints) {
-    string_id_serialize(joint.id, writer);
-
-    if (joint.parent_index.has_value()) {
-      writer.write({.value = 1, .size_bits = 1});
-      writer.write({.value = gsl::narrow<uint32_t>(joint.parent_index.value()),
-                    .size_bits = bits_joints_count});
-    }
-    else {
-      writer.write({.value = 0, .size_bits = 1});
-    }
-
-    transform_serialize(joint.rest_pose_transform, writer);
+    bit_writer_write(writer, joint.id);
+    bit_writer_write(writer, joint.parent_index, bits_joints_count);
+    bit_writer_write(writer, joint.rest_pose_transform);
   }
 }
 

@@ -17,23 +17,23 @@ namespace eely {
 class skeleton_mask final : public resource {
 public:
   // Construct skeleton mask from a buffer.
-  explicit skeleton_mask(const project& project, bit_reader& reader);
+  explicit skeleton_mask(const project& project, internal::bit_reader& reader);
 
   // Construct skeleton mask from an uncooked counterpart.
   explicit skeleton_mask(const project& project, const skeleton_mask_uncooked& uncooked);
 
-  void serialize(bit_writer& writer) const override;
+  void serialize(internal::bit_writer& writer) const override;
 
   // Return weight of a joint.
-  [[nodiscard]] float get_weight(gsl::index joint_index) const;
+  [[nodiscard]] const joint_weight& get_weight(gsl::index joint_index) const;
 
 private:
-  std::vector<float> _weights;
+  std::vector<joint_weight> _weights;
 };
 
 // Implementation
 
-inline float skeleton_mask::get_weight(const gsl::index joint_index) const
+inline const joint_weight& skeleton_mask::get_weight(const gsl::index joint_index) const
 {
   return _weights.at(joint_index);
 }

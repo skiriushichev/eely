@@ -1,99 +1,75 @@
 #pragma once
 
-#include "eely/base/assert.h"
-#include "eely/job/job_queue.h"
-#include "eely/params/params.h"
+#include "eely/anim_graph/anim_graph_node_base.h"
+#include "eely/anim_graph/anim_graph_player_context.h"
 
-#include <gsl/util>
-
+#include <any>
+#include <memory>
 #include <optional>
+#include <vector>
 
 namespace eely::internal {
-// Execution context for animation graph.
-struct anim_graph_context final {
-  // Number of graph's plays made so far.
-  uint32_t play_counter{1};
-
-  // Queue to feed jobs into by graph nodes.
-  internal::job_queue& job_queue;
-
-  // External parameters that control the graph.
-  const params& params;
-
-  // How much seconds has passed since the last update.
-  float dt_s{0.0F};
-
-  // If set, its value forces phase for all nodes below.
-  // Used to synchronize animations based on their normalized phase.
-  std::optional<float> sync_phase;
-};
-
 // Base class for animation graph runtime nodes.
-// These nodes can be played to produces poses.
+// These nodes produce poses or data for other nodes.
 class anim_graph_player_node_base {
 public:
+  // Construct player node with specified type.
+  explicit anim_graph_player_node_base(anim_graph_node_type type);
+
   virtual ~anim_graph_player_node_base() = default;
 
-  // Update node's state and state of all of its relevant children.
-  // This should always be called before `play` (which only registers the jobs).
-  // Updating a node is split into these two methods, because when
-  // synchronizing children, we need to know their durations in order to give them
-  // a synchronized phase (which is passed into `play`'s context).
-  virtual void prepare(const anim_graph_context& /*context*/);
+  // Compute node's result.
+  // `std::any` is used assuming it is implemented with SBO
+  // and we don't use types that don't fit into it.
+  // TODO: can this be checked with an assert? What if it breaks?
+  std::any compute(const anim_graph_player_context& context);
 
-  // Register jobs that produce this node's pose.
-  virtual gsl::index enqueue_job(const anim_graph_context& context) = 0;
+  // Collect all descendant nodes recursively.
+  virtual void collect_descendants(
+      std::vector<const anim_graph_player_node_base*>& /*out_descendants*/) const {};
 
-  // Return this node's duration in seconds.
-  [[nodiscard]] float get_duration_s() const;
-
-  // Return this node's normalized phase.
-  [[nodiscard]] float get_phase() const;
+  // Return this node's type.
+  [[nodiscard]] anim_graph_node_type get_type() const;
 
 protected:
-  // Set this node's duration in seconds.
-  void set_duration_s(float duration_s);
+  virtual void compute_impl(const anim_graph_player_context& /*context*/, std::any& /*out_result*/)
+  {
+  }
 
-  // Set this node's phase manually.
-  void set_phase(float phase);
-
-  // Update phase from the context.
-  // If synchornized phase is given, it will be used,
-  // otherwise phase will be increased based on time delta.
-  // If `allow_wrap` is `true`, phase will wrap over 1.0F value,
-  // otherwise it will be clamped to 1.0F.
-  void update_phase_from_context(const anim_graph_context& context, bool allow_wrap = true);
-
-  virtual void on_start(const anim_graph_context& context);
+  // Return `true` if this a first time a node is played,
+  // i.e. either graph is played for the first time,
+  // or after at least one graph update when this node was inactive.
+  // Can be used to reset node's state if needed.
+  [[nodiscard]] bool is_first_play(const anim_graph_player_context& context) const;
 
 private:
-  uint32_t _prev_graph_play_counter{0};
+  anim_graph_node_type _type;
 
-  float _duration_s{0.0F};
-  float _phase{0.0F};
+  // These two are mutable for `if_first_play` to be a const API.
+  // They are just cached values.
+  mutable std::optional<int> _prev_graph_play_counter;
+  mutable bool _is_first_play{false};
 };
+
+// Shorter name for unique pointer to a player node.
+using anim_graph_player_node_uptr = std::unique_ptr<anim_graph_player_node_base>;
 
 // Implementation
 
-inline void anim_graph_player_node_base::set_duration_s(const float duration_s)
+inline anim_graph_node_type anim_graph_player_node_base::get_type() const
 {
-  EXPECTS(duration_s >= 0.0F);
-  _duration_s = duration_s;
+  return _type;
 }
 
-inline float anim_graph_player_node_base::get_duration_s() const
+inline bool anim_graph_player_node_base::is_first_play(
+    const anim_graph_player_context& context) const
 {
-  return _duration_s;
-}
+  if (_prev_graph_play_counter != context.play_counter) {
+    _is_first_play = (!_prev_graph_play_counter.has_value() ||
+                      (context.play_counter != _prev_graph_play_counter.value() + 1));
+    _prev_graph_play_counter = context.play_counter;
+  }
 
-inline void anim_graph_player_node_base::set_phase(const float phase)
-{
-  EXPECTS(phase >= 0.0F && phase <= 1.0F);
-  _phase = phase;
-}
-
-inline float anim_graph_player_node_base::get_phase() const
-{
-  return _phase;
+  return _is_first_play;
 }
 }  // namespace eely::internal

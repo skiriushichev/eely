@@ -17,9 +17,11 @@ public:
   virtual void collect_dependencies(std::unordered_set<string_id>& out_dependencies) const;
 };
 
+namespace internal {
 // Serialize uncooked resource's type and data into a memory buffer.
 void resource_uncooked_serialize(const resource_uncooked& resource, bit_writer& writer);
 
 // Create and deserialize uncooked resource from a memory buffer.
 std::unique_ptr<resource_uncooked> resource_uncooked_deserialize(bit_reader& reader);
+}  // namespace internal
 }  // namespace eely

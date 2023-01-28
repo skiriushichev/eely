@@ -6,6 +6,8 @@
 #include "eely/clip/clip_player_fixed.h"
 #include "eely/clip/clip_utils.h"
 #include "eely/math/quantization.h"
+#include "eely/math/transform.h"
+#include "eely/skeleton/skeleton_utils.h"
 
 #include <gsl/narrow>
 #include <gsl/util>
@@ -178,43 +180,44 @@ clip_impl_fixed::clip_impl_fixed(bit_reader& reader)
 {
   // Metadata
 
-  _metadata.duration_s = bit_cast<float>(reader.read(32));
+  _metadata.duration_s = bit_reader_read<float>(reader);
   EXPECTS(_metadata.duration_s >= 0.0F);
 
-  _metadata.is_additive = reader.read(1) == 1U;
+  _metadata.is_additive = bit_reader_read<bool>(reader);
 
-  const gsl::index metadata_joint_components_size{reader.read(bits_joints_count)};
+  auto metadata_joint_components_size{bit_reader_read<gsl::index>(reader, bits_joints_count)};
+
   _metadata.joints_components.resize(metadata_joint_components_size);
   for (gsl::index i{0}; i < metadata_joint_components_size; ++i) {
     joint_components j;
-    j.joint_index = reader.read(bits_joints_count);
-    j.components = gsl::narrow<int>(reader.read(bits_transform_components));
+    j.joint_index = bit_reader_read<gsl::index>(reader, bits_joints_count);
+    j.components = bit_reader_read<int>(reader, bits_transform_components);
 
     _metadata.joints_components[i] = j;
   }
 
-  const gsl::index metadata_joint_ranges_size{reader.read(bits_joints_count)};
+  const auto metadata_joint_ranges_size{bit_reader_read<gsl::index>(reader, bits_joints_count)};
   _metadata.joints_ranges.resize(metadata_joint_ranges_size);
   for (gsl::index i{0}; i < metadata_joint_ranges_size; ++i) {
     joint_range j;
 
-    j.joint_index = reader.read(bits_joints_count);
-    j.range_translation_from = bit_cast<float>(reader.read(32));
-    j.range_translation_length = bit_cast<float>(reader.read(32));
-    j.range_scale_from = bit_cast<float>(reader.read(32));
-    j.range_scale_length = bit_cast<float>(reader.read(32));
+    j.joint_index = bit_reader_read<gsl::index>(reader, bits_joints_count);
+    j.range_translation_from = bit_reader_read<float>(reader);
+    j.range_translation_length = bit_reader_read<float>(reader);
+    j.range_scale_from = bit_reader_read<float>(reader);
+    j.range_scale_length = bit_reader_read<float>(reader);
 
     _metadata.joints_ranges[i] = j;
   }
 
   // Data
 
-  const gsl::index data_size{reader.read(32)};
+  const auto data_size{bit_reader_read<gsl::index>(reader, 32)};
   EXPECTS(data_size > 0);
 
   _data.resize(data_size);
   for (gsl::index i{0}; i < data_size; ++i) {
-    _data[i] = reader.read(16);
+    _data[i] = bit_reader_read<uint16_t>(reader);
   }
 }
 
@@ -244,34 +247,30 @@ void clip_impl_fixed::serialize(bit_writer& writer) const
 {
   // Metadata
 
-  writer.write({.value = bit_cast<uint32_t>(_metadata.duration_s), .size_bits = 32});
-  writer.write({.value = _metadata.is_additive ? 1U : 0U, .size_bits = 1});
+  bit_writer_write(writer, _metadata.duration_s);
+  bit_writer_write(writer, _metadata.is_additive);
 
-  writer.write({.value = gsl::narrow<uint32_t>(_metadata.joints_components.size()),
-                .size_bits = bits_joints_count});
+  bit_writer_write(writer, _metadata.joints_components.size(), bits_joints_count);
   for (const joint_components& j : _metadata.joints_components) {
-    writer.write({.value = gsl::narrow<uint32_t>(j.joint_index), .size_bits = bits_joints_count});
-    writer.write(
-        {.value = gsl::narrow<uint32_t>(j.components), .size_bits = bits_transform_components});
+    bit_writer_write(writer, j.joint_index, bits_joints_count);
+    bit_writer_write(writer, j.components, bits_transform_components);
   }
 
-  writer.write({.value = gsl::narrow<uint32_t>(_metadata.joints_ranges.size()),
-                .size_bits = bits_joints_count});
-
+  bit_writer_write(writer, _metadata.joints_ranges.size(), bits_joints_count);
   for (const joint_range& j : _metadata.joints_ranges) {
-    writer.write({.value = gsl::narrow<uint32_t>(j.joint_index), .size_bits = bits_joints_count});
+    bit_writer_write(writer, j.joint_index, bits_joints_count);
 
-    writer.write({.value = bit_cast<uint32_t>(j.range_translation_from), .size_bits = 32});
-    writer.write({.value = bit_cast<uint32_t>(j.range_translation_length), .size_bits = 32});
-    writer.write({.value = bit_cast<uint32_t>(j.range_scale_from), .size_bits = 32});
-    writer.write({.value = bit_cast<uint32_t>(j.range_scale_length), .size_bits = 32});
+    bit_writer_write(writer, j.range_translation_from);
+    bit_writer_write(writer, j.range_translation_length);
+    bit_writer_write(writer, j.range_scale_from);
+    bit_writer_write(writer, j.range_scale_length);
   }
 
   // Data
 
-  writer.write({.value = gsl::narrow<uint32_t>(_data.size()), .size_bits = 32});
+  bit_writer_write(writer, _data.size(), 32);
   for (uint16_t d : _data) {
-    writer.write({.value = d, .size_bits = 16});
+    bit_writer_write(writer, d);
   }
 }
 

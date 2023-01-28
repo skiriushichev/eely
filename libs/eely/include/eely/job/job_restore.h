@@ -28,8 +28,10 @@ inline void job_restore::set_saved_pose_index(const gsl::index index)
 
 inline skeleton_pose_pool::ptr job_restore::execute_impl(job_queue& queue)
 {
-  auto pose_ptr{queue.get_pose_pool().borrow()};
-  const auto& restored_pose{queue.restore_pose(_pose_index.value())};
+  const skeleton_pose_pool::ptr& restored_pose{queue.restore_pose(_pose_index.value())};
+  EXPECTS(restored_pose != nullptr);
+
+  skeleton_pose_pool::ptr pose_ptr{queue.get_pose_pool().borrow()};
   *pose_ptr = *restored_pose;
   return pose_ptr;
 }

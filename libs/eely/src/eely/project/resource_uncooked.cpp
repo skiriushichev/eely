@@ -1,7 +1,6 @@
 #include "eely/project/resource_uncooked.h"
 
-#include "eely/anim_graph/btree/btree_uncooked.h"
-#include "eely/anim_graph/fsm/fsm_uncooked.h"
+#include "eely/anim_graph/anim_graph_uncooked.h"
 #include "eely/base/assert.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
@@ -14,14 +13,15 @@
 #include <unordered_set>
 
 namespace eely {
-static constexpr gsl::index bits_resource_type{4};
-
-enum class resource_uncooked_type { skeleton, clip, clip_additive, skeleton_mask, btree, fsm };
-
 void resource_uncooked::collect_dependencies(
     std::unordered_set<string_id>& /*out_dependencies*/) const
 {
 }
+
+namespace internal {
+static constexpr gsl::index bits_resource_type{4};
+
+enum class resource_uncooked_type { skeleton, clip, clip_additive, skeleton_mask, anim_graph };
 
 void resource_uncooked_serialize(const resource_uncooked& resource, bit_writer& writer)
 {
@@ -38,24 +38,21 @@ void resource_uncooked_serialize(const resource_uncooked& resource, bit_writer& 
   else if (dynamic_cast<const skeleton_mask_uncooked*>(&resource) != nullptr) {
     type = resource_uncooked_type::skeleton_mask;
   }
-  else if (dynamic_cast<const btree_uncooked*>(&resource) != nullptr) {
-    type = resource_uncooked_type::btree;
-  }
-  else if (dynamic_cast<const fsm_uncooked*>(&resource) != nullptr) {
-    type = resource_uncooked_type::fsm;
+  else if (dynamic_cast<const anim_graph_uncooked*>(&resource) != nullptr) {
+    type = resource_uncooked_type::anim_graph;
   }
   else {
     throw std::runtime_error("Unknown resource type for serialization");
   }
 
-  writer.write({.value = static_cast<uint32_t>(type), .size_bits = bits_resource_type});
+  bit_writer_write(writer, type, bits_resource_type);
 
   resource.serialize(writer);
 }
 
 std::unique_ptr<resource_uncooked> resource_uncooked_deserialize(bit_reader& reader)
 {
-  const auto type{static_cast<resource_uncooked_type>(reader.read(bits_resource_type))};
+  const auto type{bit_reader_read<resource_uncooked_type>(reader, bits_resource_type)};
 
   switch (type) {
     case resource_uncooked_type::skeleton: {
@@ -74,12 +71,8 @@ std::unique_ptr<resource_uncooked> resource_uncooked_deserialize(bit_reader& rea
       return std::make_unique<skeleton_mask_uncooked>(reader);
     } break;
 
-    case resource_uncooked_type::btree: {
-      return std::make_unique<btree_uncooked>(reader);
-    } break;
-
-    case resource_uncooked_type::fsm: {
-      return std::make_unique<fsm_uncooked>(reader);
+    case resource_uncooked_type::anim_graph: {
+      return std::make_unique<anim_graph_uncooked>(reader);
     } break;
 
     default: {
@@ -87,4 +80,5 @@ std::unique_ptr<resource_uncooked> resource_uncooked_deserialize(bit_reader& rea
     } break;
   }
 }
+}  // namespace internal
 }  // namespace eely

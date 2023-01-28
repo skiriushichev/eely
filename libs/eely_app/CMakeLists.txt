@@ -32,7 +32,7 @@ set(SOURCE_FILES
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC include src)
-target_link_libraries(${PROJECT_NAME} PUBLIC eely external_bgfx external_entt external_fmt external_gsl external_imgui external_imgui_bgfx external_sdl)
+target_link_libraries(${PROJECT_NAME} PUBLIC eely external_bgfx external_entt external_fmt external_gsl external_imgui external_imgui_bgfx external_imgui_node_editor external_sdl)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)

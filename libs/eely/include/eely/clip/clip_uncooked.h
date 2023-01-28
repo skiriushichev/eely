@@ -34,12 +34,12 @@ struct clip_uncooked_track final {
 class clip_uncooked final : public resource_uncooked {
 public:
   // Construct an uncooked clip from a memory buffer.
-  explicit clip_uncooked(bit_reader& reader);
+  explicit clip_uncooked(internal::bit_reader& reader);
 
   // Construct an empty uncooked clip.
   explicit clip_uncooked(const string_id& id);
 
-  void serialize(bit_writer& writer) const override;
+  void serialize(internal::bit_writer& writer) const override;
 
   void collect_dependencies(std::unordered_set<string_id>& out_dependencies) const override;
 
@@ -48,6 +48,14 @@ public:
 
   // Set id of a skeleton this clip is targeted at.
   void set_target_skeleton_id(string_id skeleton_id);
+
+  // Return skeleton mask to be used when clip is cooked.
+  [[nodiscard]] string_id get_skeleton_mask_id() const;
+
+  // Set skeleton mask to be used when clip is cooked.
+  // Joints with zero weight will not be in a final clip,
+  // and others will have an according percentage written.
+  void set_skeleton_mask_id(string_id skeleton_mask_id);
 
   // Return list of clip tracks.
   [[nodiscard]] const std::vector<clip_uncooked_track>& get_tracks() const;
@@ -66,6 +74,7 @@ public:
 
 private:
   string_id _target_skeleton_id;
+  string_id _skeleton_mask_id;
   clip_compression_scheme _compression_scheme;
   std::vector<clip_uncooked_track> _tracks;
 };
@@ -80,12 +89,12 @@ public:
   };
 
   // Construct an uncooked additive clip from a memory buffer.
-  explicit clip_additive_uncooked(bit_reader& reader);
+  explicit clip_additive_uncooked(internal::bit_reader& reader);
 
   // Construct an empty uncooked additive clip.
   explicit clip_additive_uncooked(const string_id& id);
 
-  void serialize(bit_writer& writer) const override;
+  void serialize(internal::bit_writer& writer) const override;
 
   void collect_dependencies(std::unordered_set<string_id>& out_dependencies) const override;
 

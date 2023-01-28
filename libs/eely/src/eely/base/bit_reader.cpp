@@ -1,6 +1,7 @@
 #include "eely/base/bit_reader.h"
 
 #include "eely/base/assert.h"
+#include "eely/base/base_utils.h"
 
 #include <gsl/narrow>
 #include <gsl/util>
@@ -10,7 +11,7 @@
 #include <span>
 #include <stdexcept>
 
-namespace eely {
+namespace eely::internal {
 bit_reader::bit_reader(const std::span<const std::byte>& data)
     : _data{data.data()}, _data_size_bits{std::ssize(data) * 8}
 {
@@ -82,4 +83,4 @@ gsl::index bit_reader_get_bytes_read(const bit_reader& reader)
 {
   return (reader.get_position_bits() + 7) / 8;
 }
-}  // namespace eely
+}  // namespace eely::internal

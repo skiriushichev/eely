@@ -17,7 +17,7 @@ namespace eely {
 class project_uncooked final {
 public:
   // Construct a project from a memory buffer.
-  explicit project_uncooked(bit_reader& reader);
+  explicit project_uncooked(internal::bit_reader& reader);
 
   // Construct empty project with specified measurement unit and axis system.
   explicit project_uncooked(measurement_unit measurement_unit = measurement_unit::meters,
@@ -32,7 +32,7 @@ public:
   project_uncooked& operator=(project_uncooked&&) = delete;
 
   // Serialize project into a memory buffer.
-  void serialize(bit_writer& writer);
+  void serialize(internal::bit_writer& writer);
 
   // Get measurement unit used in project.
   [[nodiscard]] measurement_unit get_measurement_unit() const;
@@ -104,7 +104,8 @@ void project_uncooked::for_each_resource_topological(const TFn& fn) const
 
   std::vector<const resource_uncooked*> sorted_resources;
   auto sorted_resources_inserter{std::back_inserter(sorted_resources)};
-  const bool traversed = graph_topological_traversal(resources_graph, sorted_resources_inserter);
+  [[maybe_unused]] const bool traversed =
+      graph_topological_traversal(resources_graph, sorted_resources_inserter);
   EXPECTS(traversed);
 
   for (const resource_uncooked* r : sorted_resources) {

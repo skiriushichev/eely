@@ -4,6 +4,7 @@
 #include "eely_app/asset_material.h"
 #include "eely_app/asset_mesh.h"
 #include "eely_app/asset_uniform.h"
+#include "eely_app/filesystem_utils.h"
 #include "eely_app/inputs.h"
 
 #include <eely/base/time_utils.h>
@@ -27,6 +28,7 @@
 #include <SDL_video.h>
 
 #include <chrono>
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -104,7 +106,6 @@ app::app(const unsigned int width, const unsigned int height, const std::string&
   // ImGui
 
   ImGui::CreateContext();
-  ImGui::StyleColorsLight();
 
   ImGui_Implbgfx_Init(bgfx_imgui_view_id);
 

@@ -47,8 +47,8 @@ private:
   std::vector<std::unique_ptr<skeleton_pose>> _poses;
 
 #if defined(EELY_DEBUG)
-  // Number of borrowed poses that are not yet returned to the pool
-  // To check that all poses are returned to the pool before pool is destroyed
+  // Number of borrowed poses that are not yet returned to the pool.
+  // To check that all poses are returned before the pool is destroyed.
   gsl::index _borrows{0};
 #endif
 };

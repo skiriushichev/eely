@@ -37,7 +37,7 @@ void system_skeleton_update(app& /*app*/, entt::registry& registry, const float 
 
     component_skeleton& component_skeleton{anim_graphs_view.get<eely::component_skeleton>(entity)};
 
-    component_anim_graph.player->play(dt_s, component_skeleton.pose);
+    component_anim_graph.player->play(dt_s, *component_anim_graph.params, component_skeleton.pose);
   }
 }
 }  // namespace eely

@@ -148,8 +148,8 @@ static void render_skeleton(app& app,
   const asset_uniform::key uniform_key{.id = "u_color", .bgfx_type = bgfx::UniformType::Vec4};
   const asset_uniform& uniform{app.get_uniforms().get(uniform_key)};
 
-  static float4 black_color{0.0F, 0.0F, 0.0F, 1.0F};
-  bgfx::setUniform(uniform.get_uniform_handle(), &black_color);
+  static float4 skeleton_color{0.8F, 0.8F, 0.8F, 0.8F};
+  bgfx::setUniform(uniform.get_uniform_handle(), &skeleton_color);
 
   bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z | BGFX_STATE_MSAA |
                  BGFX_STATE_PT_LINES);

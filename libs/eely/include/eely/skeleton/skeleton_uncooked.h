@@ -29,13 +29,13 @@ public:
   };
 
   // Construct an uncooked skeleton from a memory buffer.
-  explicit skeleton_uncooked(bit_reader& reader);
+  explicit skeleton_uncooked(internal::bit_reader& reader);
 
   // Construct an empty uncooked skeleton.
   explicit skeleton_uncooked(const string_id& id);
 
   // Serialize skeleton into memory buffer.
-  void serialize(bit_writer& writer) const override;
+  void serialize(internal::bit_writer& writer) const override;
 
   // Get skeleton joints.
   [[nodiscard]] const std::vector<joint>& get_joints() const;

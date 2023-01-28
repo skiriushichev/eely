@@ -15,6 +15,8 @@ namespace eely::internal {
 // and according methods can be used to transfer or release them.
 class job_base {
 public:
+  virtual ~job_base() = default;
+
   // Execute the job and write result pose.
   void execute(job_queue& queue);
 

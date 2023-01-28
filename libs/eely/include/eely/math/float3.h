@@ -52,12 +52,6 @@ float3 float3_lerp(const float3& a, const float3& b, float t);
 // Return `true` if corresponding components are within specified epsilon.
 bool float3_near(const float3& a, const float3& b, float epsilon = epsilon_default);
 
-// Serialize `float3` into specified memory buffer.
-void float3_serialize(const float3& a, bit_writer& writer);
-
-// Deserialize `float3` from specified memory buffer.
-float3 float3_deserialize(bit_reader& reader);
-
 // Return normalized vector.
 float3 vector_normalized(const float3& a);
 
@@ -66,4 +60,25 @@ float vector_dot(const float3& a, const float3& b);
 
 // Return cross product of two vectors.
 float3 vector_cross(const float3& a, const float3& b);
+
+namespace internal {
+// Return `float3` value read from a memory buffer.
+template <>
+float3 bit_reader_read(bit_reader& reader);
+
+// Write `float3 into a memory buffer.
+void bit_writer_write(bit_writer& writer, const float3& value);
+}  // namespace internal
+
+// Implementation
+
+namespace internal {
+template <>
+inline float3 bit_reader_read(bit_reader& reader)
+{
+  return float3{.x = bit_reader_read<float>(reader),
+                .y = bit_reader_read<float>(reader),
+                .z = bit_reader_read<float>(reader)};
+}
+}  // namespace internal
 }  // namespace eely
