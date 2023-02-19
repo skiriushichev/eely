@@ -7,6 +7,7 @@
 #include "eely/project/resource_uncooked.h"
 
 #include <bit>
+#include <memory>
 
 namespace eely {
 static constexpr gsl::index bits_resources_count{16};
@@ -19,8 +20,8 @@ project_uncooked::project_uncooked(internal::bit_reader& reader)
   const auto resources_count{bit_reader_read<gsl::index>(reader, bits_resources_count)};
 
   for (gsl::index i{0}; i < resources_count; ++i) {
-    std::unique_ptr<resource_uncooked> r{resource_uncooked_deserialize(reader)};
-    set_resource(std::move(r));
+    std::unique_ptr<resource_uncooked> r{resource_uncooked_deserialize(*this, reader)};
+    _resources[r->get_id()] = std::move(r);
   }
 }
 

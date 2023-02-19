@@ -3,6 +3,7 @@
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
 #include "eely/base/string_id.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/project/resource_uncooked.h"
 
 #include <unordered_map>
@@ -23,11 +24,11 @@ struct joint_weight final {
 class skeleton_mask_uncooked final : public resource_uncooked {
 public:
   // Construct skeleton mask from a memory buffer.
-  explicit skeleton_mask_uncooked(internal::bit_reader& reader);
+  explicit skeleton_mask_uncooked(const project_uncooked& project, internal::bit_reader& reader);
 
   // Construct empty skeleton mask.
   // By default, all weights are equal to one (i.e. nothing is omitted).
-  explicit skeleton_mask_uncooked(const string_id& id);
+  explicit skeleton_mask_uncooked(const project_uncooked& project, string_id id);
 
   void serialize(internal::bit_writer& writer) const override;
 

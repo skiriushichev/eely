@@ -1,6 +1,7 @@
 project(eely_app)
 
 set(SOURCE_FILES
+  include/eely_app/anim_graph_editor.h
   include/eely_app/app.h
   include/eely_app/asset_map.h
   include/eely_app/asset_material.h
@@ -18,6 +19,7 @@ set(SOURCE_FILES
   include/eely_app/system_camera.h
   include/eely_app/system_render.h
   include/eely_app/system_skeleton.h
+  src/eely_app/anim_graph_editor.cpp
   src/eely_app/app.cpp
   src/eely_app/asset_material.cpp
   src/eely_app/asset_mesh.cpp

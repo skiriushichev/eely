@@ -5,6 +5,7 @@
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
 #include "eely/clip/clip_uncooked.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/skeleton/skeleton_uncooked.h"
 #include "eely/skeleton_mask/skeleton_mask_uncooked.h"
 
@@ -13,6 +14,20 @@
 #include <unordered_set>
 
 namespace eely {
+resource_uncooked::resource_uncooked(const project_uncooked& project, internal::bit_reader& reader)
+    : resource_base{reader}, _project{project}
+{
+}
+
+resource_uncooked::resource_uncooked(const project_uncooked& project, string_id id)
+    : resource_base{std::move(id)}, _project{project}
+{
+}
+
+const project_uncooked& resource_uncooked::get_project() const
+{
+  return _project;
+}
 void resource_uncooked::collect_dependencies(
     std::unordered_set<string_id>& /*out_dependencies*/) const
 {
@@ -50,29 +65,30 @@ void resource_uncooked_serialize(const resource_uncooked& resource, bit_writer& 
   resource.serialize(writer);
 }
 
-std::unique_ptr<resource_uncooked> resource_uncooked_deserialize(bit_reader& reader)
+std::unique_ptr<resource_uncooked> resource_uncooked_deserialize(const project_uncooked& project,
+                                                                 bit_reader& reader)
 {
   const auto type{bit_reader_read<resource_uncooked_type>(reader, bits_resource_type)};
 
   switch (type) {
     case resource_uncooked_type::skeleton: {
-      return std::make_unique<skeleton_uncooked>(reader);
+      return std::make_unique<skeleton_uncooked>(project, reader);
     } break;
 
     case resource_uncooked_type::clip: {
-      return std::make_unique<clip_uncooked>(reader);
+      return std::make_unique<clip_uncooked>(project, reader);
     } break;
 
     case resource_uncooked_type::clip_additive: {
-      return std::make_unique<clip_additive_uncooked>(reader);
+      return std::make_unique<clip_additive_uncooked>(project, reader);
     } break;
 
     case resource_uncooked_type::skeleton_mask: {
-      return std::make_unique<skeleton_mask_uncooked>(reader);
+      return std::make_unique<skeleton_mask_uncooked>(project, reader);
     } break;
 
     case resource_uncooked_type::anim_graph: {
-      return std::make_unique<anim_graph_uncooked>(reader);
+      return std::make_unique<anim_graph_uncooked>(project, reader);
     } break;
 
     default: {

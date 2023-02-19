@@ -5,8 +5,8 @@
 #include "eely/base/base_utils.h"
 
 namespace eely::internal {
-anim_graph_player_node_speed::anim_graph_player_node_speed()
-    : anim_graph_player_node_base{anim_graph_node_type::speed}
+anim_graph_player_node_speed::anim_graph_player_node_speed(const int id)
+    : anim_graph_player_node_base{anim_graph_node_type::speed, id}
 {
 }
 

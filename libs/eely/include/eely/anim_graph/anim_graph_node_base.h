@@ -3,6 +3,7 @@
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
 #include "eely/base/string_id.h"
+#include "eely/math/float3.h"
 
 #include <bit>
 #include <memory>
@@ -56,9 +57,21 @@ public:
   // Return this node's id unique within a graph.
   [[nodiscard]] int get_id() const;
 
+  // Get node's position on a canvas in an animation graph editor.
+  // This position is used during editing,
+  // as well as when visualizing cooked and running graph in an application.
+  [[nodiscard]] float3 get_editor_position() const;
+
+  // Set node's position on a canvas in an animation graph editor.
+  // This position is used during editing,
+  // as well as when visualizing cooked and running graph in an application.
+  void set_editor_position(const float3& value);
+
 private:
   anim_graph_node_type _type;
   int _id;
+
+  float3 _editor_position{0.0F, 0.0F, 0.0F};
 };
 
 // Shorter name for unique pointer to a node.

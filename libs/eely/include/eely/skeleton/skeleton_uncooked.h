@@ -4,6 +4,7 @@
 #include "eely/base/bit_writer.h"
 #include "eely/base/string_id.h"
 #include "eely/math/transform.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/project/resource_uncooked.h"
 #include "eely/skeleton/skeleton_utils.h"
 
@@ -29,10 +30,10 @@ public:
   };
 
   // Construct an uncooked skeleton from a memory buffer.
-  explicit skeleton_uncooked(internal::bit_reader& reader);
+  explicit skeleton_uncooked(const project_uncooked& project, internal::bit_reader& reader);
 
   // Construct an empty uncooked skeleton.
-  explicit skeleton_uncooked(const string_id& id);
+  explicit skeleton_uncooked(const project_uncooked& project, string_id id);
 
   // Serialize skeleton into memory buffer.
   void serialize(internal::bit_writer& writer) const override;

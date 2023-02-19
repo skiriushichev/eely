@@ -22,7 +22,7 @@ public:
   // Construct transition node with specified type and duration.
   // The rest of the data must be filled via setters instead of ctor params,
   // because of the possible circular dependencies in a graph.
-  explicit anim_graph_player_node_state_transition(transition_type type, float duration_s);
+  explicit anim_graph_player_node_state_transition(int id, transition_type type, float duration_s);
 
   void update_duration(const anim_graph_player_context& context) override;
 

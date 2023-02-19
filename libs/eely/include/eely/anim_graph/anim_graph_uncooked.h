@@ -18,10 +18,10 @@ namespace eely {
 class anim_graph_uncooked final : public resource_uncooked {
 public:
   // Construct an uncooked animation graph resource from a memory buffer.
-  explicit anim_graph_uncooked(internal::bit_reader& reader);
+  explicit anim_graph_uncooked(const project_uncooked& project, internal::bit_reader& reader);
 
   // Construct an empty uncooked animation graph resource.
-  explicit anim_graph_uncooked(const string_id& id);
+  explicit anim_graph_uncooked(const project_uncooked& project, string_id id);
 
   explicit anim_graph_uncooked(const anim_graph_uncooked& other);
 

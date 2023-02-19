@@ -9,6 +9,7 @@
 #include "eely/project/resource_uncooked.h"
 
 #include <concepts>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -57,12 +58,14 @@ public:
   requires std::derived_from<TRes, resource_uncooked>
   [[nodiscard]] TRes* get_resource(const string_id& id);
 
-  // Add resource to the project, if there was no such resource before.
-  // If there was such a resource, override it with the new one.
-  // Previous version of this resource will no longer be valid.
+  // Add resource with specified type and id to the project and return reference to it.
+  template <typename TRes>
+  requires std::derived_from<TRes, resource_uncooked> TRes& add_resource(const string_id& id);
+
+  // Get identificators of all resoures with specified type.
   template <typename TRes>
   requires std::derived_from<TRes, resource_uncooked>
-  void set_resource(std::unique_ptr<TRes> resource);
+  [[nodiscard]] std::vector<string_id> get_ids() const;
 
 private:
   measurement_unit _measurement_unit;
@@ -142,10 +145,29 @@ requires std::derived_from<TRes, resource_uncooked> TRes* project_uncooked::get_
 }
 
 template <typename TRes>
-requires std::derived_from<TRes, resource_uncooked>
-void project_uncooked::set_resource(std::unique_ptr<TRes> resource)
+requires std::derived_from<TRes, resource_uncooked> TRes& project_uncooked::add_resource(
+    const string_id& id)
 {
-  const string_id& id{resource->get_id()};
+  auto resource{std::make_unique<TRes>(*this, id)};
+  TRes& result{*resource.get()};
   _resources[id] = std::move(resource);
+  return result;
+}
+
+template <typename TRes>
+requires std::derived_from<TRes, resource_uncooked> std::vector<string_id>
+project_uncooked::get_ids()
+const
+{
+  std::vector<string_id> result;
+
+  for (const auto& [id, r] : _resources) {
+    // TODO: add `resource.get_type()` and use it here instead of dynamic casts
+    if (dynamic_cast<const TRes*>(r.get()) != nullptr) {
+      result.push_back(id);
+    }
+  }
+
+  return result;
 }
 }  // namespace eely

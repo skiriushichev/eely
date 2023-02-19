@@ -5,6 +5,7 @@
 #include "eely/base/bit_writer.h"
 #include "eely/base/string_id.h"
 #include "eely/math/transform.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/project/resource_uncooked.h"
 #include "eely/skeleton/skeleton_utils.h"
 
@@ -17,9 +18,8 @@
 #include <vector>
 
 namespace eely {
-skeleton_uncooked::skeleton_uncooked(const string_id& id) : resource_uncooked(id) {}
-
-skeleton_uncooked::skeleton_uncooked(internal::bit_reader& reader) : resource_uncooked(reader)
+skeleton_uncooked::skeleton_uncooked(const project_uncooked& project, internal::bit_reader& reader)
+    : resource_uncooked{project, reader}
 {
   using namespace eely::internal;
 
@@ -34,6 +34,11 @@ skeleton_uncooked::skeleton_uncooked(internal::bit_reader& reader) : resource_un
 
     joint.rest_pose_transform = bit_reader_read<transform>(reader);
   }
+}
+
+skeleton_uncooked::skeleton_uncooked(const project_uncooked& project, string_id id)
+    : resource_uncooked{project, std::move(id)}
+{
 }
 
 void skeleton_uncooked::serialize(internal::bit_writer& writer) const

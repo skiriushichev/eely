@@ -21,7 +21,7 @@ public:
   // Construct empty node.
   // Data must be filled via setters instead of ctor params,
   // because of the possible circular dependencies in a graph.
-  explicit anim_graph_player_node_blend();
+  explicit anim_graph_player_node_blend(int id);
 
   void update_duration(const anim_graph_player_context& context) override;
 
@@ -40,6 +40,16 @@ public:
   // Set node that provides factor value for blending.
   void set_factor_node(anim_graph_player_node_base* node);
 
+  // Return blend source node.
+  const anim_graph_player_node_pose_base* get_current_source_node() const;
+
+  // Return blend destination node.
+  const anim_graph_player_node_pose_base* get_current_destination_node() const;
+
+  // Return destination node's weight.
+  // Source node's weight is 1.0F minus this value.
+  float get_current_destination_node_weight() const;
+
 protected:
   void compute_impl(const anim_graph_player_context& context, std::any& out_result) override;
 
@@ -51,9 +61,9 @@ private:
   anim_graph_player_node_base* _factor_node{nullptr};
 
   std::optional<float> _prev_factor;
-  anim_graph_player_node_pose_base* _blended_node_from{nullptr};
-  anim_graph_player_node_pose_base* _blended_node_to{nullptr};
-  float _blend_weight{0.0F};
+  anim_graph_player_node_pose_base* _sorce_node{nullptr};
+  anim_graph_player_node_pose_base* _destination_node{nullptr};
+  float _destination_node_weight{0.0F};
 
   job_blend _job_blend;
 };

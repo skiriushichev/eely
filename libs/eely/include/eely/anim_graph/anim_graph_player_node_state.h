@@ -12,10 +12,10 @@ namespace eely::internal {
 // Runtime version of `anim_graph_node_state`.
 class anim_graph_player_node_state final : public anim_graph_player_node_pose_base {
 public:
-  // Construct empty node.
-  // Data must be filled via setters instead of ctor params,
+  // Construct node with specified name.
+  // The rest of the data must be filled via setters instead of ctor params,
   // because of the possible circular dependencies in a graph.
-  explicit anim_graph_player_node_state();
+  explicit anim_graph_player_node_state(int id, string_id name);
 
   void update_duration(const anim_graph_player_context& context) override;
 
@@ -51,6 +51,7 @@ protected:
   void compute_impl(const anim_graph_player_context& context, std::any& out_result) override;
 
 private:
+  string_id _name;
   anim_graph_player_node_pose_base* _pose_node{nullptr};
   std::vector<anim_graph_player_node_state_transition*> _out_transition_nodes;
   std::vector<float> _breakpoints;

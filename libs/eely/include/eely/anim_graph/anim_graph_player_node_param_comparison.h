@@ -13,7 +13,8 @@ namespace eely::internal {
 class anim_graph_player_node_param_comparison final : public anim_graph_player_node_base {
 public:
   // Construct node for specific parameter and value.
-  explicit anim_graph_player_node_param_comparison(string_id param_id,
+  explicit anim_graph_player_node_param_comparison(int id,
+                                                   string_id param_id,
                                                    const param_value& value,
                                                    anim_graph_node_param_comparison::op op);
 

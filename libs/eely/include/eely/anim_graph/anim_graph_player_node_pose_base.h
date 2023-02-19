@@ -11,7 +11,7 @@ namespace eely::internal {
 class anim_graph_player_node_pose_base : public anim_graph_player_node_base {
 public:
   // Construct player pose node with specified type.
-  explicit anim_graph_player_node_pose_base(anim_graph_node_type type);
+  explicit anim_graph_player_node_pose_base(anim_graph_node_type type, int id);
 
   // Update this node's duration.
   // This method can be called before `compute` by parent nodes,

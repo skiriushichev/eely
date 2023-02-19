@@ -123,71 +123,99 @@ void anim_graph_player::play(float dt_s, const params& params, skeleton_pose& ou
   _job_queue.execute(out_pose);
 }
 
+const std::vector<internal::anim_graph_player_node_uptr>& anim_graph_player::get_nodes() const
+{
+  return _nodes;
+}
+
+const internal::anim_graph_player_node_base* anim_graph_player::get_player_node(const int id) const
+{
+  using namespace internal;
+
+  for (const anim_graph_player_node_uptr& node : _nodes) {
+    if (node->get_id() == id) {
+      return node.get();
+    }
+  }
+
+  return nullptr;
+}
+
+bool anim_graph_player::is_player_node_active(
+    const internal::anim_graph_player_node_base& node) const
+{
+  return node.get_last_play_counter() == _play_counter;
+}
+
 internal::anim_graph_player_node_uptr anim_graph_player::create_player_node(
     const anim_graph_node_uptr& node)
 {
   using namespace eely::internal;
 
+  const int id{node->get_id()};
+
   switch (node->get_type()) {
     case anim_graph_node_type::and_logic: {
-      return std::make_unique<anim_graph_player_node_and>();
+      return std::make_unique<anim_graph_player_node_and>(id);
     } break;
 
     case anim_graph_node_type::blend: {
-      return std::make_unique<anim_graph_player_node_blend>();
+      return std::make_unique<anim_graph_player_node_blend>(id);
     } break;
 
     case anim_graph_node_type::clip: {
-      const auto* node_clip = polymorphic_downcast<const anim_graph_node_clip*>(node.get());
+      const auto* node_clip{polymorphic_downcast<const anim_graph_node_clip*>(node.get())};
       const auto& clip{*_project.get_resource<eely::clip>(node_clip->get_clip_id())};
-      return std::make_unique<anim_graph_player_node_clip>(clip);
+      return std::make_unique<anim_graph_player_node_clip>(id, clip);
     } break;
 
     case anim_graph_node_type::param_comparison: {
-      const auto* node_param_comparison =
-          polymorphic_downcast<const anim_graph_node_param_comparison*>(node.get());
+      const auto* node_param_comparison{
+          polymorphic_downcast<const anim_graph_node_param_comparison*>(node.get())};
       return std::make_unique<anim_graph_player_node_param_comparison>(
-          node_param_comparison->get_param_id(), node_param_comparison->get_value(),
+          id, node_param_comparison->get_param_id(), node_param_comparison->get_value(),
           node_param_comparison->get_op());
     } break;
 
     case anim_graph_node_type::param: {
-      const auto* node_param = polymorphic_downcast<const anim_graph_node_param*>(node.get());
-      return std::make_unique<anim_graph_player_node_param>(node_param->get_param_id());
+      const auto* node_param{polymorphic_downcast<const anim_graph_node_param*>(node.get())};
+      return std::make_unique<anim_graph_player_node_param>(id, node_param->get_param_id());
     } break;
 
     case anim_graph_node_type::random: {
-      return std::make_unique<anim_graph_player_node_random>();
+      return std::make_unique<anim_graph_player_node_random>(id);
     } break;
 
     case anim_graph_node_type::speed: {
-      return std::make_unique<anim_graph_player_node_speed>();
+      return std::make_unique<anim_graph_player_node_speed>(id);
     } break;
 
     case anim_graph_node_type::state_condition: {
-      const auto* node_state_condition =
-          polymorphic_downcast<const anim_graph_node_state_condition*>(node.get());
+      const auto* node_state_condition{
+          polymorphic_downcast<const anim_graph_node_state_condition*>(node.get())};
       return std::make_unique<anim_graph_player_node_state_condition>(
-          node_state_condition->get_phase());
+          id, node_state_condition->get_phase());
     } break;
 
     case anim_graph_node_type::state_machine: {
-      return std::make_unique<anim_graph_player_node_state_machine>();
+      return std::make_unique<anim_graph_player_node_state_machine>(id);
     } break;
 
     case anim_graph_node_type::state_transition: {
-      const auto* node_state_transition =
-          polymorphic_downcast<const anim_graph_node_state_transition*>(node.get());
+      const auto* node_state_transition{
+          polymorphic_downcast<const anim_graph_node_state_transition*>(node.get())};
       return std::make_unique<anim_graph_player_node_state_transition>(
-          node_state_transition->get_transition_type(), node_state_transition->get_duration_s());
+          id, node_state_transition->get_transition_type(),
+          node_state_transition->get_duration_s());
     } break;
 
     case anim_graph_node_type::state: {
-      return std::make_unique<anim_graph_player_node_state>();
+      const auto* node_state{polymorphic_downcast<const anim_graph_node_state*>(node.get())};
+      return std::make_unique<anim_graph_player_node_state>(id, node_state->get_name());
     } break;
 
     case anim_graph_node_type::sum: {
-      return std::make_unique<anim_graph_player_node_sum>();
+      return std::make_unique<anim_graph_player_node_sum>(id);
     } break;
   }
 }

@@ -30,6 +30,11 @@ public:
   requires std::derived_from<TRes, resource>
   [[nodiscard]] const TRes* get_resource(const string_id& id) const;
 
+  // Get identificators of all resoures with specified type.
+  template <typename TRes>
+  requires std::derived_from<TRes, resource>
+  [[nodiscard]] std::vector<string_id> get_ids() const;
+
   // Cook project from uncooked version
   // and write results into a memory buffer.
   static void cook(const project_uncooked& project_uncooked,
@@ -54,5 +59,21 @@ const TRes* project::get_resource(const string_id& id) const
   }
 
   return nullptr;
+}
+
+template <typename TRes>
+requires std::derived_from<TRes, resource> std::vector<string_id> project::get_ids()
+const
+{
+  std::vector<string_id> result;
+
+  for (const auto& [id, r] : _resources) {
+    // TODO: add `resource.get_type()` and use it here instead of dynamic casts
+    if (dynamic_cast<const TRes*>(r.get()) != nullptr) {
+      result.push_back(id);
+    }
+  }
+
+  return result;
 }
 }  // namespace eely

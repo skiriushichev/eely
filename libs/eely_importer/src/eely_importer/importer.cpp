@@ -156,12 +156,10 @@ skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_index)
   }
 
   const string_id id{fbx_skeleton->GetNode()->GetName()};
-  std::unique_ptr<skeleton_uncooked> result{std::make_unique<skeleton_uncooked>(id)};
-  result->set_joints(joints);
+  skeleton_uncooked& result{_project.add_resource<skeleton_uncooked>(id)};
+  result.set_joints(joints);
 
-  _project.set_resource(std::move(result));
-
-  return *_project.get_resource<skeleton_uncooked>(id);
+  return result;
 }
 
 clip_uncooked& importer::import_clip(const gsl::index animation_index,
@@ -173,13 +171,11 @@ clip_uncooked& importer::import_clip(const gsl::index animation_index,
   collect_tracks_recursively(fbx_anim_layer, _fbx_scene->GetRootNode(), skeleton, tracks);
 
   const string_id id{_filename};
-  std::unique_ptr<clip_uncooked> result{std::make_unique<clip_uncooked>(id)};
-  result->set_target_skeleton_id(skeleton.get_id());
-  result->set_tracks(tracks);
+  clip_uncooked& result{_project.add_resource<clip_uncooked>(id)};
+  result.set_target_skeleton_id(skeleton.get_id());
+  result.set_tracks(tracks);
 
-  _project.set_resource(std::move(result));
-
-  return *_project.get_resource<clip_uncooked>(id);
+  return result;
 }
 
 FbxSkeleton* importer::get_skeleton_attribute(FbxNode* fbx_node)

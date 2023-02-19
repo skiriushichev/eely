@@ -12,7 +12,9 @@
 #include <vector>
 
 namespace eely {
-anim_graph_uncooked::anim_graph_uncooked(internal::bit_reader& reader) : resource_uncooked{reader}
+anim_graph_uncooked::anim_graph_uncooked(const project_uncooked& project,
+                                         internal::bit_reader& reader)
+    : resource_uncooked{project, reader}
 {
   using namespace eely::internal;
 
@@ -26,10 +28,13 @@ anim_graph_uncooked::anim_graph_uncooked(internal::bit_reader& reader) : resourc
   _root_node_id = bit_reader_read<std::optional<int>>(reader, bits_anim_graph_node_id);
 }
 
-anim_graph_uncooked::anim_graph_uncooked(const string_id& id) : resource_uncooked{id} {}
+anim_graph_uncooked::anim_graph_uncooked(const project_uncooked& project, string_id id)
+    : resource_uncooked{project, std::move(id)}
+{
+}
 
 anim_graph_uncooked::anim_graph_uncooked(const anim_graph_uncooked& other)
-    : resource_uncooked{other.get_id()}
+    : resource_uncooked{other.get_project(), other.get_id()}
 {
   _skeleton_id = other._skeleton_id;
 
@@ -42,7 +47,7 @@ anim_graph_uncooked::anim_graph_uncooked(const anim_graph_uncooked& other)
 }
 
 anim_graph_uncooked::anim_graph_uncooked(anim_graph_uncooked&& other) noexcept
-    : resource_uncooked{other.get_id()}
+    : resource_uncooked{other.get_project(), other.get_id()}
 {
   _skeleton_id = std::move(other._skeleton_id);
   _nodes = std::move(other._nodes);

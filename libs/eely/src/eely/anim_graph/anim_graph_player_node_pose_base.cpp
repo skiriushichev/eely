@@ -8,10 +8,10 @@
 #include <optional>
 
 namespace eely::internal {
-anim_graph_player_node_pose_base::anim_graph_player_node_pose_base(const anim_graph_node_type type)
-    : anim_graph_player_node_base{type}
+anim_graph_player_node_pose_base::anim_graph_player_node_pose_base(const anim_graph_node_type type,
+                                                                   const int id)
+    : anim_graph_player_node_base{type, id}
 {
-  using namespace eely::internal;
 }
 
 void anim_graph_player_node_pose_base::update_duration(const anim_graph_player_context& context)

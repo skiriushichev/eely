@@ -11,8 +11,8 @@
 #include <vector>
 
 namespace eely::internal {
-anim_graph_player_node_sum::anim_graph_player_node_sum()
-    : anim_graph_player_node_pose_base{anim_graph_node_type::sum}
+anim_graph_player_node_sum::anim_graph_player_node_sum(const int id)
+    : anim_graph_player_node_pose_base{anim_graph_node_type::sum, id}
 {
 }
 

@@ -11,7 +11,6 @@ eely_add_app(
     res/block_start.fbx
     res/cast_0.fbx
     res/cast_1.fbx
-    res/idle_flex.fbx
     res/idle.fbx
     res/slash_0.fbx
     res/slash_1.fbx)

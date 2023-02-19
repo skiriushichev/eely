@@ -4,6 +4,7 @@
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
 #include "eely/base/string_id.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/project/resource_uncooked.h"
 #include "eely/skeleton/skeleton_utils.h"
 
@@ -14,8 +15,9 @@
 #include <unordered_set>
 
 namespace eely {
-skeleton_mask_uncooked::skeleton_mask_uncooked(internal::bit_reader& reader)
-    : resource_uncooked(reader)
+skeleton_mask_uncooked::skeleton_mask_uncooked(const project_uncooked& project,
+                                               internal::bit_reader& reader)
+    : resource_uncooked{project, reader}
 {
   using namespace eely::internal;
 
@@ -32,7 +34,10 @@ skeleton_mask_uncooked::skeleton_mask_uncooked(internal::bit_reader& reader)
   }
 }
 
-skeleton_mask_uncooked::skeleton_mask_uncooked(const string_id& id) : resource_uncooked(id) {}
+skeleton_mask_uncooked::skeleton_mask_uncooked(const project_uncooked& project, string_id id)
+    : resource_uncooked{project, std::move(id)}
+{
+}
 
 void skeleton_mask_uncooked::serialize(internal::bit_writer& writer) const
 {

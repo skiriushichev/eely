@@ -13,6 +13,7 @@ public:
   explicit resource(const project& project, internal::bit_reader& reader);
   explicit resource(const project& project, string_id id);
 
+  // Get project this resource belongs to.
   [[nodiscard]] const project& get_project() const;
 
 private:

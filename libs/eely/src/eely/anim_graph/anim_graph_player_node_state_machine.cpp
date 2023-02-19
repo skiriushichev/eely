@@ -10,22 +10,23 @@
 
 #include <algorithm>
 #include <any>
+#include <stack>
 #include <vector>
 
 namespace eely::internal {
 // Disable warning on purpose.
 // This seems to be the easiest way to give access to the current state machine.
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-const anim_graph_player_node_state_machine* anim_graph_player_node_state_machine::current{nullptr};
+std::stack<anim_graph_player_node_state_machine*>
+    anim_graph_player_node_state_machine::active_state_machines_stack;  // NOLINT
 
 const anim_graph_player_node_state_machine* anim_graph_player_node_state_machine::get_current()
 {
-  EXPECTS(current != nullptr);
-  return current;
+  EXPECTS(!active_state_machines_stack.empty());
+  return active_state_machines_stack.top();
 }
 
-anim_graph_player_node_state_machine::anim_graph_player_node_state_machine()
-    : anim_graph_player_node_pose_base{anim_graph_node_type::state_machine}
+anim_graph_player_node_state_machine::anim_graph_player_node_state_machine(const int id)
+    : anim_graph_player_node_pose_base{anim_graph_node_type::state_machine, id}
 {
   // State machine's phase is always equal to current state's phase.
   set_phase_rules(phase_rules::copy);
@@ -35,7 +36,12 @@ void anim_graph_player_node_state_machine::update_duration(const anim_graph_play
 {
   anim_graph_player_node_pose_base::update_duration(context);
 
-  anim_graph_player_node_state_machine::current = this;
+  anim_graph_player_node_state_machine::active_state_machines_stack.push(this);
+
+  if (is_first_play(context)) {
+    // Reset state when state machine becomes active for the first time.
+    _current_node = _state_nodes[0];
+  }
 
   // Ideally, we would like to report duration of a state machine
   // after all transitions have been checked and we calculated which state the machine is in.
@@ -45,8 +51,8 @@ void anim_graph_player_node_state_machine::update_duration(const anim_graph_play
   //
   // We will still check all conditions here,
   // but in sync mode we will use previous phase instead of a new one.
-  // We will reevaluate in `compute` to make sure that all up-to-date transitions do happen on this
-  // frame, while reporting duration as precise as possible.
+  // We will reevaluate in `compute` to make sure that all up-to-date transitions do happen on
+  // this frame, while reporting duration as precise as possible.
   //
   // Unfortunately, this means that synchronized state machines take more time to update
   // (since we check all conditions twice).
@@ -89,7 +95,7 @@ void anim_graph_player_node_state_machine::update_duration(const anim_graph_play
 
   update_phase_copy_source();
 
-  anim_graph_player_node_state_machine::current = nullptr;
+  anim_graph_player_node_state_machine::active_state_machines_stack.pop();
 }
 
 void anim_graph_player_node_state_machine::collect_descendants(
@@ -111,7 +117,6 @@ void anim_graph_player_node_state_machine::set_state_nodes(
                       [](const auto* n) { return n != nullptr; }));
 
   _state_nodes = std::move(state_nodes);
-  _current_node = _state_nodes[0];
 }
 
 const anim_graph_player_node_state*
@@ -135,7 +140,7 @@ void anim_graph_player_node_state_machine::compute_impl(const anim_graph_player_
 {
   anim_graph_player_node_pose_base::compute_impl(context, out_result);
 
-  anim_graph_player_node_state_machine::current = this;
+  anim_graph_player_node_state_machine::active_state_machines_stack.push(this);
 
   if (context.sync_enabled) {
     // See comment in `update_duration` on why state is updated here as well for synced mode.
@@ -158,7 +163,7 @@ void anim_graph_player_node_state_machine::compute_impl(const anim_graph_player_
   update_phase_copy_source();
   apply_next_phase(context);
 
-  anim_graph_player_node_state_machine::current = nullptr;
+  anim_graph_player_node_state_machine::active_state_machines_stack.pop();
 }
 
 bool anim_graph_player_node_state_machine::update_state(const anim_graph_player_context& context,

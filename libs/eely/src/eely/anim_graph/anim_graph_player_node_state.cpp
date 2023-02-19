@@ -12,8 +12,8 @@
 #include <vector>
 
 namespace eely::internal {
-anim_graph_player_node_state::anim_graph_player_node_state()
-    : anim_graph_player_node_pose_base{anim_graph_node_type::state}
+anim_graph_player_node_state::anim_graph_player_node_state(const int id, string_id name)
+    : anim_graph_player_node_pose_base{anim_graph_node_type::state, id}, _name{std::move(name)}
 {
   set_phase_rules(phase_rules::copy);
 }

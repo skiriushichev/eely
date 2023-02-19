@@ -8,8 +8,8 @@
 #include <vector>
 
 namespace eely::internal {
-anim_graph_player_node_and::anim_graph_player_node_and()
-    : anim_graph_player_node_base{anim_graph_node_type::and_logic}
+anim_graph_player_node_and::anim_graph_player_node_and(const int id)
+    : anim_graph_player_node_base{anim_graph_node_type::and_logic, id}
 {
 }
 

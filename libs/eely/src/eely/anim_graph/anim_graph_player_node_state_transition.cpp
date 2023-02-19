@@ -17,9 +17,10 @@
 
 namespace eely::internal {
 anim_graph_player_node_state_transition::anim_graph_player_node_state_transition(
+    const int id,
     const transition_type type,
     const float duration_s)
-    : anim_graph_player_node_pose_base{anim_graph_node_type::state_transition}, _type{type}
+    : anim_graph_player_node_pose_base{anim_graph_node_type::state_transition, id}, _type{type}
 {
   // Transition does not apply synchronized phase on purpose since:
   //  - it can move backwards (when reversed)

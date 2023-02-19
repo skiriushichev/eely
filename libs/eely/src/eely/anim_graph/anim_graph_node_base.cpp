@@ -26,7 +26,9 @@ anim_graph_node_base::anim_graph_node_base(const anim_graph_node_type type, cons
 
 anim_graph_node_base::anim_graph_node_base(const anim_graph_node_type type,
                                            internal::bit_reader& reader)
-    : _type{type}, _id{internal::bit_reader_read<int>(reader, internal::bits_anim_graph_node_id)}
+    : _type{type},
+      _id{internal::bit_reader_read<int>(reader, internal::bits_anim_graph_node_id)},
+      _editor_position(internal::bit_reader_read<float3>(reader))
 {
 }
 
@@ -39,6 +41,7 @@ void anim_graph_node_base::serialize(internal::bit_writer& writer) const
   // (it's read in `bit_reader_read` and written in `bit_writer_writer`)
 
   bit_writer_write(writer, _id, bits_anim_graph_node_id);
+  bit_writer_write(writer, _editor_position);
 }
 
 anim_graph_node_type anim_graph_node_base::get_type() const
@@ -49,6 +52,16 @@ anim_graph_node_type anim_graph_node_base::get_type() const
 int anim_graph_node_base::get_id() const
 {
   return _id;
+}
+
+float3 anim_graph_node_base::get_editor_position() const
+{
+  return _editor_position;
+}
+
+void anim_graph_node_base::set_editor_position(const float3& value)
+{
+  _editor_position = value;
 }
 
 namespace internal {

@@ -14,7 +14,7 @@ public:
   // Construct empty node.
   // Data must be filled via setters instead of ctor params,
   // because of the possible circular dependencies in a graph.
-  anim_graph_player_node_random();
+  anim_graph_player_node_random(int id);
 
   void update_duration(const anim_graph_player_context& context) override;
 

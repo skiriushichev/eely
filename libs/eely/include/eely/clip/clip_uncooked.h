@@ -6,6 +6,7 @@
 #include "eely/clip/clip_compression_scheme.h"
 #include "eely/math/float3.h"
 #include "eely/math/quaternion.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/project/resource_uncooked.h"
 
 #include <map>
@@ -34,10 +35,10 @@ struct clip_uncooked_track final {
 class clip_uncooked final : public resource_uncooked {
 public:
   // Construct an uncooked clip from a memory buffer.
-  explicit clip_uncooked(internal::bit_reader& reader);
+  explicit clip_uncooked(const project_uncooked& project, internal::bit_reader& reader);
 
   // Construct an empty uncooked clip.
-  explicit clip_uncooked(const string_id& id);
+  explicit clip_uncooked(const project_uncooked& project, string_id id);
 
   void serialize(internal::bit_writer& writer) const override;
 
@@ -89,10 +90,10 @@ public:
   };
 
   // Construct an uncooked additive clip from a memory buffer.
-  explicit clip_additive_uncooked(internal::bit_reader& reader);
+  explicit clip_additive_uncooked(const project_uncooked& project, internal::bit_reader& reader);
 
   // Construct an empty uncooked additive clip.
-  explicit clip_additive_uncooked(const string_id& id);
+  explicit clip_additive_uncooked(const project_uncooked& project, string_id id);
 
   void serialize(internal::bit_writer& writer) const override;
 

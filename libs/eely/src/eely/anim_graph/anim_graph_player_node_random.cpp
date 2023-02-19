@@ -11,8 +11,8 @@
 #include <vector>
 
 namespace eely::internal {
-anim_graph_player_node_random::anim_graph_player_node_random()
-    : anim_graph_player_node_pose_base{anim_graph_node_type::random},
+anim_graph_player_node_random::anim_graph_player_node_random(const int id)
+    : anim_graph_player_node_pose_base{anim_graph_node_type::random, id},
       _random_generator{std::random_device{}()}
 {
   set_phase_rules(phase_rules::copy);
@@ -30,7 +30,7 @@ void anim_graph_player_node_random::update_duration(const anim_graph_player_cont
   //  - we do not know exact phase yet if we're in a sync mode
   //  - if we switch to a new node here, this node will never report a 1.0F phase,
   //    which can break transitions. This can probably be fixed by keeping previous phase
-  //    along with a new one, if needed/
+  //    along with a new one, if needed.
 
   _selected_node->update_duration(context);
   set_duration_s(_selected_node->get_duration_s());

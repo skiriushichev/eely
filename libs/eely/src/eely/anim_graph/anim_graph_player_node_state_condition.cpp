@@ -10,8 +10,9 @@
 
 namespace eely::internal {
 anim_graph_player_node_state_condition::anim_graph_player_node_state_condition(
+    const int id,
     const std::optional<float> phase)
-    : anim_graph_player_node_base{anim_graph_node_type::state_condition}, _phase{phase}
+    : anim_graph_player_node_base{anim_graph_node_type::state_condition, id}, _phase{phase}
 {
 }
 

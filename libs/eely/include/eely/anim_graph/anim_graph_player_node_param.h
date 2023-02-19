@@ -12,7 +12,7 @@ namespace eely::internal {
 class anim_graph_player_node_param final : public anim_graph_player_node_base {
 public:
   // Construct node for given parameter id.
-  explicit anim_graph_player_node_param(string_id param_id);
+  explicit anim_graph_player_node_param(int id, string_id param_id);
 
 protected:
   void compute_impl(const anim_graph_player_context& context, std::any& out_result) override;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <eely_app/anim_graph_editor.h>
 #include <eely_app/app.h>
 #include <eely_app/scene.h>
 
@@ -22,5 +23,7 @@ private:
   scene _scene;
   entt::entity _character;
   params _params;
+  bool _show_graph_editor{false};
+  std::unique_ptr<anim_graph_editor> _anim_graph_editor;
 };
 }  // namespace eely

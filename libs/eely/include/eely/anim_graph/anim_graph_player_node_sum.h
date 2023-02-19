@@ -15,7 +15,7 @@ public:
   // Construct empty node.
   // Data must be filled via setters instead of ctor params,
   // because of the possible circular dependencies in a graph.
-  explicit anim_graph_player_node_sum();
+  explicit anim_graph_player_node_sum(int id);
 
   void update_duration(const anim_graph_player_context& context) override;
 

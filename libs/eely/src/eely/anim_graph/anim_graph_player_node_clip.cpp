@@ -10,8 +10,9 @@
 #include <memory>
 
 namespace eely::internal {
-anim_graph_player_node_clip::anim_graph_player_node_clip(const clip& clip)
-    : anim_graph_player_node_pose_base{anim_graph_node_type::clip}, _player{clip.create_player()}
+anim_graph_player_node_clip::anim_graph_player_node_clip(const int id, const clip& clip)
+    : anim_graph_player_node_pose_base{anim_graph_node_type::clip, id},
+      _player{clip.create_player()}
 {
   _job_clip.set_player(*_player);
   set_duration_s(_player->get_duration_s());

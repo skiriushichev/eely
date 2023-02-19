@@ -3,6 +3,7 @@
 #include "eely/anim_graph/anim_graph_node_base.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
+#include "eely/base/string_id.h"
 
 #include <memory>
 #include <optional>
@@ -22,6 +23,14 @@ public:
 
   [[nodiscard]] anim_graph_node_uptr clone() const override;
 
+  // Get state's name.
+  // Name is used when showing this node in an animation graph editor.
+  [[nodiscard]] const string_id& get_name() const;
+
+  // Set state's name.
+  // Name is used when showing this node in an animation graph editor.
+  void set_name(string_id name);
+
   // Get id if a node that calculates pose
   // when this state is active or is being transitioned from.
   [[nodiscard]] std::optional<int> get_pose_node() const;
@@ -37,6 +46,7 @@ public:
   [[nodiscard]] std::vector<int>& get_out_transition_nodes();
 
 private:
+  string_id _name;
   std::optional<int> _pose_node;
   std::vector<int> _out_transition_nodes;
 };

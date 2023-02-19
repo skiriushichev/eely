@@ -3,6 +3,7 @@
 #include "eely/anim_graph/anim_graph_node_base.h"
 #include "eely/base/bit_reader.h"
 #include "eely/base/bit_writer.h"
+#include "eely/base/string_id.h"
 
 #include <memory>
 #include <optional>
@@ -19,6 +20,8 @@ anim_graph_node_state::anim_graph_node_state(internal::bit_reader& reader)
 {
   using namespace eely::internal;
 
+  _name = bit_reader_read<string_id>(reader);
+
   _pose_node = bit_reader_read<std::optional<int>>(reader, bits_anim_graph_node_id);
 
   _out_transition_nodes.resize(bit_reader_read<gsl::index>(reader, bits_anim_graph_nodes_size));
@@ -33,6 +36,8 @@ void anim_graph_node_state::serialize(internal::bit_writer& writer) const
 
   anim_graph_node_base::serialize(writer);
 
+  bit_writer_write(writer, _name);
+
   bit_writer_write(writer, _pose_node, bits_anim_graph_node_id);
 
   bit_writer_write(writer, _out_transition_nodes.size(), bits_anim_graph_nodes_size);
@@ -44,6 +49,16 @@ void anim_graph_node_state::serialize(internal::bit_writer& writer) const
 anim_graph_node_uptr anim_graph_node_state::clone() const
 {
   return std::make_unique<anim_graph_node_state>(*this);
+}
+
+const string_id& anim_graph_node_state::get_name() const
+{
+  return _name;
+}
+
+void anim_graph_node_state::set_name(string_id name)
+{
+  _name = std::move(name);
 }
 
 std::optional<int> anim_graph_node_state::get_pose_node() const

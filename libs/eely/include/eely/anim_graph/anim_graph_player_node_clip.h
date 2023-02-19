@@ -12,7 +12,7 @@ namespace eely::internal {
 class anim_graph_player_node_clip final : public anim_graph_player_node_pose_base {
 public:
   // Construct node with specified clip resource.
-  explicit anim_graph_player_node_clip(const clip& clip);
+  explicit anim_graph_player_node_clip(int id, const clip& clip);
 
 protected:
   void compute_impl(const anim_graph_player_context& context, std::any& out_result) override;

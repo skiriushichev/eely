@@ -21,6 +21,17 @@ public:
   // Play a graph and put results into `out_pose`.
   void play(float dt_s, const params& params, skeleton_pose& out_pose);
 
+  // Get list of all runtime nodes.
+  [[nodiscard]] const std::vector<internal::anim_graph_player_node_uptr>& get_nodes() const;
+
+  // Get runtime node by id.
+  [[nodiscard]] const internal::anim_graph_player_node_base* get_player_node(int id) const;
+
+  // Return `true` if specified node was active on last play.
+  // Note: this is queried from player instead of a node itself,
+  // because nodes don't receive any signals about being deactivated.
+  [[nodiscard]] bool is_player_node_active(const internal::anim_graph_player_node_base& node) const;
+
 private:
   internal::anim_graph_player_node_uptr create_player_node(const anim_graph_node_uptr& node);
   static void init_player_node(

@@ -10,10 +10,11 @@
 
 namespace eely::internal {
 anim_graph_player_node_param_comparison::anim_graph_player_node_param_comparison(
+    const int id,
     string_id param_id,
     const param_value& value,
     const anim_graph_node_param_comparison::op op)
-    : anim_graph_player_node_base{anim_graph_node_type::param_comparison},
+    : anim_graph_player_node_base{anim_graph_node_type::param_comparison, id},
       _param_id{std::move(param_id)},
       _value{value},
       _op{op}

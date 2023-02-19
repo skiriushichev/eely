@@ -8,6 +8,7 @@
 #include "eely/clip/clip_compression_scheme.h"
 #include "eely/math/float3.h"
 #include "eely/math/quaternion.h"
+#include "eely/project/project_uncooked.h"
 #include "eely/project/resource_uncooked.h"
 #include "eely/skeleton/skeleton_uncooked.h"
 #include "eely/skeleton/skeleton_utils.h"
@@ -26,7 +27,8 @@ namespace internal {
 static constexpr gsl::index bits_keys_count{16};
 }
 
-clip_uncooked::clip_uncooked(internal::bit_reader& reader) : resource_uncooked(reader)
+clip_uncooked::clip_uncooked(const project_uncooked& project, internal::bit_reader& reader)
+    : resource_uncooked{project, reader}
 {
   using namespace eely::internal;
 
@@ -60,8 +62,8 @@ clip_uncooked::clip_uncooked(internal::bit_reader& reader) : resource_uncooked(r
   }
 }
 
-clip_uncooked::clip_uncooked(const string_id& id)
-    : resource_uncooked(id), _compression_scheme(clip_compression_scheme::fixed)
+clip_uncooked::clip_uncooked(const project_uncooked& project, string_id id)
+    : resource_uncooked{project, std::move(id)}, _compression_scheme(clip_compression_scheme::fixed)
 {
 }
 
@@ -159,8 +161,9 @@ float clip_uncooked::get_duration_s() const
   return duration_s;
 }
 
-clip_additive_uncooked::clip_additive_uncooked(internal::bit_reader& reader)
-    : resource_uncooked(reader)
+clip_additive_uncooked::clip_additive_uncooked(const project_uncooked& project,
+                                               internal::bit_reader& reader)
+    : resource_uncooked{project, reader}
 {
   using namespace eely::internal;
 
@@ -186,8 +189,8 @@ clip_additive_uncooked::clip_additive_uncooked(internal::bit_reader& reader)
       bit_reader_read<clip_compression_scheme>(reader, bits_clip_compression_scheme);
 }
 
-clip_additive_uncooked::clip_additive_uncooked(const string_id& id)
-    : resource_uncooked(id), _compression_scheme(clip_compression_scheme::fixed)
+clip_additive_uncooked::clip_additive_uncooked(const project_uncooked& project, string_id id)
+    : resource_uncooked{project, std::move(id)}, _compression_scheme(clip_compression_scheme::fixed)
 {
 }
 

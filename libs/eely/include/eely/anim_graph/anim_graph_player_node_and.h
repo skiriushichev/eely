@@ -13,7 +13,7 @@ public:
   // Construct empty node.
   // Data must be filled via setters instead of ctor params,
   // because of the possible circular dependencies in a graph.
-  anim_graph_player_node_and();
+  anim_graph_player_node_and(int id);
 
   void collect_descendants(
       std::vector<const anim_graph_player_node_base*>& out_descendants) const override;

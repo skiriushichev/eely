@@ -6,6 +6,7 @@
 #include "eely/anim_graph/anim_graph_player_node_state.h"
 
 #include <any>
+#include <stack>
 #include <vector>
 
 namespace eely::internal {
@@ -20,7 +21,7 @@ public:
   // Construct empty node.
   // Data must be filled via setters instead of ctor params,
   // because of the possible circular dependencies in a graph.
-  explicit anim_graph_player_node_state_machine();
+  explicit anim_graph_player_node_state_machine(int id);
 
   void update_duration(const anim_graph_player_context& context) override;
 
@@ -50,10 +51,13 @@ private:
 
   void update_phase_copy_source();
 
+  // Contains pointer to a state machine being updated.
+  // Stack is needed because state machines can be nested.
+  //
   // Disable warning on purpose.
   // This seems to be the easiest way to give access to the current state machine.
   // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-  static const anim_graph_player_node_state_machine* current;
+  static std::stack<anim_graph_player_node_state_machine*> active_state_machines_stack;
 
   std::vector<anim_graph_player_node_state*> _state_nodes;
 

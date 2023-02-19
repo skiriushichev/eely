@@ -14,8 +14,8 @@
 #include <vector>
 
 namespace eely::internal {
-anim_graph_player_node_blend::anim_graph_player_node_blend()
-    : anim_graph_player_node_pose_base{anim_graph_node_type::blend}
+anim_graph_player_node_blend::anim_graph_player_node_blend(const int id)
+    : anim_graph_player_node_pose_base{anim_graph_node_type::blend, id}
 {
 }
 
@@ -25,15 +25,15 @@ void anim_graph_player_node_blend::update_duration(const anim_graph_player_conte
 
   select_blended_nodes(context);
 
-  if (_blended_node_from == nullptr) {
-    _blended_node_to->update_duration(context);
-    set_duration_s(_blended_node_to->get_duration_s());
+  if (_sorce_node == nullptr) {
+    _destination_node->update_duration(context);
+    set_duration_s(_destination_node->get_duration_s());
   }
   else {
-    _blended_node_from->update_duration(context);
-    _blended_node_to->update_duration(context);
-    set_duration_s(std::lerp(_blended_node_from->get_duration_s(),
-                             _blended_node_to->get_duration_s(), _blend_weight));
+    _sorce_node->update_duration(context);
+    _destination_node->update_duration(context);
+    set_duration_s(std::lerp(_sorce_node->get_duration_s(), _destination_node->get_duration_s(),
+                             _destination_node_weight));
   }
 }
 
@@ -73,6 +73,23 @@ void anim_graph_player_node_blend::set_factor_node(anim_graph_player_node_base* 
   _factor_node = node;
 }
 
+const anim_graph_player_node_pose_base* anim_graph_player_node_blend::get_current_source_node()
+    const
+{
+  return _sorce_node;
+}
+
+const anim_graph_player_node_pose_base* anim_graph_player_node_blend::get_current_destination_node()
+    const
+{
+  return _destination_node;
+}
+
+float anim_graph_player_node_blend::get_current_destination_node_weight() const
+{
+  return _destination_node_weight;
+}
+
 void anim_graph_player_node_blend::compute_impl(const anim_graph_player_context& context,
                                                 std::any& out_result)
 {
@@ -92,19 +109,18 @@ void anim_graph_player_node_blend::compute_impl(const anim_graph_player_context&
   // without remembering previous phase value.
   context_pass_on.sync_phase = next_phase_unwrapped;
 
-  if (_blended_node_from == nullptr) {
-    out_result = _blended_node_to->compute(context_pass_on);
+  if (_sorce_node == nullptr) {
+    out_result = _destination_node->compute(context_pass_on);
     return;
   }
 
-  const auto first_job_index{
-      std::any_cast<gsl::index>(_blended_node_from->compute(context_pass_on))};
+  const auto first_job_index{std::any_cast<gsl::index>(_sorce_node->compute(context_pass_on))};
   const auto second_job_index{
-      std::any_cast<gsl::index>(_blended_node_to->compute(context_pass_on))};
+      std::any_cast<gsl::index>(_destination_node->compute(context_pass_on))};
 
   _job_blend.set_first_job_index(first_job_index);
   _job_blend.set_second_job_index(second_job_index);
-  _job_blend.set_weight(_blend_weight);
+  _job_blend.set_weight(_destination_node_weight);
   out_result = context.job_queue.add_job(_job_blend);
 }
 
@@ -144,9 +160,9 @@ void anim_graph_player_node_blend::select_blended_nodes(const anim_graph_player_
   if (!upper_bound_child_index_opt.has_value()) {
     // Parameter value is greater than all nodes,
     // use last node (with greatest value) as a fallback
-    _blended_node_from = nullptr;
-    _blended_node_to = &_pose_nodes[children_size - 1].node;
-    _blend_weight = 1.0F;
+    _sorce_node = nullptr;
+    _destination_node = &_pose_nodes[children_size - 1].node;
+    _destination_node_weight = 1.0F;
   }
   else {
     const gsl::index upper_bound_child_index{upper_bound_child_index_opt.value()};
@@ -156,9 +172,9 @@ void anim_graph_player_node_blend::select_blended_nodes(const anim_graph_player_
     if (float_near(upper_bound_node.factor, factor)) {
       // Selected node's parameter value is the same as supplied one,
       // play this one node
-      _blended_node_from = nullptr;
-      _blended_node_to = &upper_bound_node.node;
-      _blend_weight = 1.0F;
+      _sorce_node = nullptr;
+      _destination_node = &upper_bound_node.node;
+      _destination_node_weight = 1.0F;
     }
     else {
       EXPECTS(upper_bound_child_index >= 1);
@@ -167,10 +183,10 @@ void anim_graph_player_node_blend::select_blended_nodes(const anim_graph_player_
       const float factor_range{upper_bound_node.factor - lower_bound_node.factor};
       EXPECTS(!float_near(factor_range, 0.0F));
 
-      _blended_node_from = &lower_bound_node.node;
-      _blended_node_to = &upper_bound_node.node;
-      _blend_weight = (factor - lower_bound_node.factor) / factor_range;
-      EXPECTS(_blend_weight >= 0.0F && _blend_weight <= 1.0F);
+      _sorce_node = &lower_bound_node.node;
+      _destination_node = &upper_bound_node.node;
+      _destination_node_weight = (factor - lower_bound_node.factor) / factor_range;
+      EXPECTS(_destination_node_weight >= 0.0F && _destination_node_weight <= 1.0F);
     }
   }
 }

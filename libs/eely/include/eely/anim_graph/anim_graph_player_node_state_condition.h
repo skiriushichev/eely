@@ -11,7 +11,7 @@ namespace eely::internal {
 class anim_graph_player_node_state_condition final : public anim_graph_player_node_base {
 public:
   // Construct node with specified state conditions.
-  anim_graph_player_node_state_condition(std::optional<float> phase);
+  anim_graph_player_node_state_condition(int id, std::optional<float> phase);
 
   // Return required phase value.
   [[nodiscard]] std::optional<float> get_phase() const;

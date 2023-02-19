@@ -99,7 +99,7 @@ void app_example_clip::update(const float dt_s)
 
     ImGui::SliderFloat("Time", &component_clip.play_time_s, 0.0F,
                        component_clip.player->get_duration_s(), "%.2fs", 1.0F);
-    ImGui::SliderFloat("Playback speed", &component_clip.speed, 0.0F, 2.0F, "%.1f");
+    ImGui::SliderFloat("Playback speed", &component_clip.speed, 0.0F, 2.0F, "%.2f");
 
     ImGui::End();
   }

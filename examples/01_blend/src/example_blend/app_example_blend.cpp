@@ -81,71 +81,85 @@ static std::unique_ptr<project> import_and_cook_resources()
   //  - standing and movement animations are blended by crouching parameter
   // Additional node controls playback speed of this whole tree.
 
-  auto graph{std::make_unique<anim_graph_uncooked>("graph")};
+  auto& graph{project_uncooked.add_resource<anim_graph_uncooked>("graph")};
 
-  graph->set_skeleton_id(skeleton_uncooked.get_id());
+  graph.set_skeleton_id(skeleton_uncooked.get_id());
 
   // Clips
 
-  auto& node_walk{graph->add_node<anim_graph_node_clip>()};
+  auto& node_walk{graph.add_node<anim_graph_node_clip>()};
   node_walk.set_clip_id("walk");
+  node_walk.set_editor_position(float3{692.0F, 97.0F, 0.0F});
 
-  auto& node_jog{graph->add_node<anim_graph_node_clip>()};
+  auto& node_jog{graph.add_node<anim_graph_node_clip>()};
   node_jog.set_clip_id("jog");
+  node_jog.set_editor_position(float3{692.0F, 177.0F, 0.0F});
 
-  auto& node_run{graph->add_node<anim_graph_node_clip>()};
+  auto& node_run{graph.add_node<anim_graph_node_clip>()};
   node_run.set_clip_id("run");
+  node_run.set_editor_position(float3{692.0F, 257.0F, 0.0F});
 
-  auto& node_crouch_walk{graph->add_node<anim_graph_node_clip>()};
+  auto& node_crouch_walk{graph.add_node<anim_graph_node_clip>()};
   node_crouch_walk.set_clip_id("walk_crouch");
+  node_crouch_walk.set_editor_position(float3{692.0F, 474.0F, 0.0F});
 
-  auto& node_crouch_run{graph->add_node<anim_graph_node_clip>()};
+  auto& node_crouch_run{graph.add_node<anim_graph_node_clip>()};
   node_crouch_run.set_clip_id("run_crouch");
+  node_crouch_run.set_editor_position(float3{692.0F, 554.0F, 0.0F});
 
   // Params
 
-  auto& node_speed_param{graph->add_node<anim_graph_node_param>()};
-  node_speed_param.set_param_id(param_id_speed);
+  auto& node_speed_param_for_walk{graph.add_node<anim_graph_node_param>()};
+  node_speed_param_for_walk.set_param_id(param_id_speed);
+  node_speed_param_for_walk.set_editor_position(float3{692.0F, -14.0F, 0.0F});
 
-  auto& node_crouch_param{graph->add_node<anim_graph_node_param>()};
+  auto& node_speed_param_for_crouch{graph.add_node<anim_graph_node_param>()};
+  node_speed_param_for_crouch.set_param_id(param_id_speed);
+  node_speed_param_for_crouch.set_editor_position(float3{692.0F, 369.0F, 0.0F});
+
+  auto& node_crouch_param{graph.add_node<anim_graph_node_param>()};
   node_crouch_param.set_param_id(param_id_crouch);
+  node_crouch_param.set_editor_position(float3{436.0F, 17.0F, 0.0F});
 
-  auto& node_playback_speed_param{graph->add_node<anim_graph_node_param>()};
+  auto& node_playback_speed_param{graph.add_node<anim_graph_node_param>()};
   node_playback_speed_param.set_param_id(param_id_playback_speed);
+  node_playback_speed_param.set_editor_position(float3{228.0F, -46.0F, 0.0F});
 
   // Blends
 
-  auto& node_blend_walk_jog_run{graph->add_node<anim_graph_node_blend>()};
+  auto& node_blend_walk_jog_run{graph.add_node<anim_graph_node_blend>()};
   node_blend_walk_jog_run.get_pose_nodes() = {
       {.id = node_walk.get_id(), .factor = param_speed_walk},
       {.id = node_jog.get_id(), .factor = param_speed_jog},
       {.id = node_run.get_id(), .factor = param_speed_run},
   };
-  node_blend_walk_jog_run.set_factor_node_id(node_speed_param.get_id());
+  node_blend_walk_jog_run.set_factor_node_id(node_speed_param_for_walk.get_id());
+  node_blend_walk_jog_run.set_editor_position(float3{430.0F, 125.0F, 0.0F});
 
-  auto& node_blend_crouch_walk_run{graph->add_node<anim_graph_node_blend>()};
+  auto& node_blend_crouch_walk_run{graph.add_node<anim_graph_node_blend>()};
   node_blend_crouch_walk_run.get_pose_nodes() = {
       {.id = node_crouch_walk.get_id(), .factor = param_speed_walk},
       {.id = node_crouch_run.get_id(), .factor = param_speed_run},
   };
-  node_blend_crouch_walk_run.set_factor_node_id(node_speed_param.get_id());
+  node_blend_crouch_walk_run.set_factor_node_id(node_speed_param_for_crouch.get_id());
+  node_blend_crouch_walk_run.set_editor_position(float3{430.0F, 400.0F, 0.0F});
 
-  auto& node_blend_stand_crouch{graph->add_node<anim_graph_node_blend>()};
+  auto& node_blend_stand_crouch{graph.add_node<anim_graph_node_blend>()};
   node_blend_stand_crouch.get_pose_nodes() = {
       {.id = node_blend_walk_jog_run.get_id(), .factor = 0.0F},
       {.id = node_blend_crouch_walk_run.get_id(), .factor = 1.0F},
   };
   node_blend_stand_crouch.set_factor_node_id(node_crouch_param.get_id());
+  node_blend_stand_crouch.set_editor_position(float3{228.0F, 40.0F, 0.0F});
 
   // Playback speed node
 
-  auto& node_playback_speed{graph->add_node<anim_graph_node_speed>()};
+  auto& node_playback_speed{graph.add_node<anim_graph_node_speed>()};
   node_playback_speed.set_speed_provider_node(node_playback_speed_param.get_id());
   node_playback_speed.set_child_node(node_blend_stand_crouch.get_id());
+  node_playback_speed.set_editor_position(float3{0.0F, 0.0F, 0.0F});
 
-  graph->set_root_node_id(node_playback_speed.get_id());
-
-  project_uncooked.set_resource(std::move(graph));
+  graph.set_root_node_id(node_playback_speed.get_id());
 
   // Convert into runtime project
 
@@ -182,14 +196,19 @@ app_example_blend::app_example_blend(const unsigned int width,
 
   registry.emplace<component_transform>(_character, transform{});
   registry.emplace<component_skeleton>(_character, &skeleton, skeleton_pose(skeleton));
-  registry.emplace<component_anim_graph>(_character, std::make_unique<anim_graph_player>(graph),
-                                         &_params);
+  auto& component_anim_graph{registry.emplace<eely::component_anim_graph>(
+      _character, std::make_unique<anim_graph_player>(graph), &_params)};
 
   // Initialize default parameter values
 
   _params.get_value<float>(param_id_speed) = param_speed_walk;
   _params.get_value<float>(param_id_crouch) = 0.0F;
   _params.get_value<float>(param_id_playback_speed) = 1.0F;
+
+  // Initialize graph editor for visualization
+
+  _anim_graph_editor =
+      std::make_unique<anim_graph_editor>(graph, component_anim_graph.player.get());
 }
 
 void app_example_blend::update(const float dt_s)
@@ -197,7 +216,7 @@ void app_example_blend::update(const float dt_s)
   bgfx::setViewRect(view_id, 0, 0, get_width(), get_height());
   bgfx::setViewClear(view_id, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, view_clear_color);
 
-  ImGui::SetNextWindowSize(ImVec2(340.0F, 100.0F));
+  ImGui::SetNextWindowSize(ImVec2(350.0F, 0.0F));
   ImGui::SetNextWindowPos(ImVec2(10.0F, 10.0F));
   if (ImGui::Begin(
           "Blend", nullptr,
@@ -209,9 +228,22 @@ void app_example_blend::update(const float dt_s)
     ImGui::SliderFloat("Crouch", &crouch_value, 0.0F, 1.0F, "%.2f");
 
     float& playback_speed_value{_params.get_value<float>(param_id_playback_speed)};
-    ImGui::SliderFloat("Playback speed", &playback_speed_value, 0.0F, 2.0F, "%.1f");
+    ImGui::SliderFloat("Playback speed", &playback_speed_value, 0.0F, 2.0F, "%.2f");
+
+    ImGui::Separator();
+
+    ImGui::Checkbox("Show graph editor", &_show_graph_editor);
 
     ImGui::End();
+  }
+
+  if (_show_graph_editor) {
+    ImGui::SetNextWindowSize(ImVec2(600.0F, 600.0F), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(10.0F, 160.0F), ImGuiCond_Once);
+    if (ImGui::Begin("Graph", nullptr, ImGuiWindowFlags_NoScrollbar)) {
+      _anim_graph_editor->render();
+      ImGui::End();
+    }
   }
 
   _scene.update(dt_s);

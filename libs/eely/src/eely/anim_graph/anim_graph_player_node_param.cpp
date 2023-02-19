@@ -9,8 +9,8 @@
 #include <any>
 
 namespace eely::internal {
-anim_graph_player_node_param::anim_graph_player_node_param(string_id param_id)
-    : anim_graph_player_node_base{anim_graph_node_type::param}, _param_id{std::move(param_id)}
+anim_graph_player_node_param::anim_graph_player_node_param(const int id, string_id param_id)
+    : anim_graph_player_node_base{anim_graph_node_type::param, id}, _param_id{std::move(param_id)}
 {
 }
 
