@@ -114,4 +114,4 @@ This example app has two modes:
 
 ## License
 
-See [LICENSE](https://github.com/nfrechette/acl)
+See [LICENSE](https://github.com/skiriushichev/eely/blob/master/LICENSE)
