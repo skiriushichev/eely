@@ -28,9 +28,12 @@ Examples that use animation graphs also can visualize them, to show their struct
 
 This example shows how to play a single clip imported from an FBX file.
 
+<details>
+<summary>GIF</summary>
 <a href="https://github.com/skiriushichev/eely/blob/master/examples/00_clip/capture.gif">
 <img src="https://github.com/skiriushichev/eely/blob/master/examples/00_clip/capture.gif" width=70%>
 </a>
+</details>
 
 ### Blending
 
@@ -40,9 +43,12 @@ There are 5 clips in total: walking, jogging, running, crouch walking and crouch
 
 This example also demonstrates phase synchronization between blended movement clips to avoid foot sliding.
 
+<details>
+<summary>GIF</summary>
 <a href="https://github.com/skiriushichev/eely/blob/master/examples/01_blend/capture.gif">
 <img src="https://github.com/skiriushichev/eely/blob/master/examples/01_blend/capture.gif" width=70%>
 </a>
+</details>
 
 ### Additive animations
 
@@ -52,9 +58,12 @@ There are 5 clips in total: walking, jogging, running, looking at -45 degrees (a
 
 Additive clips are precomputed and use skeleton masks to layer out every joint except the upper-body joints.
 
+<details>
+<summary>GIF</summary>
 <a href="https://github.com/skiriushichev/eely/blob/master/examples/02_additive/capture.gif">
 <img src="https://github.com/skiriushichev/eely/blob/master/examples/02_additive/capture.gif" width=70%>
 </a>
+</details>
 
 ### Simple state machine
 
@@ -62,9 +71,12 @@ This example shows how to make a simple state machine within an animation graph.
 
 There are two states, each playing a single clip: idle and taunt. Taunt is played on request and then the state machine moves back to idle.
 
+<details>
+<summary>GIF</summary>
 <a href="https://github.com/skiriushichev/eely/blob/master/examples/03_state_machine_simple/capture.gif">
 <img src="https://github.com/skiriushichev/eely/blob/master/examples/03_state_machine_simple/capture.gif" width=70%>
 </a>
+</details>
 
 ### Complex state machine
 
@@ -80,9 +92,12 @@ There are 4 states in the state machine:
 
 The animation graph is controlled by a single parameter: current character state. This parameter is then used by state transitions.
 
+<details>
+<summary>GIF</summary>
 <a href="https://github.com/skiriushichev/eely/blob/master/examples/04_state_machine_complex/capture.gif">
 <img src="https://github.com/skiriushichev/eely/blob/master/examples/04_state_machine_complex/capture.gif" width=70%>
 </a>
+</details>
 
 ### Inverse kinematics
 
@@ -90,9 +105,12 @@ This example app has two modes:
 * IK mode - work in progress
 * Constraints mode - joint limits are visualized and can be played with by rotating joints and seeing both constrained and unconstrained version
 
+<details>
+<summary>GIF</summary>
 <a href="https://github.com/skiriushichev/eely/blob/master/examples/05_ik/capture.gif">
 <img src="https://github.com/skiriushichev/eely/blob/master/examples/05_ik/capture.gif" width=70%>
 </a>
+</details>
 
 ## License
 
