@@ -142,7 +142,10 @@ skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_index)
   collect_fbx_skeletons_recursively(fbx_skeleton->GetNode(), std::nullopt, fbx_joints,
                                     parent_indices);
 
-  std::vector<skeleton_uncooked::joint> joints;
+  const string_id id{fbx_skeleton->GetNode()->GetName()};
+  skeleton_uncooked& result{_project.add_resource<skeleton_uncooked>(id)};
+
+  std::vector<skeleton_uncooked::joint>& joints{result.get_joints()};
 
   const gsl::index joints_count{std::ssize(fbx_joints)};
   for (gsl::index i{0}; i < joints_count; ++i) {
@@ -154,10 +157,6 @@ skeleton_uncooked& importer::import_skeleton(const gsl::index skeleton_index)
                       .parent_index = parent_indices[i],
                       .rest_pose_transform = local_transform});
   }
-
-  const string_id id{fbx_skeleton->GetNode()->GetName()};
-  skeleton_uncooked& result{_project.add_resource<skeleton_uncooked>(id)};
-  result.set_joints(joints);
 
   return result;
 }

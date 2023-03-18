@@ -232,7 +232,7 @@ void app_example_blend::update(const float dt_s)
 
     ImGui::Separator();
 
-    ImGui::Checkbox("Show graph editor", &_show_graph_editor);
+    ImGui::Checkbox("Show animation graph", &_show_graph_editor);
 
     ImGui::End();
   }

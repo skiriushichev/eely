@@ -255,7 +255,7 @@ void app_example_additive::update(const float dt_s)
   ImGui::SetNextWindowSize(ImVec2(350.0F, 0.0F));
   ImGui::SetNextWindowPos(ImVec2(10.0F, 10.0F));
   if (ImGui::Begin(
-          "Blend", nullptr,
+          "Additive", nullptr,
           ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse)) {
     float& speed_value{_params.get_value<float>(param_id_speed)};
     ImGui::SliderFloat("Speed", &speed_value, param_speed_walk, param_speed_run, "%.2f");
@@ -268,7 +268,7 @@ void app_example_additive::update(const float dt_s)
 
     ImGui::Separator();
 
-    ImGui::Checkbox("Show graph editor", &_show_graph_editor);
+    ImGui::Checkbox("Show animation graph", &_show_graph_editor);
 
     ImGui::End();
   }

@@ -8,6 +8,7 @@
 TEST(bit_reader_writer, write_and_read)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   std::array<std::byte, 4> buffer;
 
@@ -59,6 +60,7 @@ TEST(bit_reader_writer, write_and_read)
 TEST(bit_reader_writer, utils)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   std::array<std::byte, 4> buffer;
 

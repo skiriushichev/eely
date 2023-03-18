@@ -7,6 +7,7 @@
 TEST(string_id, utils)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   // string_id_serialize & string_id_deserialize
   {
@@ -15,13 +16,13 @@ TEST(string_id, utils)
     bit_writer writer{buffer};
 
     string_id id{};
-    string_id_serialize(id, writer);
-    string_id id_deserialized{string_id_deserialize(reader)};
+    bit_writer_write(writer, id);
+    string_id id_deserialized{bit_reader_read<string_id>(reader)};
     EXPECT_EQ(id, id_deserialized);
 
     id = "Such a lovely string";
-    string_id_serialize(id, writer);
-    id_deserialized = string_id_deserialize(reader);
+    bit_writer_write(writer, id);
+    id_deserialized = bit_reader_read<string_id>(reader);
     EXPECT_EQ(id, id_deserialized);
   }
 }

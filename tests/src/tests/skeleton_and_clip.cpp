@@ -26,9 +26,9 @@
 static void test_skeleton_and_cip_with_scheme(eely::clip_compression_scheme compression_scheme)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   std::array<std::byte, 1024> buffer;
-  bit_reader reader{buffer};
 
   constexpr gsl::index root_index{0};
   constexpr gsl::index child_0_index{1};
@@ -54,22 +54,23 @@ static void test_skeleton_and_cip_with_scheme(eely::clip_compression_scheme comp
     project_uncooked project_uncooked(measurement_unit::meters,
                                       axis_system::y_up_x_right_z_forward);
 
-    auto skeleton_uncooked = std::make_unique<eely::skeleton_uncooked>("test_skeleton");
-    skeleton_uncooked->set_joints(
-        {{.id = "root", .parent_index = std::nullopt, .rest_pose_transform = transform{}},
-         {.id = "child_0",
-          .parent_index = 0,
-          .rest_pose_transform = transform{float3{-1.0F, 0.0F, 0.0F}}},
-         {.id = "child_1",
-          .parent_index = 0,
-          .rest_pose_transform = transform{float3{1.0F, 0.0F, 0.0F}}}});
+    auto& skeleton_uncooked =
+        project_uncooked.add_resource<eely::skeleton_uncooked>("test_skeleton");
+    skeleton_uncooked.get_joints() = {
+        {.id = "root", .parent_index = std::nullopt, .rest_pose_transform = transform{}},
+        {.id = "child_0",
+         .parent_index = 0,
+         .rest_pose_transform = transform{float3{-1.0F, 0.0F, 0.0F}}},
+        {.id = "child_1",
+         .parent_index = 0,
+         .rest_pose_transform = transform{float3{1.0F, 0.0F, 0.0F}}}};
 
-    EXPECT_EQ(skeleton_uncooked->get_id(), "test_skeleton");
+    EXPECT_EQ(skeleton_uncooked.get_id(), "test_skeleton");
 
-    auto clip_uncooked = std::make_unique<eely::clip_uncooked>("test_clip");
-    clip_uncooked->set_compression_scheme(compression_scheme);
-    clip_uncooked->set_target_skeleton_id(skeleton_uncooked->get_id());
-    clip_uncooked->set_tracks({
+    auto& clip_uncooked = project_uncooked.add_resource<eely::clip_uncooked>("test_clip");
+    clip_uncooked.set_compression_scheme(compression_scheme);
+    clip_uncooked.set_target_skeleton_id(skeleton_uncooked.get_id());
+    clip_uncooked.set_tracks({
         {.joint_id = "root", .keys = {{0.0F, {.translation = root_translation_0}}}},
         {.joint_id = "child_0",
          .keys = {{0.0F, {.translation = child_0_translation_0, .rotation = child_0_rotation_0}},
@@ -83,19 +84,14 @@ static void test_skeleton_and_cip_with_scheme(eely::clip_compression_scheme comp
         {.joint_id = "child_1", .keys = {{2.0F, {.rotation = child_1_rotation_2}}}},
     });
 
-    EXPECT_EQ(clip_uncooked->get_id(), "test_clip");
-    EXPECT_EQ(clip_uncooked->get_target_skeleton_id(), skeleton_uncooked->get_id());
-    EXPECT_EQ(clip_uncooked->get_duration_s(), 8.0F);
+    EXPECT_EQ(clip_uncooked.get_id(), "test_clip");
+    EXPECT_EQ(clip_uncooked.get_target_skeleton_id(), skeleton_uncooked.get_id());
+    EXPECT_EQ(clip_uncooked.get_duration_s(), 8.0F);
 
-    project_uncooked.set_resource(std::move(skeleton_uncooked));
-    project_uncooked.set_resource(std::move(clip_uncooked));
-
-    bit_writer writer{buffer};
-
-    project::cook(project_uncooked, writer);
+    project::cook(project_uncooked, buffer);
   }
 
-  project project{reader};
+  project project{buffer};
 
   const skeleton* skeleton{project.get_resource<eely::skeleton>("test_skeleton")};
   EXPECT_EQ(skeleton->get_joints_count(), 3);

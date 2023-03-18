@@ -18,4 +18,10 @@ constexpr float deg_to_rad(float deg)
 {
   return deg * (pi / 180.0F);
 }
+
+// Convert radians to degrees.
+constexpr float rad_to_deg(float rad)
+{
+  return rad * (180.0F / pi);
+}
 }  // namespace eely

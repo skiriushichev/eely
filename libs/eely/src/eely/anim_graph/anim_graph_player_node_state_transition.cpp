@@ -19,8 +19,11 @@ namespace eely::internal {
 anim_graph_player_node_state_transition::anim_graph_player_node_state_transition(
     const int id,
     const transition_type type,
-    const float duration_s)
-    : anim_graph_player_node_pose_base{anim_graph_node_type::state_transition, id}, _type{type}
+    const float duration_s,
+    const bool reversible)
+    : anim_graph_player_node_pose_base{anim_graph_node_type::state_transition, id},
+      _type{type},
+      _reversible{reversible}
 {
   // Transition does not apply synchronized phase on purpose since:
   //  - it can move backwards (when reversed)
@@ -46,10 +49,8 @@ void anim_graph_player_node_state_transition::update_duration(
   // i.e. we start blending from last saved transition pose
   // and begin saving new reuslts in another slot
 
-  const bool can_continue{conditions_are_satisfied(context)};
-
   if (is_first_play(context)) {
-    EXPECTS(can_continue);
+    EXPECTS(conditions_are_satisfied(context));
 
     _reversed = false;
 
@@ -57,7 +58,11 @@ void anim_graph_player_node_state_transition::update_duration(
     _saved_pose_source_phase = 0.0F;
   }
 
-  const bool switch_reversed_status{(_reversed && can_continue) || (!_reversed && !can_continue)};
+  bool switch_reversed_status{false};
+  if (_reversible) {
+    const bool can_continue{conditions_are_satisfied(context)};
+    switch_reversed_status = (_reversed && can_continue) || (!_reversed && !can_continue);
+  }
 
   if (switch_reversed_status) {
     _reversed = !_reversed;

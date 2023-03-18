@@ -10,6 +10,9 @@ namespace eely {
 struct float3 final {
   static const float3 zeroes;
   static const float3 ones;
+  static const float3 x_axis;
+  static const float3 y_axis;
+  static const float3 z_axis;
 
   float x{0.0F};
   float y{0.0F};
@@ -52,6 +55,9 @@ float3 float3_lerp(const float3& a, const float3& b, float t);
 // Return `true` if corresponding components are within specified epsilon.
 bool float3_near(const float3& a, const float3& b, float epsilon = epsilon_default);
 
+// Return distance between two points.
+float float3_distance(const float3& a, const float3& b);
+
 // Return normalized vector.
 float3 vector_normalized(const float3& a);
 
@@ -60,6 +66,9 @@ float vector_dot(const float3& a, const float3& b);
 
 // Return cross product of two vectors.
 float3 vector_cross(const float3& a, const float3& b);
+
+// Return vector's length.
+float vector_length(const float3& a);
 
 namespace internal {
 // Return `float3` value read from a memory buffer.

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "eely/anim_graph/anim_graph_player.h"
-#include "eely/params/params.h"
+#include <eely/anim_graph/anim_graph_player.h>
+#include <eely/params/params.h>
 
 #include <memory>
 

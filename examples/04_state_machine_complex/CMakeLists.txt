@@ -1,11 +1,11 @@
-project(example_state_machine)
+project(example_state_machine_complex)
 
 eely_add_app(
   TARGET ${PROJECT_NAME}
   SOURCE_FILES
-    src/example_state_machine/app_example_state_machine.h
-    src/example_state_machine/app_example_state_machine.cpp
-    src/example_state_machine/main.cpp
+    src/example_state_machine_complex/app_example_state_machine_complex.h
+    src/example_state_machine_complex/app_example_state_machine_complex.cpp
+    src/example_state_machine_complex/main.cpp
   RESOURCE_FILES
     res/block_idle.fbx
     res/block_start.fbx

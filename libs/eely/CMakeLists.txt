@@ -60,6 +60,9 @@ set(SOURCE_FILES
     include/eely/job/job_queue.h
     include/eely/job/job_restore.h
     include/eely/job/job_save.h
+    include/eely/math/ellipse.h
+    include/eely/math/elliptical_cone.h
+    include/eely/math/float2.h
     include/eely/math/float3.h
     include/eely/math/float4.h
     include/eely/math/math_utils.h
@@ -73,6 +76,7 @@ set(SOURCE_FILES
     include/eely/project/resource_base.h
     include/eely/project/resource_uncooked.h
     include/eely/project/resource.h
+    include/eely/skeleton/presets.h
     include/eely/skeleton/skeleton_pose_pool.h
     include/eely/skeleton/skeleton_pose.h
     include/eely/skeleton/skeleton_uncooked.h
@@ -126,6 +130,9 @@ set(SOURCE_FILES
     src/eely/clip/clip.cpp
     src/eely/job/job_base.cpp
     src/eely/job/job_queue.cpp
+    src/eely/math/ellipse.cpp
+    src/eely/math/elliptical_cone.cpp
+    src/eely/math/float2.cpp
     src/eely/math/float3.cpp
     src/eely/math/quantization.cpp
     src/eely/math/quaternion.cpp
@@ -136,6 +143,7 @@ set(SOURCE_FILES
     src/eely/project/resource_base.cpp
     src/eely/project/resource_uncooked.cpp
     src/eely/project/resource.cpp
+    src/eely/skeleton/presets.cpp
     src/eely/skeleton/skeleton_pose_pool.cpp
     src/eely/skeleton/skeleton_pose.cpp
     src/eely/skeleton/skeleton_uncooked.cpp

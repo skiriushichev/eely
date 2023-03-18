@@ -205,8 +205,8 @@ internal::anim_graph_player_node_uptr anim_graph_player::create_player_node(
       const auto* node_state_transition{
           polymorphic_downcast<const anim_graph_node_state_transition*>(node.get())};
       return std::make_unique<anim_graph_player_node_state_transition>(
-          id, node_state_transition->get_transition_type(),
-          node_state_transition->get_duration_s());
+          id, node_state_transition->get_transition_type(), node_state_transition->get_duration_s(),
+          node_state_transition->get_reversible());
     } break;
 
     case anim_graph_node_type::state: {

@@ -1,4 +1,4 @@
-#include "example_state_machine/app_example_state_machine.h"
+#include "example_state_machine_complex/app_example_state_machine_complex.h"
 
 #include <eely_app/app.h>
 #include <eely_app/component_anim_graph.h>
@@ -303,9 +303,9 @@ static std::unique_ptr<project> import_and_cook_resources()
   return std::make_unique<project>(buffer);
 }
 
-app_example_state_machine::app_example_state_machine(const unsigned int width,
-                                                     const unsigned int height,
-                                                     const std::string& title)
+app_example_state_machine_complex::app_example_state_machine_complex(const unsigned int width,
+                                                                     const unsigned int height,
+                                                                     const std::string& title)
     : app(width, height, title), _project{import_and_cook_resources()}, _scene(*this)
 {
   _scene.add_system(&system_skeleton_update);
@@ -344,7 +344,7 @@ app_example_state_machine::app_example_state_machine(const unsigned int width,
       std::make_unique<anim_graph_editor>(graph, component_anim_graph.player.get());
 }
 
-void app_example_state_machine::update(const float dt_s)
+void app_example_state_machine_complex::update(const float dt_s)
 {
   bgfx::setViewRect(view_id, 0, 0, get_width(), get_height());
   bgfx::setViewClear(view_id, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, view_clear_color);
@@ -370,7 +370,7 @@ void app_example_state_machine::update(const float dt_s)
 
     ImGui::Separator();
 
-    ImGui::Checkbox("Show graph editor", &_show_graph_editor);
+    ImGui::Checkbox("Show animation graph", &_show_graph_editor);
 
     ImGui::End();
   }

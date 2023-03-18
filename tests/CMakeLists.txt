@@ -3,6 +3,8 @@ project(tests)
 set(SOURCE_FILES
     src/tests/base_utils.cpp
     src/tests/bit_reader_and_bit_writer.cpp
+    src/tests/ellipse.cpp
+    src/tests/elliptical_cone.cpp
     src/tests/float3.cpp
     src/tests/graph.cpp
     src/tests/math_utils.cpp

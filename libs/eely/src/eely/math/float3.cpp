@@ -8,6 +8,9 @@
 namespace eely {
 const float3 float3::zeroes{0.0F, 0.0F, 0.0F};
 const float3 float3::ones{1.0F, 1.0F, 1.0F};
+const float3 float3::x_axis{1.0F, 0.0F, 0.0F};
+const float3 float3::y_axis{0.0F, 1.0F, 0.0F};
+const float3 float3::z_axis{0.0F, 0.0F, 1.0F};
 
 float3 operator+(const float3& a, const float3& b)
 {
@@ -72,6 +75,11 @@ bool float3_near(const float3& a, const float3& b, const float epsilon)
          float_near(a.z, b.z, epsilon);
 }
 
+float float3_distance(const float3& a, const float3& b)
+{
+  return vector_length(a - b);
+}
+
 float3 vector_normalized(const float3& a)
 {
   const float length{std::sqrt(a.x * a.x + a.y * a.y + a.z * a.z)};
@@ -86,6 +94,11 @@ float vector_dot(const float3& a, const float3& b)
 float3 vector_cross(const float3& a, const float3& b)
 {
   return float3{a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
+}
+
+float vector_length(const float3& a)
+{
+  return std::sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
 namespace internal {

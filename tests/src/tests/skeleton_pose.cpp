@@ -11,9 +11,9 @@
 TEST(skeleton_pose, skeleton_pose)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   std::array<std::byte, 1024> buffer;
-  bit_reader reader{buffer};
 
   constexpr gsl::index root_index{0};
   constexpr gsl::index child_0_index{1};
@@ -24,26 +24,23 @@ TEST(skeleton_pose, skeleton_pose)
     project_uncooked project_uncooked(measurement_unit::meters,
                                       axis_system::y_up_x_right_z_forward);
 
-    auto skeleton_uncooked = std::make_unique<eely::skeleton_uncooked>("test_skeleton");
-    skeleton_uncooked->set_joints(
-        {{.id = "root", .parent_index = std::nullopt, .rest_pose_transform = transform{}},
-         {.id = "child_0",
-          .parent_index = 0,
-          .rest_pose_transform = transform{float3{-1.0F, 0.0F, 0.0F}}},
-         {.id = "child_1",
-          .parent_index = 0,
-          .rest_pose_transform = transform{float3{1.0F, 0.0F, 0.0F}}}});
+    auto& skeleton_uncooked =
+        project_uncooked.add_resource<eely::skeleton_uncooked>("test_skeleton");
+    skeleton_uncooked.get_joints() = {
+        {.id = "root", .parent_index = std::nullopt, .rest_pose_transform = transform{}},
+        {.id = "child_0",
+         .parent_index = 0,
+         .rest_pose_transform = transform{float3{-1.0F, 0.0F, 0.0F}}},
+        {.id = "child_1",
+         .parent_index = 0,
+         .rest_pose_transform = transform{float3{1.0F, 0.0F, 0.0F}}}};
 
-    EXPECT_EQ(skeleton_uncooked->get_id(), "test_skeleton");
+    EXPECT_EQ(skeleton_uncooked.get_id(), "test_skeleton");
 
-    project_uncooked.set_resource(std::move(skeleton_uncooked));
-
-    bit_writer writer{buffer};
-
-    project::cook(project_uncooked, writer);
+    project::cook(project_uncooked, buffer);
   }
 
-  project project{reader};
+  project project{buffer};
 
   const skeleton* skeleton{project.get_resource<eely::skeleton>("test_skeleton")};
   EXPECT_EQ(skeleton->get_joints_count(), 3);

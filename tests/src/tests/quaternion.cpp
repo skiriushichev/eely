@@ -64,6 +64,7 @@ TEST(quaternion, operators)
 TEST(quaternion, utils)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   constexpr float epsilon{1e-3F};
 
@@ -198,8 +199,8 @@ TEST(quaternion, utils)
     bit_reader reader{buffer};
     bit_writer writer{buffer};
 
-    quaternion_serialize(q, writer);
-    const quaternion q_deserialized{quaternion_deserialize(reader)};
+    bit_writer_write(writer, q);
+    const quaternion q_deserialized{bit_reader_read<quaternion>(reader)};
 
     EXPECT_EQ(q, q_deserialized);
   }

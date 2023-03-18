@@ -98,6 +98,7 @@ TEST(float3, operators)
 TEST(float3, utils)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   constexpr float epsilon{1E-5F};
 
@@ -131,8 +132,8 @@ TEST(float3, utils)
     bit_reader reader{buffer};
     bit_writer writer{buffer};
 
-    float3_serialize(v, writer);
-    const float3 v_deserialized{float3_deserialize(reader)};
+    bit_writer_write(writer, v);
+    const float3 v_deserialized{bit_reader_read<float3>(reader)};
 
     EXPECT_EQ(v, v_deserialized);
   }

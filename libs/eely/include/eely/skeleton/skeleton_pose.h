@@ -31,6 +31,9 @@ public:
   // If possible, use `sequence_*` methods instead.
   void set_transform_joint_space(gsl::index index, const transform& transform);
 
+  // Set transform of a joint with specified index, relative to the object.
+  void set_transform_object_space(gsl::index index, const transform& transform);
+
   // Start sequenced update of a pose.
   // After sequence is started, `set_transform_joint_space_sequenced` can be used.
   // `starting_index` reports shallowest index changed in a sequence.

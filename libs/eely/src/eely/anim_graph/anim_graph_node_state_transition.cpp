@@ -24,6 +24,7 @@ anim_graph_node_state_transition::anim_graph_node_state_transition(internal::bit
   _destination_state_node = bit_reader_read<std::optional<int>>(reader, bits_anim_graph_node_id);
   _type = bit_reader_read<transition_type>(reader, bits_transition_type);
   _duration_s = bit_reader_read<float>(reader);
+  _reversible = bit_reader_read<bool>(reader);
 }
 
 void anim_graph_node_state_transition::serialize(internal::bit_writer& writer) const
@@ -36,6 +37,7 @@ void anim_graph_node_state_transition::serialize(internal::bit_writer& writer) c
   bit_writer_write(writer, _destination_state_node, bits_anim_graph_node_id);
   bit_writer_write(writer, _type, bits_transition_type);
   bit_writer_write(writer, _duration_s);
+  bit_writer_write(writer, _reversible);
 }
 
 anim_graph_node_uptr anim_graph_node_state_transition::clone() const
@@ -81,5 +83,15 @@ float anim_graph_node_state_transition::get_duration_s() const
 void anim_graph_node_state_transition::set_duration_s(const float value)
 {
   _duration_s = value;
+}
+
+bool anim_graph_node_state_transition::get_reversible() const
+{
+  return _reversible;
+}
+
+void anim_graph_node_state_transition::set_reversible(bool value)
+{
+  _reversible = value;
 }
 }  // namespace eely

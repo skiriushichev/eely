@@ -35,6 +35,19 @@ void skeleton_pose::reset(const type pose_type)
   }
 }
 
+void skeleton_pose::set_transform_object_space(const gsl::index index, const transform& transform)
+{
+  const std::optional<gsl::index> parent_index_opt{_skeleton->get_joint_parent_index(index)};
+  if (!parent_index_opt.has_value()) {
+    set_transform_joint_space(index, transform);
+    return;
+  }
+
+  const eely::transform& parent_object_space_transform{
+      get_transform_object_space(parent_index_opt.value())};
+  set_transform_joint_space(index, transform_inverse(parent_object_space_transform) * transform);
+}
+
 void skeleton_pose::recalculate_object_space_transforms() const
 {
   if (!_shallow_changed_joint_index.has_value()) {

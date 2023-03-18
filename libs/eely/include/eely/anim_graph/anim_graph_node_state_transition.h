@@ -58,11 +58,20 @@ public:
   // This is how long it takes to switch from source to destination state.
   void set_duration_s(float value);
 
+  // Return `true` if transition is reversible.
+  // Reveersible transitions undo themselves if conditions are not satisfied anymore,
+  // i.e. return state machine to the previous state.
+  [[nodiscard]] bool get_reversible() const;
+
+  // Set reversible flag.
+  void set_reversible(bool value);
+
 private:
   std::optional<int> _condition_node;
   std::optional<int> _destination_state_node;
   transition_type _type{transition_type::frozen_fade};
   float _duration_s{0.0F};
+  bool _reversible{true};
 };
 
 namespace internal {

@@ -12,9 +12,11 @@
 #include <memory>
 
 namespace eely {
-class app_example_state_machine final : public app {
+class app_example_state_machine_complex final : public app {
 public:
-  app_example_state_machine(unsigned int width, unsigned int height, const std::string& title);
+  app_example_state_machine_complex(unsigned int width,
+                                    unsigned int height,
+                                    const std::string& title);
 
   void update(float dt_s) override;
 

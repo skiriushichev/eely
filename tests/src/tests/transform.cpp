@@ -83,6 +83,7 @@ TEST(transform, operators)
 TEST(transform, utils)
 {
   using namespace eely;
+  using namespace eely::internal;
 
   constexpr float epsilon{1E-5F};
 
@@ -127,8 +128,8 @@ TEST(transform, utils)
     bit_reader reader{buffer};
     bit_writer writer{buffer};
 
-    transform_serialize(t, writer);
-    const transform t_deserialized{transform_deserialize(reader)};
+    bit_writer_write(writer, t);
+    const transform t_deserialized{bit_reader_read<transform>(reader)};
 
     EXPECT_EQ(t, t_deserialized);
   }

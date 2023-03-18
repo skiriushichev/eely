@@ -48,6 +48,12 @@ quaternion quaternion_inverse(const quaternion& q);
 // and not around fixed axis ("intrinsic").
 quaternion quaternion_from_yaw_pitch_roll_intrinsic(float yaw, float pitch, float roll);
 
+// Convert `quaternion` to intrinsic yaw, pitch and roll.
+// Returned angles are in canonical set that removes ambiguity:
+//  - yaw & roll are within [-180.0F, 180.0F]
+//  - pitch is within [-90.0F, 90.0F]
+float3 quaternion_to_yaw_pitch_roll_intrinsic(const quaternion& q);
+
 // Return `quaternion` which represents rotation
 // converted from axis-angle representation.
 quaternion quaternion_from_axis_angle(float x, float y, float z, float angle_rad);
@@ -57,6 +63,12 @@ std::pair<float3, float> quaternion_to_axis_angle(const quaternion& q);
 
 // Spherically interpolate between two quaternions based on parameter `t`.
 quaternion quaternion_slerp(const quaternion& q0, const quaternion& q1, float t);
+
+// Extract rotation around specific axis.
+quaternion quaternion_extract(const quaternion& q, const float3& axis);
+
+// Return `quaternion` which represents shortest rotation `from` -> `to`.
+quaternion quaternion_shortest_arc(const float3& from, const float3& to);
 
 // Return quaternion component at specified index (0123 = xyzw).
 float& quaternion_get_at(quaternion& q, gsl::index index);

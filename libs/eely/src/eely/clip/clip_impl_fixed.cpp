@@ -29,9 +29,9 @@ static void joints_ranges_collect(const std::vector<clip_uncooked_track>& tracks
     const gsl::index joint_index{joint_index_opt.value()};
 
     float range_translation_from{std::numeric_limits<float>::max()};
-    float range_translation_to{std::numeric_limits<float>::min()};
+    float range_translation_to{std::numeric_limits<float>::lowest()};
     float range_scale_from{std::numeric_limits<float>::max()};
-    float range_scale_to{std::numeric_limits<float>::min()};
+    float range_scale_to{std::numeric_limits<float>::lowest()};
 
     bool write_metadata{false};
 
