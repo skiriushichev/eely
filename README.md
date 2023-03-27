@@ -118,9 +118,9 @@ eely requires CMake 3.23+.
 
 Also, the importer and all examples depend on FBX SDK, which must be installed separately.
 
-Right now, eely can only be built for Apple Silicon out of the box because almost all external dependencies (a complete list is in the `external` folder) are only precompiled for this platform. If you still want to build this project for another platform, currently the only option is to manually compile all dependencies and put binaries into a folder in `external`. 
+Right now, eely can only be built for Apple Silicon out of the box because almost all external dependencies (a complete list is in the `external` folder) are only precompiled for this platform. If you still want to build this project for another platform, currently the only option is to manually compile all dependencies and put binaries in `external` subfolders. 
 
-Better support for other platforms will be added later.
+Better support for other platforms will be added soon.
 
 ## License
 
