@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2022 Branimir Karadzic. All rights reserved.
+ * Copyright 2010-2024 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bx/blob/master/LICENSE
  */
 
@@ -38,7 +38,6 @@ namespace bx
 	{
 		BX_CLASS(Error
 			, NO_COPY
-			, NO_ASSIGNMENT
 			);
 
 	public:
@@ -49,7 +48,7 @@ namespace bx
 		void reset();
 
 		///
-		void setError(ErrorResult _errorResult, const StringView& _msg);
+		void setError(ErrorResult _errorResult, const StringLiteral& _msg, const Location& _location = Location::current() );
 
 		///
 		bool isOk() const;
@@ -58,7 +57,10 @@ namespace bx
 		ErrorResult get() const;
 
 		///
-		const StringView& getMessage() const;
+		const StringLiteral& getMessage() const;
+
+		///
+		const Location& getLocation() const;
 
 		///
 		bool operator==(const ErrorResult& _rhs) const;
@@ -67,12 +69,13 @@ namespace bx
 		bool operator!=(const ErrorResult& _rhs) const;
 
 	private:
-		StringView m_msg;
-		uint32_t   m_code;
+		Location      m_location;
+		StringLiteral m_msg;
+		uint32_t      m_code;
 	};
 
 	/// Do nothing even if error is set.
-	class ErrorIgnore : public Error
+	class ErrorIgnore final : public Error
 	{
 	public:
 		///
@@ -80,7 +83,7 @@ namespace bx
 	};
 
 	/// In debug build assert if error is set.
-	class ErrorAssert : public Error
+	class ErrorAssert final : public Error
 	{
 	public:
 		///
@@ -91,7 +94,7 @@ namespace bx
 	};
 
 	/// Exit application if error is set.
-	class ErrorFatal : public Error
+	class ErrorFatal final : public Error
 	{
 	public:
 		///
@@ -105,23 +108,23 @@ namespace bx
 	class ErrorScope
 	{
 		BX_CLASS(ErrorScope
+			, NO_DEFAULT_CTOR
 			, NO_COPY
-			, NO_ASSIGNMENT
 			);
 
 	public:
 		///
-		ErrorScope(Error* _err, const StringView& _name);
+		ErrorScope(Error* _err, const StringLiteral& _name);
 
 		///
 		~ErrorScope();
 
 		///
-		const StringView& getName() const;
+		const StringLiteral& getName() const;
 
 	private:
 		Error* m_err;
-		const StringView m_name;
+		const StringLiteral m_name;
 	};
 
 } // namespace bx

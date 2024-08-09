@@ -114,13 +114,12 @@ This example app has two modes:
 
 ## Building
 
-eely requires CMake 3.23+.
+Requirements:
+* Windows
+* CMake 3.23+
+* FBX SDK
 
-Also, the importer and all examples depend on FBX SDK, which must be installed separately.
-
-Right now, eely can only be built for Apple Silicon out of the box because almost all external dependencies (a complete list is in the `external` folder) are only precompiled for this platform. If you still want to build this project for another platform, currently the only option is to manually compile all dependencies and put binaries in `external` subfolders. 
-
-Better support for other platforms will be added soon.
+Just open the CMake project in Visual Studio or generate via `cmake -G`.
 
 ## License
 

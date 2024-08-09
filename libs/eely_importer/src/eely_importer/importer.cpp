@@ -90,10 +90,10 @@ importer::importer(project_uncooked& project, const std::filesystem::path& path)
   _fbx_manager->SetIOSettings(fbx_io_settings);
 
   FbxImporter* fbx_importer{FbxImporter::Create(_fbx_manager, "")};
-  const bool imported{fbx_importer->Initialize(path.c_str(), -1, _fbx_manager->GetIOSettings())};
+  const bool imported{fbx_importer->Initialize(path.string().c_str(), -1, _fbx_manager->GetIOSettings())};
   if (!imported) {
     const std::string message{fmt::format("Could not import specified FBX file ({}): {}",
-                                          path.c_str(),
+                                          path.string(),
                                           fbx_importer->GetStatus().GetErrorString())};
     throw std::runtime_error{message};
   }
@@ -185,7 +185,7 @@ FbxSkeleton* importer::get_skeleton_attribute(FbxNode* fbx_node)
     FbxNodeAttribute* fbx_attribute{fbx_node->GetNodeAttributeByIndex(i)};
     const FbxNodeAttribute::EType type{fbx_attribute->GetAttributeType()};
     if (type == FbxNodeAttribute::EType::eSkeleton) {
-      return dynamic_cast<FbxSkeleton*>(fbx_attribute);
+      return fbx_node->GetSkeleton();
     }
   }
 

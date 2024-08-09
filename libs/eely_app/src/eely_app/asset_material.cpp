@@ -2,6 +2,8 @@
 
 #include "eely_app/filesystem_utils.h"
 
+#include <gsl/narrow>
+
 #include <cstddef>
 #include <vector>
 
@@ -15,7 +17,7 @@ bool asset_material::key::operator==(const key& other) const
 bgfx::ShaderHandle create_shader(const std::filesystem::path& path)
 {
   const std::vector<std::byte> binary{load_binary(path)};
-  const bgfx::Memory* bgfx_memory{bgfx::copy(binary.data(), binary.size())};
+  const bgfx::Memory* bgfx_memory{bgfx::copy(binary.data(), gsl::narrow<uint32_t>(binary.size()))};
 
   return bgfx::createShader(bgfx_memory);
 }

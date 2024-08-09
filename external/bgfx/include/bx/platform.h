@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2022 Branimir Karadzic. All rights reserved.
+ * Copyright 2010-2024 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bx/blob/master/LICENSE
  */
 
@@ -30,20 +30,20 @@
 
 // C Runtime
 #define BX_CRT_BIONIC 0
-#define BX_CRT_BSD    0
 #define BX_CRT_GLIBC  0
 #define BX_CRT_LIBCXX 0
 #define BX_CRT_MINGW  0
 #define BX_CRT_MSVC   0
 #define BX_CRT_NEWLIB 0
 
-#ifndef BX_CRT_MUSL
-#	define BX_CRT_MUSL 0
-#endif // BX_CRT_MUSL
-
 #ifndef BX_CRT_NONE
 #	define BX_CRT_NONE 0
 #endif // BX_CRT_NONE
+
+// Language standard version
+#define BX_LANGUAGE_CPP17 201703L
+#define BX_LANGUAGE_CPP20 202002L
+#define BX_LANGUAGE_CPP23 202207L
 
 // Platform
 #define BX_PLATFORM_ANDROID    0
@@ -58,6 +58,7 @@
 #define BX_PLATFORM_PS4        0
 #define BX_PLATFORM_PS5        0
 #define BX_PLATFORM_RPI        0
+#define BX_PLATFORM_VISIONOS   0
 #define BX_PLATFORM_WINDOWS    0
 #define BX_PLATFORM_WINRT      0
 #define BX_PLATFORM_XBOXONE    0
@@ -158,7 +159,7 @@
 #		define NOMINMAX
 #	endif // NOMINMAX
 //  If _USING_V110_SDK71_ is defined it means we are using the v110_xp or v120_xp toolset.
-#	if defined(_MSC_VER) && (_MSC_VER >= 1700) && (!_USING_V110_SDK71_)
+#	if defined(_MSC_VER) && (_MSC_VER >= 1700) && !defined(_USING_V110_SDK71_)
 #		include <winapifamily.h>
 #	endif // defined(_MSC_VER) && (_MSC_VER >= 1700) && (!_USING_V110_SDK71_)
 #	if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
@@ -195,12 +196,16 @@
 	|| defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__)
 #	undef  BX_PLATFORM_IOS
 #	define BX_PLATFORM_IOS 1
+#elif defined(__has_builtin) && __has_builtin(__is_target_os) && __is_target_os(xros)
+#	undef  BX_PLATFORM_VISIONOS
+#	define BX_PLATFORM_VISIONOS 1
 #elif defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
 #	undef  BX_PLATFORM_OSX
 #	define BX_PLATFORM_OSX __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #elif defined(__EMSCRIPTEN__)
+#	include <emscripten/version.h>
 #	undef  BX_PLATFORM_EMSCRIPTEN
-#	define BX_PLATFORM_EMSCRIPTEN 1
+#	define BX_PLATFORM_EMSCRIPTEN (__EMSCRIPTEN_major__ * 10000 + __EMSCRIPTEN_minor__ * 100 + __EMSCRIPTEN_tiny__)
 #elif defined(__ORBIS__)
 #	undef  BX_PLATFORM_PS4
 #	define BX_PLATFORM_PS4 1
@@ -230,34 +235,23 @@
 #	if defined(__BIONIC__)
 #		undef  BX_CRT_BIONIC
 #		define BX_CRT_BIONIC 1
-#	elif defined(_MSC_VER)
-#		undef  BX_CRT_MSVC
-#		define BX_CRT_MSVC 1
 #	elif defined(__GLIBC__)
 #		undef  BX_CRT_GLIBC
 #		define BX_CRT_GLIBC (__GLIBC__ * 10000 + __GLIBC_MINOR__ * 100)
-#	elif defined(__MINGW32__) || defined(__MINGW64__)
+#	elif defined(__MINGW32__) \
+	||   defined(__MINGW64__)
 #		undef  BX_CRT_MINGW
 #		define BX_CRT_MINGW 1
-#	elif defined(__apple_build_version__) || defined(__ORBIS__) || defined(__EMSCRIPTEN__) || defined(__llvm__) || defined(__HAIKU__)
+#	elif defined(_MSC_VER)
+#		undef  BX_CRT_MSVC
+#		define BX_CRT_MSVC 1
+#	elif defined(__apple_build_version__) \
+	||   BX_PLATFORM_PS4                  \
+	||   BX_PLATFORM_EMSCRIPTEN           \
+	||   defined(__llvm__)
 #		undef  BX_CRT_LIBCXX
 #		define BX_CRT_LIBCXX 1
-#	elif BX_PLATFORM_BSD
-#		undef  BX_CRT_BSD
-#		define BX_CRT_BSD 1
 #	endif //
-
-#	if !BX_CRT_BIONIC \
-	&& !BX_CRT_BSD    \
-	&& !BX_CRT_GLIBC  \
-	&& !BX_CRT_LIBCXX \
-	&& !BX_CRT_MINGW  \
-	&& !BX_CRT_MSVC   \
-	&& !BX_CRT_MUSL   \
-	&& !BX_CRT_NEWLIB
-#		undef  BX_CRT_NONE
-#		define BX_CRT_NONE 1
-#	endif // BX_CRT_*
 #endif // !BX_CRT_NONE
 
 ///
@@ -274,6 +268,7 @@
 	||  BX_PLATFORM_PS4        \
 	||  BX_PLATFORM_PS5        \
 	||  BX_PLATFORM_RPI        \
+	||  BX_PLATFORM_VISIONOS   \
 	)
 
 ///
@@ -290,6 +285,7 @@
 	||  BX_PLATFORM_PS4        \
 	||  BX_PLATFORM_PS5        \
 	||  BX_PLATFORM_RPI        \
+	||  BX_PLATFORM_VISIONOS   \
 	||  BX_PLATFORM_WINDOWS    \
 	||  BX_PLATFORM_WINRT      \
 	||  BX_PLATFORM_XBOXONE    \
@@ -342,7 +338,9 @@
 		BX_STRINGIZE(__clang_minor__) "." \
 		BX_STRINGIZE(__clang_patchlevel__)
 #elif BX_COMPILER_MSVC
-#	if BX_COMPILER_MSVC >= 1920 // Visual Studio 2019
+#	if BX_COMPILER_MSVC >= 1930 // Visual Studio 2022
+#		define BX_COMPILER_NAME "MSVC 17.0"
+#	elif BX_COMPILER_MSVC >= 1920 // Visual Studio 2019
 #		define BX_COMPILER_NAME "MSVC 16.0"
 #	elif BX_COMPILER_MSVC >= 1910 // Visual Studio 2017
 #		define BX_COMPILER_NAME "MSVC 15.0"
@@ -363,11 +361,11 @@
 
 #if BX_PLATFORM_ANDROID
 #	define BX_PLATFORM_NAME "Android " \
-				BX_STRINGIZE(BX_PLATFORM_ANDROID)
+		BX_STRINGIZE(BX_PLATFORM_ANDROID)
 #elif BX_PLATFORM_BSD
 #	define BX_PLATFORM_NAME "BSD"
 #elif BX_PLATFORM_EMSCRIPTEN
-#	define BX_PLATFORM_NAME "asm.js "          \
+#	define BX_PLATFORM_NAME "Emscripten "      \
 		BX_STRINGIZE(__EMSCRIPTEN_major__) "." \
 		BX_STRINGIZE(__EMSCRIPTEN_minor__) "." \
 		BX_STRINGIZE(__EMSCRIPTEN_tiny__)
@@ -384,13 +382,15 @@
 #elif BX_PLATFORM_NX
 #	define BX_PLATFORM_NAME "NX"
 #elif BX_PLATFORM_OSX
-#	define BX_PLATFORM_NAME "OSX"
+#	define BX_PLATFORM_NAME "macOS"
 #elif BX_PLATFORM_PS4
 #	define BX_PLATFORM_NAME "PlayStation 4"
 #elif BX_PLATFORM_PS5
 #	define BX_PLATFORM_NAME "PlayStation 5"
 #elif BX_PLATFORM_RPI
 #	define BX_PLATFORM_NAME "RaspberryPi"
+#elif BX_PLATFORM_VISIONOS
+#	define BX_PLATFORM_NAME "visionOS"
 #elif BX_PLATFORM_WINDOWS
 #	define BX_PLATFORM_NAME "Windows"
 #elif BX_PLATFORM_WINRT
@@ -417,8 +417,6 @@
 
 #if BX_CRT_BIONIC
 #	define BX_CRT_NAME "Bionic libc"
-#elif BX_CRT_BSD
-#	define BX_CRT_NAME "BSD libc"
 #elif BX_CRT_GLIBC
 #	define BX_CRT_NAME "GNU C Library"
 #elif BX_CRT_MSVC
@@ -429,12 +427,10 @@
 #	define BX_CRT_NAME "Clang C Library"
 #elif BX_CRT_NEWLIB
 #	define BX_CRT_NAME "Newlib"
-#elif BX_CRT_MUSL
-#	define BX_CRT_NAME "musl libc"
 #elif BX_CRT_NONE
 #	define BX_CRT_NAME "None"
 #else
-#	error "Unknown BX_CRT!"
+#	define BX_CRT_NAME "Unknown CRT"
 #endif // BX_CRT_
 
 #if BX_ARCH_32BIT
@@ -443,23 +439,63 @@
 #	define BX_ARCH_NAME "64-bit"
 #endif // BX_ARCH_
 
-#if BX_COMPILER_MSVC
-#	define BX_CPP_NAME "C++MsvcUnknown"
-#elif defined(__cplusplus)
-#	if __cplusplus < 201103L
-#		error "Pre-C++11 compiler is not supported!"
-#	elif __cplusplus < 201402L
-#		define BX_CPP_NAME "C++11"
-#	elif __cplusplus < 201703L
-#		define BX_CPP_NAME "C++14"
-#	elif __cplusplus < 201704L
+#if defined(__cplusplus)
+#	if BX_COMPILER_MSVC && defined(_MSVC_LANG) && _MSVC_LANG != __cplusplus
+#		error "When using MSVC you must set /Zc:__cplusplus compiler option."
+#	endif // BX_COMPILER_MSVC && defined(_MSVC_LANG) && _MSVC_LANG != __cplusplus
+
+#	if   __cplusplus < BX_LANGUAGE_CPP17
+#		define BX_CPP_NAME "C++Unsupported"
+#	elif __cplusplus < BX_LANGUAGE_CPP20
 #		define BX_CPP_NAME "C++17"
+#	elif __cplusplus < BX_LANGUAGE_CPP23
+#		define BX_CPP_NAME "C++20"
 #	else
 // See: https://gist.github.com/bkaradzic/2e39896bc7d8c34e042b#orthodox-c
 #		define BX_CPP_NAME "C++WayTooModern"
 #	endif // BX_CPP_NAME
 #else
 #	define BX_CPP_NAME "C++Unknown"
+#endif // defined(__cplusplus)
+
+#if BX_COMPILER_MSVC && (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
+#	error "When using MSVC you must set /Zc:preprocessor compiler option."
+#endif // BX_COMPILER_MSVC && (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
+
+#if defined(__cplusplus)
+
+static_assert(__cplusplus >= BX_LANGUAGE_CPP17, "\n\n"
+	"\t** IMPORTANT! **\n\n"
+	"\tC++17 standard support is required to build.\n"
+	"\t\n");
+
+// https://releases.llvm.org/
+static_assert(!BX_COMPILER_CLANG || BX_COMPILER_CLANG >= 110000, "\n\n"
+	"\t** IMPORTANT! **\n\n"
+	"\tMinimum supported Clang version is 11.0 (October 12, 2020).\n"
+	"\t\n");
+
+// https://gcc.gnu.org/releases.html
+static_assert(!BX_COMPILER_GCC || BX_COMPILER_GCC >= 80400, "\n\n"
+	"\t** IMPORTANT! **\n\n"
+	"\tMinimum supported GCC version is 8.4 (March 4, 2020).\n"
+	"\t\n");
+
+static_assert(!BX_CPU_ENDIAN_BIG, "\n\n"
+	"\t** IMPORTANT! **\n\n"
+	"\tThe code was not tested for big endian, and big endian CPU is considered unsupported.\n"
+	"\t\n");
+
+static_assert(!BX_PLATFORM_BSD || !BX_PLATFORM_HAIKU || !BX_PLATFORM_HURD, "\n\n"
+	"\t** IMPORTANT! **\n\n"
+	"\tYou're compiling for unsupported platform!\n"
+	"\tIf you wish to support this platform, make your own fork, and modify code for _yourself_.\n"
+	"\t\n"
+	"\tDo not submit PR to main repo, it won't be considered, and it would code rot anyway. I have no ability\n"
+	"\tto test on these platforms, and over years there wasn't any serious contributor who wanted to take\n"
+	"\tburden of maintaining code for these platforms.\n"
+	"\t\n");
+
 #endif // defined(__cplusplus)
 
 #endif // BX_PLATFORM_H_HEADER_GUARD

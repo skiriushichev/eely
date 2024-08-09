@@ -114,6 +114,7 @@ set(SOURCE_FILES
     src/eely/anim_graph/anim_graph_player.cpp
     src/eely/anim_graph/anim_graph_uncooked.cpp
     src/eely/anim_graph/anim_graph.cpp
+    src/eely/base/base_utils.cpp
     src/eely/base/bit_reader.cpp
     src/eely/base/bit_writer.cpp
     src/eely/base/string_id.cpp
@@ -155,7 +156,3 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} PUBLIC external_acl external_fmt external_gsl)
 target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:DEBUG>:EELY_DEBUG>)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
-endif()

@@ -217,6 +217,11 @@ internal::anim_graph_player_node_uptr anim_graph_player::create_player_node(
     case anim_graph_node_type::sum: {
       return std::make_unique<anim_graph_player_node_sum>(id);
     } break;
+
+    default: {
+      EXPECTS(false);
+      return nullptr;
+    } break;
   }
 }
 

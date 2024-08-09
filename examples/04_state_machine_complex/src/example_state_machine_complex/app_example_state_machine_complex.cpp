@@ -297,7 +297,7 @@ static std::unique_ptr<project> import_and_cook_resources()
 
   // Convert into runtime project
 
-  static constexpr size_t buffer_size_bytes{gsl::narrow<size_t>(1024 * 1024)};
+  static constexpr size_t buffer_size_bytes{gsl::narrow<size_t>(1024 * 128)};
   std::array<std::byte, buffer_size_bytes> buffer;
   project::cook(project_uncooked, buffer);
   return std::make_unique<project>(buffer);
@@ -346,7 +346,8 @@ app_example_state_machine_complex::app_example_state_machine_complex(const unsig
 
 void app_example_state_machine_complex::update(const float dt_s)
 {
-  bgfx::setViewRect(view_id, 0, 0, get_width(), get_height());
+  bgfx::setViewRect(view_id, 0, 0, gsl::narrow<uint16_t>(get_width()),
+                    gsl::narrow<uint16_t>(get_height()));
   bgfx::setViewClear(view_id, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, view_clear_color);
 
   ImGui::SetNextWindowSize(ImVec2(350.0F, 0.0F));

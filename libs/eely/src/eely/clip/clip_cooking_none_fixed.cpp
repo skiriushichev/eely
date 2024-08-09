@@ -176,8 +176,8 @@ std::vector<key_component> key_component_collect(const std::vector<clip_uncooked
         const float3& translation{uncooked_key.translation.value()};
         key_component key{.joint_index = joint_index,
                           .time = time,
-                          .component = transform_components::translation,
                           .data = float4{translation.x, translation.y, translation.z},
+                          .component = transform_components::translation,
                           .time_to_use = get_time_to_use_for_next_key(translation_keys)};
         translation_keys.push_back(key);
       }
@@ -186,8 +186,8 @@ std::vector<key_component> key_component_collect(const std::vector<clip_uncooked
         const quaternion& rotation{uncooked_key.rotation.value()};
         key_component key{.joint_index = joint_index,
                           .time = time,
-                          .component = transform_components::rotation,
                           .data = float4{rotation.x, rotation.y, rotation.z, rotation.w},
+                          .component = transform_components::rotation,
                           .time_to_use = get_time_to_use_for_next_key(rotation_keys)};
         rotation_keys.push_back(key);
       }
@@ -196,8 +196,8 @@ std::vector<key_component> key_component_collect(const std::vector<clip_uncooked
         const float3& scale{uncooked_key.scale.value()};
         key_component key{.joint_index = joint_index,
                           .time = time,
-                          .component = transform_components::scale,
                           .data = float4{scale.x, scale.y, scale.z},
+                          .component = transform_components::scale,
                           .time_to_use = get_time_to_use_for_next_key(scale_keys)};
         scale_keys.push_back(key);
       }

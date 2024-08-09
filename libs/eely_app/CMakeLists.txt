@@ -36,10 +36,6 @@ add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC include src)
 target_link_libraries(${PROJECT_NAME} PUBLIC eely external_bgfx external_entt external_fmt external_gsl external_imgui external_imgui_bgfx external_imgui_node_editor external_sdl)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
-endif()
-
 # Create build rule for a shader
 # Only for internal use by "eely_add_app"
 function(eely_internal_add_shader)
@@ -65,11 +61,11 @@ function(eely_internal_add_shader)
 
   get_target_property(EXTERNAL_BGFX_SOURCE_DIR external_bgfx SOURCE_DIR)
 
-  if (${EELY_TARGET_SYSTEM} STREQUAL ${EELY_TARGET_SYSTEM_MACOS_ARM})
-    set(SHADER_PLATFORM "osx")
-    set(SHADER_VERTEX_PROFILE "metal")
-    set(SHADER_FRAGMENT_PROFILE "metal")
-    set(SHADERC ${EXTERNAL_BGFX_SOURCE_DIR}/extras/${EELY_TARGET_SYSTEM_MACOS_ARM}/shaderc)
+  if (${EELY_PLATFORM} STREQUAL ${EELY_PLATFORM_WIN64})
+    set(SHADER_PLATFORM "windows")
+    set(SHADER_VERTEX_PROFILE "s_5_0")
+    set(SHADER_FRAGMENT_PROFILE "s_5_0")
+    set(SHADERC ${EXTERNAL_BGFX_SOURCE_DIR}/extras/${EELY_PLATFORM_WIN64}/shadercRelease.exe)
   else()
     message(FATAL_ERROR "Unsupported platform")
   endif()
@@ -104,7 +100,12 @@ function(eely_add_app)
   add_executable(${PARSED_ARGS_TARGET} ${PARSED_ARGS_SOURCE_FILES})
   target_include_directories(${PARSED_ARGS_TARGET} PUBLIC include)
   target_include_directories(${PARSED_ARGS_TARGET} PRIVATE src)
-  target_link_libraries(${PARSED_ARGS_TARGET} PRIVATE eely_app)
+  target_link_libraries(${PARSED_ARGS_TARGET} PRIVATE external_sdl_main eely_app)
+
+  add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${PROJECT_NAME}> $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}>
+    COMMAND_EXPAND_LISTS)
 
   # Process resource files
   # Create commands to build some of them, others stay the same

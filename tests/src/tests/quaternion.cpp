@@ -70,7 +70,7 @@ TEST(quaternion, utils)
 
   // quaternion_length + quaternion_normalize
   {
-    quaternion q{0.4400896F, 0.3600733, 0.3920798F, 0.7231472F};
+    quaternion q{0.4400896F, 0.3600733F, 0.3920798F, 0.7231472F};
     EXPECT_NEAR(quaternion_length(q), 1.0F, epsilon);
     expect_quaternion_near(q, quaternion_normalized(q), epsilon);
 
@@ -83,7 +83,7 @@ TEST(quaternion, utils)
 
   // quaternion_inverse
   {
-    const quaternion q{0.4400896F, 0.3600733, 0.3920798F, 0.7231472F};
+    const quaternion q{0.4400896F, 0.3600733F, 0.3920798F, 0.7231472F};
     const quaternion q_inversed{quaternion_inverse(q)};
     EXPECT_NEAR(q_inversed.x, -q.x, epsilon);
     EXPECT_NEAR(q_inversed.y, -q.y, epsilon);
@@ -176,7 +176,7 @@ TEST(quaternion, utils)
 
   // quaternion_near
   {
-    const quaternion q{0.4400896F, 0.3600733, 0.3920798F, 0.7231472F};
+    const quaternion q{0.4400896F, 0.3600733F, 0.3920798F, 0.7231472F};
     EXPECT_TRUE(quaternion_near(q, q));
 
     const quaternion q0_plus_half_epsilon{q.x + epsilon / 2.0F, q.y + epsilon / 2.0F,

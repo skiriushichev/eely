@@ -55,20 +55,20 @@ void project::cook(const project_uncooked& project_uncooked, const std::span<std
                               &resources_ordered](const resource_uncooked* resource_uncooked) {
     std::unique_ptr<resource> resource_cooked;
 
-    if (const auto* ru{dynamic_cast<const skeleton_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<skeleton>(tmp_project, *ru);
+    if (const auto* skel_res_uncooked{dynamic_cast<const skeleton_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<skeleton>(tmp_project, *skel_res_uncooked);
     }
-    else if (const auto* ru{dynamic_cast<const clip_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<clip>(tmp_project, project_uncooked, *ru);
+    else if (const auto* clip_res_uncooked{dynamic_cast<const clip_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<clip>(tmp_project, project_uncooked, *clip_res_uncooked);
     }
-    else if (const auto* ru{dynamic_cast<const clip_additive_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<clip>(tmp_project, project_uncooked, *ru);
+    else if (const auto* clip_additive_res_uncooked{dynamic_cast<const clip_additive_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<clip>(tmp_project, project_uncooked, *clip_additive_res_uncooked);
     }
-    else if (const auto* ru{dynamic_cast<const skeleton_mask_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<skeleton_mask>(tmp_project, *ru);
+    else if (const auto* skeleton_mask_res_uncooked{dynamic_cast<const skeleton_mask_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<skeleton_mask>(tmp_project, *skeleton_mask_res_uncooked);
     }
-    else if (const auto* ru{dynamic_cast<const anim_graph_uncooked*>(resource_uncooked)}) {
-      resource_cooked = std::make_unique<anim_graph>(tmp_project, *ru);
+    else if (const auto* anim_graph_res_uncooked{dynamic_cast<const anim_graph_uncooked*>(resource_uncooked)}) {
+      resource_cooked = std::make_unique<anim_graph>(tmp_project, *anim_graph_res_uncooked);
     }
     else {
       EXPECTS(false);

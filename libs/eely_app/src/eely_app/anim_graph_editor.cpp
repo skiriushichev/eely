@@ -259,11 +259,11 @@ void anim_graph_editor::render()
     EXPECTS(l.pin_id_from != l.pin_id_to);
     const ax::NodeEditor::LinkId id{get_editor_link_id(l.pin_id_from, l.pin_id_to)};
 
-    const int node_id_from{get_node_id(l.pin_id_from.Get())};
+    const int node_id_from{get_node_id(gsl::narrow<uint32_t>(l.pin_id_from.Get()))};
     const anim_graph_node_base* node_from{get_node(node_id_from)};
     EXPECTS(node_from != nullptr);
 
-    const int node_id_to{get_node_id(l.pin_id_to.Get())};
+    const int node_id_to{get_node_id(gsl::narrow<uint32_t>(l.pin_id_to.Get()))};
     const anim_graph_node_base* node_to{get_node(node_id_to)};
     EXPECTS(node_to != nullptr);
 

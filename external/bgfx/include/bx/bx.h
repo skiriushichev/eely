@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2022 Branimir Karadzic. All rights reserved.
+ * Copyright 2010-2024 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bx/blob/master/LICENSE
  */
 
@@ -8,17 +8,23 @@
 
 #include <alloca.h> // alloca
 #include <stdarg.h> // va_list
+#include <stddef.h> // ptrdiff_t
 #include <stdint.h> // uint32_t
 #include <stdlib.h> // size_t
-#include <stddef.h> // ptrdiff_t
 
 #include "platform.h"
 #include "config.h"
+#include "constants.h"
 #include "macros.h"
 #include "debug.h"
+#include "typetraits.h"
 
 ///
 #define BX_COUNTOF(_x) sizeof(bx::CountOfRequireArrayArgumentT(_x) )
+
+///
+#define BX_OFFSETOF(_type, _member) \
+	(reinterpret_cast<ptrdiff_t>(&(reinterpret_cast<_type*>(16)->_member) )-ptrdiff_t(16) )
 
 ///
 #if BX_COMPILER_MSVC
@@ -30,25 +36,142 @@
 ///
 #define BX_ENABLED(_x) BX_IGNORE_C4127(bx::isEnabled<!!(_x)>::value)
 
+///
+#define BX_DECLARE_TAG(_name)  \
+	struct    _name ## Tag {}; \
+	constexpr _name ## Tag _name
+
 namespace bx
 {
-	/// Used to return successful execution of a program code.
-	constexpr int32_t kExitSuccess = 0;
+	/// Placement new tag.
+	BX_DECLARE_TAG(PlacementNew);
 
-	/// Used to return unsuccessful execution of a program code.
-	constexpr int32_t kExitFailure = 1;
+	/// Fields are left uninitialized.
+	BX_DECLARE_TAG(InitNone);
 
-	/// Returns true if type `Ty` is trivially copyable / POD type.
-	template<class Ty>
-	constexpr bool isTriviallyCopyable();
+	/// Fields are initialized to zero.
+	BX_DECLARE_TAG(InitZero);
+
+	/// Fields are initialized to identity value.
+	BX_DECLARE_TAG(InitIdentity);
+
+	/// Source location with file path, and file line.
+	///
+	struct Location
+	{
+		/// Default constructor.
+		///
+		constexpr Location()
+			: filePath(""), line(0) {}
+
+		/// Constructor with specific file name, and line number.
+		///
+		constexpr Location(const char* _filePath, uint32_t _line)
+			: filePath(_filePath), line(_line) {}
+
+		/// Current source location.
+		///
+		static Location current(
+			  const char* _filePath = __builtin_FILE()
+			, uint32_t _line = __builtin_LINE()
+			);
+
+		const char* filePath; //!< File path.
+		uint32_t    line;     //!< File line.
+	};
+
+	/// Unknown source code location.
+	static constexpr Location kUnknownLocation("Unknown?", 0);
+
+	/// Source location with file path, file line, and function name.
+	///
+	struct LocationFull
+	{
+		/// Default constructor.
+		///
+		constexpr LocationFull()
+			: function(""), filePath(""), line(0) {}
+
+		/// Constructor with specific function name, file name, and line number.
+		///
+		constexpr LocationFull(const char* _function, const char* _filePath, uint32_t _line)
+			: function(_function), filePath(_filePath), line(_line) {}
+
+		/// Current source location.
+		///
+		static LocationFull current(
+			  const char* _function = __builtin_FUNCTION()
+			, const char* _filePath = __builtin_FILE()
+			, uint32_t _line = __builtin_LINE()
+			);
+
+		const char* function; //!< Function name.
+		const char* filePath; //!< File path.
+		uint32_t    line;     //!< File line.
+	};
+
+	/// Unknown source code location.
+	static constexpr LocationFull kUnknownLocationFull("Unknown?", "Unknown?", 0);
+
+	/// Assert handler function.
+	///
+	/// @param[in] _location Source code location where function is called.
+	/// @param[in] _format Printf style format.
+	/// @param[in] _argList Arguments for `_format` specification.
+	///
+	/// @returns True if assert should stop code execution, otherwise returns false.
+	///
+	typedef bool (*AssertHandlerFn)(const Location& _location, const char* _format, va_list _argList);
+
+	/// Set assert handler function.
+	///
+	/// @param[in] _assertHandlerFn Pointer to AssertHandlerFn function.
+	///
+	/// @remarks It can be set only once. This is usually done on application startup.
+	///
+	void setAssertHandler(AssertHandlerFn _assertHandlerFn);
+
+	/// Assert function calls AssertHandlerFn.
+	///
+	/// @param[in] _location Source code location where function is called.
+	/// @param[in] _format Printf style format.
+	/// @param[in] ... Arguments for `_format` specification.
+	///
+	/// @returns True if assert should stop code execution, otherwise returns false.
+	///
+	bool assertFunction(const Location& _location, const char* _format, ...);
+
+	/// Arithmetic type `Ty` limits.
+	template<typename Ty, bool SignT = isSigned<Ty>()>
+	struct LimitsT;
 
 	/// Find the address of an object of a class that has an overloaded unary ampersand (&) operator.
-	template <class Ty>
+	template<typename Ty>
 	Ty* addressOf(Ty& _a);
 
 	/// Find the address of an object of a class that has an overloaded unary ampersand (&) operator.
-	template <class Ty>
+	template<typename Ty>
 	const Ty* addressOf(const Ty& _a);
+
+	/// Returns typed pointer from typeless pointer offseted.
+	///
+	/// @param[in] _ptr Pointer to get offset from.
+	/// @param[in] _offsetInBytes Offset from pointer in bytes.
+	///
+	/// @returns Typed pointer from typeless pointer offseted.
+	///
+	template<typename Ty>
+	Ty* addressOf(void* _ptr, ptrdiff_t _offsetInBytes = 0);
+
+	/// Returns typed pointer from typeless pointer offseted.
+	///
+	/// @param[in] _ptr Pointer to get offset from.
+	/// @param[in] _offsetInBytes Offset from pointer in bytes.
+	///
+	/// @returns Typed pointer from typeless pointer offseted.
+	///
+	template<typename Ty>
+	const Ty* addressOf(const void* _ptr, ptrdiff_t _offsetInBytes = 0);
 
 	/// Swap two values.
 	template<typename Ty>
@@ -57,33 +180,50 @@ namespace bx
 	/// Swap memory.
 	void swap(void* _a, void* _b, size_t _numBytes);
 
+	/// Returns numeric minimum of type.
+	template<typename Ty>
+	constexpr Ty min();
+
+	/// Returns numeric maximum of type.
+	template<typename Ty>
+	constexpr Ty max();
+
 	/// Returns minimum of two values.
 	template<typename Ty>
-	constexpr Ty min(const Ty& _a, const Ty& _b);
+	constexpr Ty min(const Ty& _a, const TypeIdentityType<Ty>& _b);
 
 	/// Returns maximum of two values.
 	template<typename Ty>
-	constexpr Ty max(const Ty& _a, const Ty& _b);
+	constexpr Ty max(const Ty& _a, const TypeIdentityType<Ty>& _b);
 
 	/// Returns minimum of three or more values.
 	template<typename Ty, typename... Args>
-	constexpr Ty min(const Ty& _a, const Ty& _b, const Args&... _args);
+	constexpr Ty min(const Ty& _a, const TypeIdentityType<Ty>& _b, const Args&... _args);
 
 	/// Returns maximum of three or more values.
 	template<typename Ty, typename... Args>
-	constexpr Ty max(const Ty& _a, const Ty& _b, const Args&... _args);
+	constexpr Ty max(const Ty& _a, const TypeIdentityType<Ty>& _b, const Args&... _args);
 
 	/// Returns middle of three or more values.
 	template<typename Ty, typename... Args>
-	constexpr Ty mid(const Ty& _a, const Ty& _b, const Args&... _args);
+	constexpr Ty mid(const Ty& _a, const TypeIdentityType<Ty>& _b, const Args&... _args);
 
 	/// Returns clamped value between min/max.
 	template<typename Ty>
-	constexpr Ty clamp(const Ty& _a, const Ty& _min, const Ty& _max);
+	constexpr Ty clamp(const Ty& _a, const TypeIdentityType<Ty>& _min, const TypeIdentityType<Ty>& _max);
 
 	/// Returns true if value `_a` is power of 2.
 	template<typename Ty>
 	constexpr bool isPowerOf2(Ty _a);
+
+	/// Returns a value of type `Ty` by reinterpreting the object representation of `FromT`.
+	template <typename Ty, typename FromT>
+	constexpr Ty bitCast(const FromT& _from);
+
+	/// Performs `static_cast` of value `_from`, and in debug build runtime verifies/asserts
+	/// that the value didn't change.
+	template<typename Ty, typename FromT>
+	constexpr Ty narrowCast(const FromT& _from, Location _location = Location::current() );
 
 	/// Copy memory block.
 	///

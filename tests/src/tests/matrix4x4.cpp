@@ -257,9 +257,9 @@ TEST(matrix4x4, utils)
   // matrix4x4_transform
   {
     clip_space_params params{.fov_x = pi / 2.0F,
+                             .aspect_ratio_x_to_y = 100.0F / 200.0F,
                              .near = 0.01F,
                              .far = 100.0F,
-                             .aspect_ratio_x_to_y = 100.0F / 200.0F,
                              .depth_range = clip_space_depth_range::minus_one_to_plus_one};
 
     const float projection_source_plane_z{10.0F};

@@ -35,7 +35,8 @@ app_editor::app_editor(const unsigned int width,
 
 void app_editor::update(const float /*dt_s*/)
 {
-  bgfx::setViewRect(view_id, 0, 0, get_width(), get_height());
+  bgfx::setViewRect(view_id, 0, 0, gsl::narrow<uint16_t>(get_width()),
+                    gsl::narrow<uint16_t>(get_height()));
   bgfx::setViewClear(view_id, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, view_clear_color);
 }
 }  // namespace eely

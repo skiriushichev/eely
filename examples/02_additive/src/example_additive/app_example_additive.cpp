@@ -104,7 +104,7 @@ static std::unique_ptr<project> import_and_cook_resources()
   clip_look_left_additive.set_skeleton_mask_id("look_mask");
   clip_look_left_additive.set_base_clip_id("walk");
   clip_look_left_additive.set_base_clip_range(
-      clip_additive_uncooked::range{.to_s = 0.0F, .from_s = 0.0F});
+      clip_additive_uncooked::range{.from_s = 0.0F, .to_s = 0.0F});
   clip_look_left_additive.set_source_clip_id("look_-45");
 
   auto& clip_look_right_additive{
@@ -113,7 +113,7 @@ static std::unique_ptr<project> import_and_cook_resources()
   clip_look_right_additive.set_skeleton_mask_id("look_mask");
   clip_look_right_additive.set_base_clip_id("walk");
   clip_look_right_additive.set_base_clip_range(
-      clip_additive_uncooked::range{.to_s = 0.0F, .from_s = 0.0F});
+      clip_additive_uncooked::range{.from_s = 0.0F, .to_s = 0.0F});
   clip_look_right_additive.set_source_clip_id("look_45");
 
   // Animation graph:
@@ -249,7 +249,8 @@ app_example_additive::app_example_additive(const unsigned int width,
 
 void app_example_additive::update(const float dt_s)
 {
-  bgfx::setViewRect(view_id, 0, 0, get_width(), get_height());
+  bgfx::setViewRect(view_id, 0, 0, gsl::narrow<uint16_t>(get_width()),
+                    gsl::narrow<uint16_t>(get_height()));
   bgfx::setViewClear(view_id, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, view_clear_color);
 
   ImGui::SetNextWindowSize(ImVec2(350.0F, 0.0F));

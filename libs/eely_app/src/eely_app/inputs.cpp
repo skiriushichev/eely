@@ -1,8 +1,12 @@
 #include "eely_app/inputs.h"
 
+#include "eely/base/assert.h"
+
 #include <gsl/util>
 
 #include <SDL_scancode.h>
+
+#include <algorithm>
 
 namespace eely {
 static input_digital input_digital_promote(const input_digital initial)
@@ -16,6 +20,11 @@ static input_digital input_digital_promote(const input_digital initial)
     case input_digital::pressed:
     case input_digital::just_pressed: {
       return input_digital::pressed;
+    }
+
+    default: {
+      ENSURES(false);
+      return input_digital::released;
     }
   }
 }
@@ -33,6 +42,11 @@ static input_digital input_digital_promote(const input_digital initial, const bo
       case input_digital::just_pressed: {
         return input_digital::pressed;
       }
+
+      default: {
+        ENSURES(false);
+        return input_digital::released;
+      }
     }
   }
   else {
@@ -44,6 +58,11 @@ static input_digital input_digital_promote(const input_digital initial, const bo
 
       case input_digital::released:
       case input_digital::just_released: {
+        return input_digital::released;
+      }
+
+      default: {
+        ENSURES(false);
         return input_digital::released;
       }
     }

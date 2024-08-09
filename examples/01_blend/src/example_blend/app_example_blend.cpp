@@ -19,8 +19,8 @@
 #include <eely/anim_graph/anim_graph_node_param.h>
 #include <eely/anim_graph/anim_graph_node_speed.h>
 #include <eely/anim_graph/anim_graph_uncooked.h>
-#include <eely/clip/clip.h>
-#include <eely/clip/clip_uncooked.h>
+#include <eely/base/string_id.h>
+#include <eely/math/float3.h>
 #include <eely/project/axis_system.h>
 #include <eely/project/measurement_unit.h>
 #include <eely/project/project.h>
@@ -28,12 +28,11 @@
 #include <eely/skeleton/skeleton.h>
 #include <eely/skeleton/skeleton_uncooked.h>
 
-#include <entt/entt.hpp>
-
-#include <gsl/util>
+#include <bgfx/bgfx.h>
 
 #include <imgui.h>
 
+#include <cstdint>
 #include <filesystem>
 #include <memory>
 
@@ -163,7 +162,7 @@ static std::unique_ptr<project> import_and_cook_resources()
 
   // Convert into runtime project
 
-  static constexpr size_t buffer_size_bytes{gsl::narrow<size_t>(1024 * 1024)};
+  static constexpr size_t buffer_size_bytes{gsl::narrow<size_t>(1024 * 64)};
   std::array<std::byte, buffer_size_bytes> buffer;
   project::cook(project_uncooked, buffer);
   return std::make_unique<project>(buffer);
@@ -213,7 +212,8 @@ app_example_blend::app_example_blend(const unsigned int width,
 
 void app_example_blend::update(const float dt_s)
 {
-  bgfx::setViewRect(view_id, 0, 0, get_width(), get_height());
+  bgfx::setViewRect(view_id, 0, 0, gsl::narrow<uint16_t>(get_width()),
+                    gsl::narrow<uint16_t>(get_height()));
   bgfx::setViewClear(view_id, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, view_clear_color);
 
   ImGui::SetNextWindowSize(ImVec2(350.0F, 0.0F));

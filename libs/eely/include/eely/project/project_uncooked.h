@@ -9,6 +9,7 @@
 #include "eely/project/resource_uncooked.h"
 
 #include <concepts>
+#include <iterator>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -49,22 +50,23 @@ public:
   // Get resource with specified id and type.
   // Return `nullptr` if there is no such resource.
   template <typename TRes>
-  requires std::derived_from<TRes, resource_uncooked>
+    requires std::derived_from<TRes, resource_uncooked>
   [[nodiscard]] const TRes* get_resource(const string_id& id) const;
 
   // Get resource with specified id and type.
   // Return `nullptr` if there is no such resource.
   template <typename TRes>
-  requires std::derived_from<TRes, resource_uncooked>
+    requires std::derived_from<TRes, resource_uncooked>
   [[nodiscard]] TRes* get_resource(const string_id& id);
 
   // Add resource with specified type and id to the project and return reference to it.
   template <typename TRes>
-  requires std::derived_from<TRes, resource_uncooked> TRes& add_resource(const string_id& id);
+    requires std::derived_from<TRes, resource_uncooked>
+  TRes& add_resource(const string_id& id);
 
   // Get identificators of all resoures with specified type.
   template <typename TRes>
-  requires std::derived_from<TRes, resource_uncooked>
+    requires std::derived_from<TRes, resource_uncooked>
   [[nodiscard]] std::vector<string_id> get_ids() const;
 
 private:
@@ -117,7 +119,7 @@ void project_uncooked::for_each_resource_topological(const TFn& fn) const
 }
 
 template <typename TRes>
-requires std::derived_from<TRes, resource_uncooked>
+  requires std::derived_from<TRes, resource_uncooked>
 const TRes* project_uncooked::get_resource(const string_id& id) const
 {
   using namespace eely::internal;
@@ -131,8 +133,8 @@ const TRes* project_uncooked::get_resource(const string_id& id) const
 }
 
 template <typename TRes>
-requires std::derived_from<TRes, resource_uncooked> TRes* project_uncooked::get_resource(
-    const string_id& id)
+  requires std::derived_from<TRes, resource_uncooked>
+TRes* project_uncooked::get_resource(const string_id& id)
 {
   using namespace eely::internal;
 
@@ -145,8 +147,8 @@ requires std::derived_from<TRes, resource_uncooked> TRes* project_uncooked::get_
 }
 
 template <typename TRes>
-requires std::derived_from<TRes, resource_uncooked> TRes& project_uncooked::add_resource(
-    const string_id& id)
+  requires std::derived_from<TRes, resource_uncooked>
+TRes& project_uncooked::add_resource(const string_id& id)
 {
   auto resource{std::make_unique<TRes>(*this, id)};
   TRes& result{*resource.get()};
@@ -155,9 +157,8 @@ requires std::derived_from<TRes, resource_uncooked> TRes& project_uncooked::add_
 }
 
 template <typename TRes>
-requires std::derived_from<TRes, resource_uncooked> std::vector<string_id>
-project_uncooked::get_ids()
-const
+  requires std::derived_from<TRes, resource_uncooked>
+std::vector<string_id> project_uncooked::get_ids() const
 {
   std::vector<string_id> result;
 

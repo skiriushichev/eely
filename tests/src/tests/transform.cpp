@@ -11,9 +11,9 @@ TEST(transform, constructor)
 
   // Constructor
   {
-    const float3 t{0.2, -1, 0.13};
-    const quaternion r{0.2, 0.15, 2.4, 1.13F};
-    const float3 s{2.0, 5.2, 11.0};
+    const float3 t{0.2F, -1.0F, 0.13F};
+    const quaternion r{0.2F, 0.15F, 2.4F, 1.13F};
+    const float3 s{2.0F, 5.2F, 11.0F};
 
     const transform transform{t, r, s};
     EXPECT_EQ(transform.translation, t);

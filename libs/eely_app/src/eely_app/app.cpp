@@ -86,15 +86,15 @@ app::app(const unsigned int width, const unsigned int height, const std::string&
   }
 
   bgfx::PlatformData bgfx_platform_data;
-#if BX_PLATFORM_OSX
+#if EELY_PLATFORM_WIN64
   // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
-  bgfx_platform_data.nwh = sdl_window_manager_info.info.cocoa.window;
+  bgfx_platform_data.nwh = sdl_window_manager_info.info.win.window;
 #else
-  static_assert(false, "System is not supported");
+  static_assert(false, "Platform is not supported");
 #endif
 
   bgfx::Init bgfx_init;
-  bgfx_init.type = bgfx::RendererType::Metal;  // TODO: this is for macos only
+  bgfx_init.type = bgfx::RendererType::Count;
   bgfx_init.resolution.width = width;
   bgfx_init.resolution.height = height;
   bgfx_init.resolution.reset = bgfx_reset_flags;
@@ -111,7 +111,6 @@ app::app(const unsigned int width, const unsigned int height, const std::string&
 
   const bgfx::RendererType::Enum renderer_type{bgfx::getRendererType()};
   switch (renderer_type) {
-    case bgfx::RendererType::Enum::Direct3D9:
     case bgfx::RendererType::Enum::Direct3D11:
     case bgfx::RendererType::Enum::Direct3D12: {
       ImGui_ImplSDL2_InitForD3D(_sdl_window);

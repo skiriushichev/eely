@@ -13,27 +13,23 @@
 #include <ios>
 #include <vector>
 
-#if defined(__APPLE__)
-#include <mach-o/dyld.h>
+#if EELY_PLATFORM_WIN64
+#include <windows.h>
 #endif
 
 namespace eely {
 std::filesystem::path get_executable_dir()
 {
   static const std::filesystem::path executable_dir = []() {
-#if defined(__APPLE__)
-    std::array<char, PATH_MAX> path_unresolved;
-    uint32_t size{path_unresolved.size()};
-    int get_path_result{_NSGetExecutablePath(path_unresolved.data(), &size)};
-
-    if (get_path_result == 0) {
-      std::array<char, PATH_MAX> path_resolved;
-      if (realpath(path_unresolved.data(), path_resolved.data()) == path_resolved.data()) {
-        return std::filesystem::path{path_resolved.data()}.parent_path();
-      }
+#if EELY_PLATFORM_WIN64
+    std::array<WCHAR, MAX_PATH> path;
+    if (GetModuleFileNameW(NULL, path.data(), MAX_PATH) != 0) {
+      return std::filesystem::path{path.data()}.parent_path();
     }
 
     throw std::runtime_error("Couldn't get executable dir");
+#else
+    static_assert(false, "Platform is not supported");
 #endif
   }();
 

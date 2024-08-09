@@ -82,8 +82,8 @@ void bit_writer::patch(const patch_params& params)
     _data[byte_index] |= static_cast<std::byte>(params.value << bit_index);
 
     uint32_t byte_offset = 1;
-    uint32_t value_shift = remaining_bits;
-    const uint32_t full_bytes = (params.size_bits - remaining_bits) / 8;
+    uint32_t value_shift = gsl::narrow_cast<uint32_t>(remaining_bits);
+    const uint32_t full_bytes = gsl::narrow_cast<uint32_t>(params.size_bits - remaining_bits) / 8;
     const uint32_t tail_bits = (params.size_bits - remaining_bits) % 8;
     for (uint32_t i = 0; i < full_bytes; ++i) {
       // NOLINTNEXTLINE (intentionally using pointer arithmetics)

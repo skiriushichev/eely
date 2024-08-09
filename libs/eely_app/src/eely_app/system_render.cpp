@@ -9,6 +9,7 @@
 #include "eely_app/filesystem_utils.h"
 #include "eely_app/matrix4x4.h"
 
+#include <eely/base/base_utils.h>
 #include <eely/math/ellipse.h>
 #include <eely/math/elliptical_cone.h>
 #include <eely/math/float3.h>
@@ -32,6 +33,8 @@
 namespace eely {
 static void render_coordinate_system(app& app, const transform& transform)
 {
+  using namespace eely::internal;
+
   static const string_id coordinate_system_mesh_id{"coordinate_system"};
 
   if (!asset_mesh::runtime_mesh_is_builder_registred(coordinate_system_mesh_id)) {
@@ -60,11 +63,11 @@ static void render_coordinate_system(app& app, const transform& transform)
       asset_mesh::runtime_mesh_build_result result;
 
       const bgfx::Memory* bgfx_vmemory{
-          bgfx::copy(vertices.data(), sizeof(vertex_position_color) * vertices.size())};
+          bgfx::copy(vertices.data(), sizeof(vertex_position_color) * size_u32(vertices))};
       result.bgfx_vbuffer_handle = bgfx::createVertexBuffer(bgfx_vmemory, bgfx_vlayout);
 
       const bgfx::Memory* bgfx_imemory{
-          bgfx::copy(indices.data(), sizeof(uint16_t) * indices.size())};
+          bgfx::copy(indices.data(), sizeof(uint16_t) * size_u32(indices))};
       result.bgfx_ibuffer_handle = bgfx::createIndexBuffer(bgfx_imemory);
 
       return result;
@@ -98,28 +101,30 @@ static void render_coordinate_system(app& app, const transform& transform)
                                          const transform& parent_transform,
                                          const float4& color)
 {
+  using namespace eely::internal;
+
   std::array<uint16_t, 2> indices{0, 1};
   std::array<float3, 2> vertices{from, to};
 
   bgfx::VertexLayout bgfx_vlayout;
   bgfx_vlayout.begin().add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float).end();
 
-  if (bgfx::getAvailTransientVertexBuffer(vertices.size(), bgfx_vlayout) < vertices.size()) {
+  if (bgfx::getAvailTransientVertexBuffer(size_u32(vertices), bgfx_vlayout) < vertices.size()) {
     Expects(false);
     return;
   }
 
   bgfx::TransientVertexBuffer bgfx_tvbuffer;
-  bgfx::allocTransientVertexBuffer(&bgfx_tvbuffer, vertices.size(), bgfx_vlayout);
+  bgfx::allocTransientVertexBuffer(&bgfx_tvbuffer, size_u32(vertices), bgfx_vlayout);
   memcpy(bgfx_tvbuffer.data, vertices.data(), sizeof(float3) * vertices.size());
 
-  if (bgfx::getAvailTransientIndexBuffer(indices.size(), false) < indices.size()) {
+  if (bgfx::getAvailTransientIndexBuffer(size_u32(indices), false) < indices.size()) {
     Expects(false);
     return;
   }
 
   bgfx::TransientIndexBuffer bgfx_tibuffer;
-  bgfx::allocTransientIndexBuffer(&bgfx_tibuffer, indices.size(), false);
+  bgfx::allocTransientIndexBuffer(&bgfx_tibuffer, size_u32(indices), false);
   memcpy(bgfx_tibuffer.data, indices.data(), sizeof(uint16_t) * indices.size());
 
   // Submit
@@ -136,7 +141,7 @@ static void render_coordinate_system(app& app, const transform& transform)
 
   bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z | BGFX_STATE_MSAA |
                  BGFX_STATE_PT_LINES);
-  bgfx::setVertexBuffer(0, &bgfx_tvbuffer, 0, vertices.size());
+  bgfx::setVertexBuffer(0, &bgfx_tvbuffer, 0, size_u32(vertices));
   bgfx::setIndexBuffer(&bgfx_tibuffer);
 
   matrix4x4 mat{matrix4x4_from_transform(parent_transform)};
@@ -149,7 +154,7 @@ static void render_constraint(app& app,
                               const transform& parent_constraint_frame,
                               const skeleton::constraint& constraint)
 {
-  using namespace internal;
+  using namespace eely::internal;
 
   if (!constraint.limit_swing_y_rad.has_value() || !constraint.limit_swing_z_rad.has_value()) {
     // TODO: render twist & separate swing limits
@@ -178,13 +183,13 @@ static void render_constraint(app& app,
   bgfx::VertexLayout bgfx_vlayout;
   bgfx_vlayout.begin().add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float).end();
 
-  if (bgfx::getAvailTransientVertexBuffer(vertices.size(), bgfx_vlayout) < vertices.size()) {
+  if (bgfx::getAvailTransientVertexBuffer(size_u32(vertices), bgfx_vlayout) < vertices.size()) {
     Expects(false);
     return;
   }
 
   bgfx::TransientVertexBuffer bgfx_tvbuffer;
-  bgfx::allocTransientVertexBuffer(&bgfx_tvbuffer, vertices.size(), bgfx_vlayout);
+  bgfx::allocTransientVertexBuffer(&bgfx_tvbuffer, size_u32(vertices), bgfx_vlayout);
   memcpy(bgfx_tvbuffer.data, vertices.data(), sizeof(float3) * vertices.size());
 
   // Index buffer
@@ -192,21 +197,21 @@ static void render_constraint(app& app,
   std::vector<uint16_t> indices;
   for (gsl::index i{1}; i < std::ssize(vertices) - 1; ++i) {
     indices.push_back(0);
-    indices.push_back(i);
-    indices.push_back(i + 1);
+    indices.push_back(gsl::narrow<uint16_t>(i));
+    indices.push_back(gsl::narrow<uint16_t>(i + 1));
   }
 
   indices.push_back(0);
-  indices.push_back(std::ssize(vertices) - 1);
+  indices.push_back(gsl::narrow<uint16_t>(vertices.size() - 1));
   indices.push_back(1);
 
-  if (bgfx::getAvailTransientIndexBuffer(indices.size(), false) < indices.size()) {
+  if (bgfx::getAvailTransientIndexBuffer(size_u32(indices), false) < indices.size()) {
     Expects(false);
     return;
   }
 
   bgfx::TransientIndexBuffer bgfx_tibuffer;
-  bgfx::allocTransientIndexBuffer(&bgfx_tibuffer, indices.size(), false);
+  bgfx::allocTransientIndexBuffer(&bgfx_tibuffer, size_u32(indices), false);
   memcpy(bgfx_tibuffer.data, indices.data(), sizeof(uint16_t) * indices.size());
 
   // Submit
@@ -224,7 +229,7 @@ static void render_constraint(app& app,
 
   bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z | BGFX_STATE_MSAA |
                  BGFX_STATE_BLEND_ALPHA);
-  bgfx::setVertexBuffer(0, &bgfx_tvbuffer, 0, vertices.size());
+  bgfx::setVertexBuffer(0, &bgfx_tvbuffer, 0, size_u32(vertices));
   bgfx::setIndexBuffer(&bgfx_tibuffer);
 
   transform parent_constraint_frame_no_scale{parent_constraint_frame};
@@ -240,6 +245,8 @@ static void render_skeleton_pose(app& app,
                                  component_skeleton& component_skeleton,
                                  const component_transform& component_transform)
 {
+  using namespace eely::internal;
+
   const gsl::index joints_count{component_skeleton.skeleton->get_joints_count()};
 
   if (joints_count == 0) {
@@ -251,7 +258,8 @@ static void render_skeleton_pose(app& app,
   bgfx::VertexLayout bgfx_vlayout;
   bgfx_vlayout.begin().add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float).end();
 
-  if (bgfx::getAvailTransientVertexBuffer(joints_count, bgfx_vlayout) < joints_count) {
+  if (bgfx::getAvailTransientVertexBuffer(gsl::narrow<uint32_t>(joints_count), bgfx_vlayout) <
+      joints_count) {
     Expects(false);
     return;
   }
@@ -263,7 +271,7 @@ static void render_skeleton_pose(app& app,
   }
 
   bgfx::TransientVertexBuffer bgfx_tvbuffer;
-  bgfx::allocTransientVertexBuffer(&bgfx_tvbuffer, vertices.size(), bgfx_vlayout);
+  bgfx::allocTransientVertexBuffer(&bgfx_tvbuffer, size_u32(vertices), bgfx_vlayout);
   memcpy(bgfx_tvbuffer.data, vertices.data(), sizeof(float3) * vertices.size());
 
   // Index buffer
@@ -276,17 +284,17 @@ static void render_skeleton_pose(app& app,
       continue;
     }
 
-    indices.push_back(i);
-    indices.push_back(parent_index.value());
+    indices.push_back(gsl::narrow<uint16_t>(i));
+    indices.push_back(gsl::narrow<uint16_t>(parent_index.value()));
   }
 
-  if (bgfx::getAvailTransientIndexBuffer(indices.size(), false) < indices.size()) {
+  if (bgfx::getAvailTransientIndexBuffer(size_u32(indices), false) < indices.size()) {
     Expects(false);
     return;
   }
 
   bgfx::TransientIndexBuffer bgfx_tibuffer;
-  bgfx::allocTransientIndexBuffer(&bgfx_tibuffer, indices.size(), false);
+  bgfx::allocTransientIndexBuffer(&bgfx_tibuffer, size_u32(indices), false);
   memcpy(bgfx_tibuffer.data, indices.data(), sizeof(uint16_t) * indices.size());
 
   // Submit
@@ -304,7 +312,7 @@ static void render_skeleton_pose(app& app,
   bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z | BGFX_STATE_MSAA |
                  BGFX_STATE_PT_LINES |
                  BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA));
-  bgfx::setVertexBuffer(0, &bgfx_tvbuffer, 0, vertices.size());
+  bgfx::setVertexBuffer(0, &bgfx_tvbuffer, 0, size_u32(vertices));
   bgfx::setIndexBuffer(&bgfx_tibuffer);
 
   matrix4x4 transform_matrix{matrix4x4_from_transform(component_transform.transform)};

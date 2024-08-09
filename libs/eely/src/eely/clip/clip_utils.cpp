@@ -1,13 +1,24 @@
 #include "eely/clip/clip_utils.h"
 
+#include "eely/base/string_id.h"
 #include "eely/clip/clip_uncooked.h"
+#include "eely/math/float3.h"
+#include "eely/math/math_utils.h"
+#include "eely/math/quaternion.h"
+#include "eely/math/transform.h"
 #include "eely/project/project_uncooked.h"
 #include "eely/skeleton/skeleton_uncooked.h"
-#include "eely/skeleton_mask/skeleton_mask.h"
 #include "eely/skeleton_mask/skeleton_mask_uncooked.h"
 
+#include <gsl/util>
+
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
 #include <optional>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace eely::internal {
 gsl::index clip_sampling_info_calculate_samples(const clip_sampling_info& info)
@@ -28,12 +39,12 @@ void clip_sample_track(const clip_uncooked_track& track,
   for (gsl::index sample_index{0}; sample_index < samples_count; ++sample_index) {
     const float sample_time_s = static_cast<float>(sample_index) * sample_timestep_s;
 
-    transform sample{clip_sample_component<transform_components::translation>(
-                         track, default_value.translation, sample_time_s),
-                     clip_sample_component<transform_components::rotation>(
-                         track, default_value.rotation, sample_time_s),
-                     clip_sample_component<transform_components::scale>(track, default_value.scale,
-                                                                        sample_time_s)};
+    const transform sample{clip_sample_component<transform_components::translation>(
+                               track, default_value.translation, sample_time_s),
+                           clip_sample_component<transform_components::rotation>(
+                               track, default_value.rotation, sample_time_s),
+                           clip_sample_component<transform_components::scale>(
+                               track, default_value.scale, sample_time_s)};
 
     out_samples.push_back(sample);
   }
@@ -159,7 +170,7 @@ void clip_calculate_additive_tracks(const project_uncooked& project,
 
   // Prepare sampling parameters
 
-  clip_sampling_info source_sampling_info{
+  const clip_sampling_info source_sampling_info{
       .time_from_s = clip_source_range.from_s, .time_to_s = clip_source_range.to_s, .rate = 30};
   const gsl::index source_samples{clip_sampling_info_calculate_samples(source_sampling_info)};
 

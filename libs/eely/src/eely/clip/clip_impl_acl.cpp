@@ -16,18 +16,19 @@
 #include <gsl/narrow>
 #include <gsl/util>
 
+#include <malloc.h>
 #include <memory>
 #include <span>
 #include <vector>
 
 namespace eely::internal {
-std::unique_ptr<uint8_t, decltype(&std::free)> acl_allocate_compressed_tracks_storage(
+std::unique_ptr<uint8_t, decltype(&aligned_free)> acl_allocate_compressed_tracks_storage(
     const size_t size)
 {
   const size_t alignment{alignof(acl::compressed_tracks)};
   const size_t aligned_size{align_size_to({.alignment = alignment, .size = size})};
 
-  return {static_cast<uint8_t*>(std::aligned_alloc(alignment, aligned_size)), std::free};
+  return {static_cast<uint8_t*>(aligned_alloc(alignment, aligned_size)), aligned_free};
 }
 
 // ACL needs equal number of samples for every track in a clip.
@@ -97,7 +98,7 @@ std::unique_ptr<uint8_t, decltype(&std::free)> acl_compress(
   // Populate ACL tracks
   // TODO: take `measurement_unit` into account here
 
-  track_array_qvvf raw_track_list(acl_allocator, joints_count);
+  track_array_qvvf raw_track_list(acl_allocator, gsl::narrow<uint32_t>(joints_count));
 
   for (gsl::index track_index{0}; track_index < joints_count; ++track_index) {
     const sampled_track& track{sampled_tracks[track_index]};
@@ -114,15 +115,17 @@ std::unique_ptr<uint8_t, decltype(&std::free)> acl_compress(
 
     track_desc_transformf acl_track_description;
     acl_track_description.default_value = acl_default_qvvf;
-    acl_track_description.output_index = track_index;
-    acl_track_description.parent_index = track.joint_parent_index.value_or(k_invalid_track_index);
+    acl_track_description.output_index = gsl::narrow<uint32_t>(track_index);
+    acl_track_description.parent_index =
+        gsl::narrow<uint32_t>(track.joint_parent_index.value_or(k_invalid_track_index));
     acl_track_description.precision = 0.001F;
     acl_track_description.shell_distance = 0.3F;
 
     const gsl::index samples_size{std::ssize(track.samples)};
 
     track_qvvf acl_track{track_qvvf::make_reserve(acl_track_description, acl_allocator,
-                                                  samples_size, acl_sample_rate)};
+                                                  gsl::narrow<uint32_t>(samples_size),
+                                                  acl_sample_rate)};
 
     for (gsl::index sample_index{0}; sample_index < samples_size; ++sample_index) {
       const transform& sample = track.samples[sample_index];
@@ -134,10 +137,10 @@ std::unique_ptr<uint8_t, decltype(&std::free)> acl_compress(
           rtm::vector_set(sample.translation.x, sample.translation.y, sample.translation.z);
       acl_qvvf.scale = rtm::vector_set(sample.scale.x, sample.scale.y, sample.scale.z);
 
-      acl_track[sample_index] = acl_qvvf;
+      acl_track[gsl::narrow<uint32_t>(sample_index)] = acl_qvvf;
     }
 
-    raw_track_list[track_index] = std::move(acl_track);
+    raw_track_list[gsl::narrow<uint32_t>(track_index)] = std::move(acl_track);
   }
 
   // Compress ACL tracks

@@ -26,7 +26,7 @@ void system_camera_update(app& app, entt::registry& registry, const float dt_s)
 
       const input_analog& cursor_relative{inputs.get_mouse_cursor_relative()};
 
-      static constexpr float coordinate_to_deg{deg_to_rad(0.1F)};
+      static constexpr float coordinate_to_deg{deg_to_rad(0.4F)};
       component_camera.yaw += cursor_relative.x * coordinate_to_deg;
       component_camera.pitch += cursor_relative.y * coordinate_to_deg;
       component_camera.pitch = std::clamp(component_camera.pitch, -pi / 2.0F, pi / 2.0F);

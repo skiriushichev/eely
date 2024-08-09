@@ -1,6 +1,8 @@
 .cache/
 .vscode/
-build/
+.vs/
+.build/
+.out/
 
 .DS_Store
 compile_commands.json

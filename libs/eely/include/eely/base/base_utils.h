@@ -2,6 +2,7 @@
 
 #include "eely/base/assert.h"
 
+#include <gsl/narrow>
 #include <gsl/pointers>
 
 #include <bit>
@@ -72,4 +73,16 @@ TDst polymorphic_downcast(TSrc src)
   EXPECTS(dynamic_cast<TDst>(src) == src);
   return static_cast<TDst>(src);
 }
+
+// Prettier version of `gsl::narrow<uint32>(container.size())`,
+// to use with APIs that use uint32_t for sizes.
+template <typename T>
+uint32_t size_u32(const T& container)
+{
+  return gsl::narrow<uint32_t>(container.size());
+}
+
+void* aligned_alloc(size_t alignment, size_t aligned_size);
+
+void aligned_free(void* ptr);
 }  // namespace eely::internal

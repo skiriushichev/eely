@@ -18,6 +18,6 @@ TEST(math_utils, math_utils)
   {
     EXPECT_TRUE(float_near(deg_to_rad(95.4F), 1.665044F));
     EXPECT_TRUE(float_near(deg_to_rad(-11.43F), -0.19949113F));
-    EXPECT_TRUE(float_near(deg_to_rad(247.56), 4.3207371F));
+    EXPECT_TRUE(float_near(deg_to_rad(247.56F), 4.3207371F));
   }
 }
